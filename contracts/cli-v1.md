@@ -65,6 +65,19 @@ in the envelope may be written to stderr only after redaction.
 }
 ```
 
+## Version response
+
+`version` is the smallest runtime-negotiation command. It is local, side-effect free, and does not
+contact the Broker. A successful response contains only:
+
+- `runtime_version`: the exact SemVer of the invoked native Runtime;
+- `cli_schema`: the newest CLI schema emitted by that Runtime;
+- `platform`: `macOS`, `linux`, or `windows`.
+
+The checked fixture at
+[`conformance/cli-v1/version.completed.json`](../conformance/cli-v1/version.completed.json) is the
+normative v1 shape. Fixture values such as version `0.0.0` are test values, not a published release.
+
 ### Status values
 
 | Status | Meaning |

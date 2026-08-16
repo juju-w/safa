@@ -31,6 +31,12 @@ jobs:
         run: .ci-venv/bin/python tests/validate_skill.py skills/safa
       - name: Validate runtime manifest schema JSON
         run: python3 -m json.tool contracts/runtime-manifest-v1.schema.json >/dev/null
+      - name: Validate CLI conformance fixtures
+        shell: bash
+        run: |
+          for fixture in conformance/cli-v1/*.json; do
+            python3 -m json.tool "$fixture" >/dev/null
+          done
       - name: Validate launcher syntax
         run: sh -n skills/safa/scripts/safa
       - name: Validate fail-closed launcher behavior

@@ -172,6 +172,11 @@ leave a plaintext intermediate. This workflow is not part of the current preview
 2. Keep the working Swift implementation intact while moving product-owned Skill material here.
 3. Add the Rust workspace and Linux platform boundary without claiming Linux support.
 4. Introduce shared conformance fixtures consumed by both Swift and Rust CI.
-5. Implement and security-review a Linux credential/IPC adapter.
-6. Produce signed macOS runtime assets and a verified manifest.
-7. Release the Skill only after the end-to-end resolver and rollback path pass review.
+5. Introduce a non-shipping Rust CLI shell for parsing, version negotiation, stable envelopes, and
+   fail-closed backend discovery; it does not replace the working Swift/macOS CLI yet.
+6. Implement and security-review the native Broker client and credential/IPC adapter for each
+   platform. The eventual Rust frontend must not move vault or authorization authority into the CLI.
+7. Replace a platform's installed CLI only after command parity, signing, IPC identity, and shared
+   conformance gates pass on that platform.
+8. Produce signed macOS runtime assets and a verified manifest.
+9. Release the Skill only after the end-to-end resolver and rollback path pass review.
