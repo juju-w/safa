@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install Skill validator dependency
+        run: python3 -m pip install --quiet PyYAML
+      - name: Validate Skill metadata
+        run: python3 tests/validate_skill.py skills/safa
+      - name: Validate runtime manifest schema JSON
+        run: python3 -m json.tool contracts/runtime-manifest-v1.schema.json >/dev/null
+      - name: Validate launcher syntax
+        run: sh -n skills/safa/scripts/safa
+      - name: Validate fail-closed launcher behavior
+        run: tests/launcher_contract.sh
+      - name: Check whitespace
+        shell: bash
+        run: |
+          if [[ -n "${GITHUB_BASE_REF}" ]]; then
+            git diff --check "origin/${GITHUB_BASE_REF}...HEAD"
+          else
+            git show --check --format= HEAD
+          fi

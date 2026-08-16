@@ -41,6 +41,7 @@ sequenceDiagram
     participant O as Operating system
     participant T as Target resource
 
+    A->>S: install Skill files (copy/symlink only)
     A->>S: request operation using resource alias
     S->>L: safa doctor/resource/exec --json
     L->>L: detect platform and architecture
@@ -55,9 +56,10 @@ sequenceDiagram
     S-->>A: finding, status, or safe next action
 ```
 
-The launcher is deliberately narrow. It selects, verifies, installs in the current user's scope,
-and invokes the runtime. It cannot read vault data, interpret remote commands, approve work, or
-weaken the runtime's authorization decision.
+The Skill installer does not execute an npm-style lifecycle hook. The launcher is installed as an
+ordinary Skill file and is deliberately narrow. On first invocation it selects, verifies, installs
+one native Runtime package in the current user's scope, and invokes its CLI. It cannot read vault
+data, interpret remote commands, approve work, or weaken the Broker's authorization decision.
 
 ## 4. Stable external contract
 
@@ -84,6 +86,10 @@ not part of the Agent-facing contract.
 Platform adapters implement a small set of capabilities: secure storage, user authorization,
 trusted local IPC, process identity, host-key/endpoint policy, and lifecycle management. Protocol,
 resource domain, sanitization, and conformance behavior remain platform-neutral.
+
+“One Runtime” refers to one installed package, not one all-powerful process. The package keeps a thin
+Agent-facing CLI separate from the Broker/daemon that owns vault authority. On macOS the package is
+`SAFA.app`, containing `safa`, `safa-broker`, and the one-shot `safa-askpass` helper.
 
 ## 6. Trust boundaries
 
@@ -142,6 +148,10 @@ Runtime and Skill releases are separate:
 3. A pull request adds an exact-version manifest to `safa`.
 4. Contract compatibility and provenance are reviewed.
 5. Only then may a Skill release reference that manifest.
+
+The resulting user journey is one Skill installation command followed by normal use. Runtime
+bootstrap happens on the first launcher invocation, not as hidden code execution inside
+`npx skills add`. See [distribution.md](distribution.md).
 
 There is no automatic `latest` promotion. Rollback selects a previously reviewed manifest; it does
 not mutate an already published manifest.

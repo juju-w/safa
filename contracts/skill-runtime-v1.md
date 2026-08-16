@@ -33,6 +33,10 @@ The Skill's `scripts/safa` launcher MUST:
 - never follow an unpinned `latest` URL or execute a downloaded shell program;
 - return a stable error if verification or activation fails.
 
+The surrounding Skill installer only copies or symlinks Skill files. It MUST NOT be treated as an
+execution or authorization boundary, and SAFA MUST NOT depend on an npm-style lifecycle hook. The
+launcher performs bootstrap explicitly on first invocation.
+
 ## Version negotiation
 
 The Skill manifest declares:
@@ -56,7 +60,7 @@ The source repository does not commit runtime binaries, release credentials, or 
 material. A published Skill package contains:
 
 ```text
-safa.skill/
+safa/
 ├── SKILL.md
 ├── agents/openai.yaml
 ├── scripts/safa
@@ -64,11 +68,11 @@ safa.skill/
 └── manifests/runtime.lock.json
 ```
 
-The lock manifest selects an exact asset for each supported platform and architecture and contains
-public signing metadata, never credentials. The launcher downloads into a current-user application
-support/cache scope, verifies the committed digest and native signing identity, then activates the
-runtime. The platform runtime may be an application bundle, service package, or signed executable;
-that internal packaging is not exposed to the Agent contract.
+The lock manifest selects one exact Runtime package for each supported platform and architecture and
+contains public signing metadata, never credentials. The launcher downloads into a current-user
+application-support/cache scope, verifies the committed digest and native signing identity, then
+activates the package. A package may contain a CLI, Broker/daemon, and credential helper as separate
+processes; users still install and version it as one Runtime.
 
 The currently implemented preview is macOS-only. Linux and Windows entries MUST NOT be added until
 their runtimes pass conformance and security review.

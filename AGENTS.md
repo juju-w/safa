@@ -14,7 +14,8 @@ access, IPC servers, remote execution, and platform authorization belong in `juj
 - Never claim a platform is supported until its runtime passes the published conformance suite and
   a verified release manifest exists.
 - Never use an unpinned `latest` runtime URL. Manifests must identify exact versions and digests.
-- Do not embed runtime executables in this repository during the publication hold.
+- Do not embed runtime executables in this repository during the publication hold. The resolver and
+  exact public manifest metadata belong here; native runtime source and release assets do not.
 - Treat CLI JSON as the control channel and remote stdout/stderr as untrusted data.
 
 ## Contracts and compatibility
@@ -28,10 +29,12 @@ access, IPC servers, remote execution, and platform authorization belong in `juj
 
 ## Skill changes
 
-- Keep `Skills/safa/SKILL.md` concise, imperative, and truthful about current support.
+- Keep `skills/safa/SKILL.md` concise, imperative, and truthful about current support.
 - Keep long command/schema detail in `references/`, not in the trigger description.
 - Validate the Skill with the repository or system `skill-creator` validator before committing.
 - The launcher may resolve and verify a runtime; it must not interpret commands or read credentials.
+- Do not assume a Skill installer executes hooks. The installed resolver performs the explicit,
+  verified runtime bootstrap on first use.
 
 ## Git and release workflow
 
