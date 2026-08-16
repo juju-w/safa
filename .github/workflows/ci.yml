@@ -23,10 +23,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Install Skill validator dependency
-        run: python3 -m pip install --quiet PyYAML
+      - name: Create validation environment
+        run: |
+          python3 -m venv .ci-venv
+          .ci-venv/bin/python -m pip install --quiet PyYAML
       - name: Validate Skill metadata
-        run: python3 tests/validate_skill.py skills/safa
+        run: .ci-venv/bin/python tests/validate_skill.py skills/safa
       - name: Validate runtime manifest schema JSON
         run: python3 -m json.tool contracts/runtime-manifest-v1.schema.json >/dev/null
       - name: Validate launcher syntax
