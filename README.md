@@ -97,6 +97,22 @@ verified runtime; the resolver then reuses it after verification.
 
 See [Runtime distribution and bootstrap](docs/distribution.md) for the exact trust and update model.
 
+### Shell completion
+
+The native CLI generates completion for `zsh`, `bash`, and `fish`. For Oh My Zsh, after the `safa`
+launcher is on `PATH`:
+
+```bash
+mkdir -p ~/.oh-my-zsh/completions
+safa --generate-completion-script zsh > ~/.oh-my-zsh/completions/_safa
+exec zsh
+```
+
+Commands, flags, states, resource types, and templates are completed statically. Existing resource
+aliases are read from the safe resource-list projection without Touch ID; endpoints, usernames,
+inventory details, and credentials are never completion candidates. An unavailable Broker simply
+produces no alias candidates.
+
 ## What SAFA protects
 
 - **Normalized private resource directory** — kind, versioned template, host platform, and roles are
