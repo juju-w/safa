@@ -1,6 +1,6 @@
 ---
 name: safa
-description: Securely discover and operate registered infrastructure resources through the SAFA macOS companion CLI without exposing reusable credentials to the Agent. The encrypted directory supports SSH hosts, including Windows targets with OpenSSH, plus typed database, object-storage, cache, graph, search, and HTTP resource registration; non-SSH protocol operations remain capability-gated. Use when a user asks to inspect resource metadata, diagnose a remote host, execute a bounded operation, review access, or revoke a grant. Never request, reveal, paste, export, or store raw passwords, private keys, sudo passwords, tokens, access keys, or recovery secrets in conversation.
+description: Securely discover and operate registered infrastructure resources through the SAFA macOS companion CLI without exposing reusable credentials to the Agent. The encrypted directory supports Linux, macOS, and Windows OpenSSH hosts plus typed database, object-storage, cache, messaging, graph, search, and HTTP resource registration; non-SSH protocol operations remain capability-gated. Use when a user asks to inspect resource metadata, diagnose a remote host, execute a bounded operation, review access, or revoke a grant. Never request, reveal, paste, export, or store raw passwords, private keys, sudo passwords, tokens, access keys, or recovery secrets in conversation.
 ---
 
 # SAFA
@@ -48,10 +48,12 @@ safa resource setup ALIAS --from-ssh-config SSH_ALIAS --json
 ```
 
 Setup uses macOS user presence, a pre-existing trusted `known_hosts` entry, and an existing local
-OpenSSH identity or agent. It supports direct routes, including an already running local Core Tunnel
-listener. If SAFA returns a host-identity, authentication, tunnel, or route remediation, report it;
+OpenSSH identity or agent. It verifies the registered host platform and records a bounded read-only
+hardware/system inventory snapshot. It supports direct routes, including an already running local
+Core Tunnel listener. If SAFA returns a host-identity, authentication, tunnel, or route remediation, report it;
 never collect the missing secret or bypass the failure with raw SSH.
 
+Select only `host.linux`, `host.macos`, or `host.windows`; NAS is a resource role, not a host type.
 For a Windows target that already exposes OpenSSH, select `--template ssh --type host.windows`.
 Do not describe this as a Windows-native Runtime. For a database, object store, cache, graph, search,
 or HTTP resource, the Agent may select a built-in `--template` only after an explicit add request.
@@ -59,9 +61,9 @@ If SAFA returns `user_action_required`, stop and direct the user to the trusted 
 flow; do not ask for its endpoint, username, database, bucket, password, token, or access key.
 
 Use `safa resource show ALIAS --json` for a non-interactive safe summary. Run
-`safa resource inspect ALIAS --json` only when the user explicitly asks for protected inventory or
-connection details. Inspect must rely on the macOS-owned user-presence prompt; never script around,
-repeat-spam, or reinterpret a denial. Even after authorization, never ask SAFA for or infer a
+`safa resource show ALIAS --details --json` only when the user explicitly asks for protected
+inventory or connection details. Detailed show must rely on the macOS-owned user-presence prompt;
+never script around, repeat-spam, or reinterpret a denial. Even after authorization, never ask SAFA for or infer a
 credential value.
 
 ## Execute work

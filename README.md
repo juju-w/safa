@@ -99,9 +99,10 @@ See [Runtime distribution and bootstrap](docs/distribution.md) for the exact tru
 
 ## What SAFA protects
 
-- **Extensible private resource directory** — hosts, databases, object stores, caches, and services
-  share typed aliases, metadata, relationships, and opaque credential references.
-- **Two-level discovery** — list/show exposes only allowlisted safe metadata; protected inspection
+- **Normalized private resource directory** — kind, versioned template, host platform, and roles are
+  independent; hosts, databases, object stores, caches, messaging, and services share typed aliases,
+  metadata, relationships, and opaque credential references.
+- **Two-level discovery** — list/show exposes only allowlisted safe metadata; protected details
   requires native user authorization and still never returns credentials.
 - **Native credentials** — the current macOS runtime uses Data Protection Keychain and Secure
   Enclave primitives where supported; future platforms must use their own protected stores without
@@ -121,6 +122,8 @@ Implemented in `safa-runtime`:
 - safe resource discovery by logical alias;
 - user-authorized resource add/edit/setup/disable/enable/remove;
 - SSH-config imports entering `draft/needs_setup` until host identity and authentication succeed;
+- first-connection Linux/macOS/Windows probes that atomically record bounded hardware and system
+  inventory in the encrypted directory;
 - encrypted inventory and Keychain password storage;
 - strict pinned-host SSH configuration;
 - argument-constrained diagnostics such as `systemctl is-active`, fixed-field process/container

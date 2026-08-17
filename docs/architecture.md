@@ -135,10 +135,17 @@ Key invariants:
 
 ## 7. Resource extensibility
 
-The directory models a resource as a typed profile with a stable alias, lifecycle state, safe public
-metadata, protected connection material, and declared capabilities. SSH hosts are the first profile;
-database, object storage, cache, and service profiles can reuse the same directory without forcing
-their credentials into SSH-shaped fields.
+The directory classifies a resource with independent kind, immutable template ID/version, optional
+host platform, and orthogonal roles. A NAS is therefore a host role rather than an operating-system
+type. Each resource also has a stable alias, lifecycle state, safe public metadata, protected
+connection material, and declared capabilities. SSH hosts are the first executable profile;
+database, object storage, cache, messaging, search, graph, and service profiles can reuse the same
+directory without forcing their credentials into SSH-shaped fields.
+
+Initial SSH activation runs one bounded read-only probe after account and platform verification.
+Validated CPU, memory, storage, architecture, hardware, OS/kernel, and Docker facts are committed in
+the same encrypted-vault transaction as activation and are disclosed only through the protected
+details path unless an individual key is source-code allowlisted.
 
 Adding a type requires a contract definition and platform-independent conformance fixtures before a
 runtime adapter is considered supported.

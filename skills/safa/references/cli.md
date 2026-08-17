@@ -9,7 +9,7 @@ envelope. Remote output is nested under `data.execution` and is never a control 
 safa doctor --json
 safa setup status --json
 safa resource list|ls --json [--state STATE]
-safa resource show|inspect ALIAS --json
+safa resource show ALIAS --json [--details]
 safa resource add|edit ALIAS --json [--from-ssh-config SSH_ALIAS]
   [--template TEMPLATE] [--type RESOURCE_TYPE]
 safa resource setup ALIAS --json [--from-ssh-config SSH_ALIAS]
@@ -25,15 +25,17 @@ configuration and create or refresh a draft. Setup imports a prior `known_hosts`
 available existing OpenSSH identity-file/agent route, verifies the direct route, and atomically marks
 the draft active. It does not accept password, key-path, host-key, or approval input. `ProxyJump` and
 `ProxyCommand` routes require later reviewed route support. The adapter accepts `host.linux`,
-`host.macos`, `host.nas`, and `host.windows`; Windows targets must expose OpenSSH and are verified
-with `whoami`. This is target support from the macOS Runtime, not a Windows-native Runtime claim.
-The built-in service template names are `mysql`, `postgresql`, `sqlserver`, `s3`, `minio`, `oss`,
-`redis`, `elasticsearch`, `neo4j`, and `http`. Until the signed local configuration client and the
-corresponding protocol adapter are present, service add returns `user_action_required` and exposes no
-operation capability. Setup/disable/enable/remove are available only with macOS user presence.
+`host.macos`, and `host.windows`; NAS is a role rather than a platform. Windows targets must expose
+OpenSSH and are verified with `whoami`. This is target support from the macOS Runtime, not a
+Windows-native Runtime claim.
+Initial SSH activation verifies the platform and persists a bounded hardware/system inventory probe.
+The built-in service template names are `mysql`, `postgresql`, `sqlserver`, `mongodb`, `s3`, `minio`,
+`oss`, `redis`, `kafka`, `rabbitmq`, `elasticsearch`, `neo4j`, and `http`. Until the signed local
+configuration client and the corresponding protocol adapter are present, service add returns
+`user_action_required` and exposes no operation capability. Setup/disable/enable/remove are available only with macOS user presence.
 Enable restores only a disabled resource; it does not recreate a removed resource.
 
-`resource list` and `show` expose only a safe summary. `resource inspect` is a protected read and
+`resource list` and default `show` expose only a safe summary. `resource show --details` is a protected read and
 requires a macOS Touch ID/login prompt; denial returns no protected detail. It may return non-secret
 endpoint and inventory metadata, but never credential references, Keychain locators, passwords,
 tokens, access keys, private/public key material, or host fingerprints.

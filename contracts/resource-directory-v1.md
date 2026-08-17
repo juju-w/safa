@@ -10,7 +10,11 @@ method. Registering a type does not grant access and does not claim its adapter 
 |---|---|---|
 | canonical alias | public | Lowercase logical name; globally unique in one vault |
 | alternate aliases | authorized | Share the canonical alias collision namespace |
-| resource type | public | Validated open identifier, for example `database.mysql` |
+| resource kind | public | Validated category such as `host`, `database`, or `messaging` |
+| template ID/version | public | Immutable built-in schema/adapter binding |
+| host platform | public | Hosts only: `linux`, `macos`, or `windows` |
+| roles | public | Orthogonal safe purposes such as `nas` or `gpu` |
+| resource type | public | Additive CLI v1 compatibility projection only |
 | display name | authorized | Encrypted; may contain internal context |
 | access methods | authorized | Open identifiers; do not imply adapter availability |
 | endpoint/user/route | authorized | Encrypted connection metadata |
@@ -21,16 +25,64 @@ method. Registering a type does not grant access and does not claim its adapter 
 
 ## Initial identifiers
 
-Resource types:
+Resource kinds:
+
+```text
+host
+database
+object-storage
+cache
+messaging
+search
+graph
+service
+```
+
+Host platforms:
+
+```text
+linux
+macos
+windows
+```
+
+Built-in template IDs:
+
+```text
+ssh
+mysql
+postgresql
+sqlserver
+mongodb
+s3
+minio
+oss
+redis
+kafka
+rabbitmq
+elasticsearch
+neo4j
+http
+```
+
+Additive CLI v1 compatibility resource types:
 
 ```text
 host.linux
 host.macos
-host.nas
+host.windows
 database.mysql
 database.postgresql
+database.sqlserver
+database.mongodb
 object-storage.s3
+object-storage.minio
+object-storage.oss
 cache.redis
+messaging.kafka
+messaging.rabbitmq
+search.elasticsearch
+graph.neo4j
 service.http
 ```
 
@@ -40,8 +92,16 @@ Access methods:
 ssh
 database.mysql
 database.postgresql
+database.sqlserver
 object-storage.s3
+object-storage.minio
+object-storage.oss
 cache.redis
+database.mongodb
+messaging.kafka
+messaging.rabbitmq
+search.elasticsearch
+graph.neo4j
 http
 ```
 
@@ -56,7 +116,7 @@ Supported values are `text`, `integer`, `boolean`, `byte_count`, and `text_list`
 credentials, and recognized encoded key material are rejected before persistence. Public summary
 fields require an exact
 source-reviewed key, type, and value. Other non-secret typed extension fields remain private until
-an authorized inspect and must pass bounded value/content checks. The `ssh.*` namespace is reserved
+an authorized detailed show and must pass bounded value/content checks. The `ssh.*` namespace is reserved
 for dedicated connection and identity fields. Complete sensitive key components and recognized
 compounds for credentials, fingerprints, keys, Keychain locators, passwords, tokens, PEM,
 certificates, passcodes/PINs, passphrases, JWK/JWKS, and locators are rejected without treating benign components
@@ -90,6 +150,7 @@ Initial host profile keys:
 | Key | Value | Default visibility |
 |---|---|---|
 | `host.os.family` | text | public summary |
+| `host.architecture` | text | authorized |
 | `host.os.version` | text | authorized |
 | `host.kernel.release` | text | authorized |
 | `host.cpu.model` | text | authorized |
@@ -99,6 +160,8 @@ Initial host profile keys:
 | `host.storage.available-bytes` | byte count | authorized |
 | `host.docker.available` | boolean | public summary |
 | `host.docker.version` | text | authorized |
+| `host.hardware.vendor` | text | authorized |
+| `host.hardware.model` | text | authorized |
 
 Initial profile-summary keys also include `database.engine`, `object-storage.provider`,
 `cache.engine`, and `service.protocol`. The allowlist lives in trusted source code. An imported
@@ -120,16 +183,18 @@ The Agent XPC surface uses separate explicit DTOs instead of the legacy dynamic 
 
 - `list`: safe summaries, optionally filtered by lifecycle state; never prompts.
 - `show`: one safe summary by canonical or alternate alias; never prompts.
-- `inspect`: resolves the canonical resource, rate-limits prompts, and asks macOS for device-owner
-  authentication. Only an approved request receives `ResourceDetailsV1`.
+- `show --details`: resolves the canonical resource, rate-limits prompts, and asks macOS for
+  device-owner authentication. Only an approved request receives `ResourceDetailsV1`; `inspect`
+  remains a hidden preview compatibility alias.
 - `add` / `edit`: require device-owner authentication and accept only logical aliases and an
   optional supported host type. The broker resolves private connection fields locally;
   imports stay `draft/needs_setup`, trusted resources cannot be silently retargeted, and only
-  `host.linux`, `host.macos`, `host.nas`, or `host.windows` is accepted by this adapter. Windows
+  `host.linux`, `host.macos`, or `host.windows` is accepted by this adapter. Windows
   targets use the same pinned OpenSSH lifecycle rather than a separate password transport.
 - `setup`: requires device-owner authentication, resolves the same explicit OpenSSH alias, imports
   prior `known_hosts` trust plus an available existing identity-file/agent locator, and runs bounded
-  direct-route verification. It commits `active` only when the draft revision remains unchanged.
+  direct-route verification plus a bounded read-only hardware/system probe. It commits `active`
+  with validated probe metadata only when the draft revision remains unchanged.
   `ProxyJump` and `ProxyCommand` routes fail closed pending reviewed route snapshot support.
 - `disable` / `remove`: require device-owner authentication and use revisioned broker transactions;
   removal refuses to break a live relationship.
@@ -140,8 +205,8 @@ key, host fingerprint, or private/public key material.
 
 ## Service adapter boundary
 
-Database, object-storage, cache, and service resources reuse the same encrypted CRUD transaction and
-typed template registry. Their signed protocol adapters still own connection and credential
+Database, object-storage, cache, messaging, search, graph, and service resources reuse the same
+encrypted CRUD transaction and typed template registry. Their signed protocol adapters still own connection and credential
 verification; metadata is never interpreted as executable instructions. The Broker records
 revision-bound verification evidence, exposes `needs_verification` before that proof, and clears the
 proof when connection or credential material changes. Least-privilege accounts remain separate
