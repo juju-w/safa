@@ -11,7 +11,7 @@ safa setup status --json
 safa resource list|ls --json [--state STATE]
 safa resource show|inspect ALIAS --json
 safa resource add|edit ALIAS --json [--from-ssh-config SSH_ALIAS]
-  [--type RESOURCE_TYPE]
+  [--template TEMPLATE] [--type RESOURCE_TYPE]
 safa resource setup ALIAS --json [--from-ssh-config SSH_ALIAS]
 safa resource disable|enable|remove ALIAS --json
 safa exec ALIAS --json --intent TEXT [--expected-effect TEXT] [--rollback TEXT]
@@ -25,8 +25,13 @@ configuration and create or refresh a draft. Setup imports a prior `known_hosts`
 available existing OpenSSH identity-file/agent route, verifies the direct route, and atomically marks
 the draft active. It does not accept password, key-path, host-key, or approval input. `ProxyJump` and
 `ProxyCommand` routes require later reviewed route support. The adapter accepts `host.linux`,
-`host.macos`, and `host.nas` only. Setup/disable/enable/remove are available only with macOS user
-presence. Enable restores only a disabled resource; it does not recreate a removed resource.
+`host.macos`, `host.nas`, and `host.windows`; Windows targets must expose OpenSSH and are verified
+with `whoami`. This is target support from the macOS Runtime, not a Windows-native Runtime claim.
+The built-in service template names are `mysql`, `postgresql`, `sqlserver`, `s3`, `minio`, `oss`,
+`redis`, `elasticsearch`, `neo4j`, and `http`. Until the signed local configuration client and the
+corresponding protocol adapter are present, service add returns `user_action_required` and exposes no
+operation capability. Setup/disable/enable/remove are available only with macOS user presence.
+Enable restores only a disabled resource; it does not recreate a removed resource.
 
 `resource list` and `show` expose only a safe summary. `resource inspect` is a protected read and
 requires a macOS Touch ID/login prompt; denial returns no protected detail. It may return non-secret

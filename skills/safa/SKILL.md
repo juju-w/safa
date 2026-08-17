@@ -1,6 +1,6 @@
 ---
 name: safa
-description: Securely discover and operate registered infrastructure resources through the SAFA macOS companion CLI without exposing reusable credentials to the Agent. The encrypted directory supports host profiles now and is designed for database, object-storage, cache, and service profiles. Use when a user asks to inspect resource metadata, diagnose a remote host, execute a bounded operation, review access, or revoke a grant. Never request, reveal, paste, export, or store raw passwords, private keys, sudo passwords, tokens, access keys, or recovery secrets in conversation.
+description: Securely discover and operate registered infrastructure resources through the SAFA macOS companion CLI without exposing reusable credentials to the Agent. The encrypted directory supports SSH hosts, including Windows targets with OpenSSH, plus typed database, object-storage, cache, graph, search, and HTTP resource registration; non-SSH protocol operations remain capability-gated. Use when a user asks to inspect resource metadata, diagnose a remote host, execute a bounded operation, review access, or revoke a grant. Never request, reveal, paste, export, or store raw passwords, private keys, sudo passwords, tokens, access keys, or recovery secrets in conversation.
 ---
 
 # SAFA
@@ -51,6 +51,12 @@ Setup uses macOS user presence, a pre-existing trusted `known_hosts` entry, and 
 OpenSSH identity or agent. It supports direct routes, including an already running local Core Tunnel
 listener. If SAFA returns a host-identity, authentication, tunnel, or route remediation, report it;
 never collect the missing secret or bypass the failure with raw SSH.
+
+For a Windows target that already exposes OpenSSH, select `--template ssh --type host.windows`.
+Do not describe this as a Windows-native Runtime. For a database, object store, cache, graph, search,
+or HTTP resource, the Agent may select a built-in `--template` only after an explicit add request.
+If SAFA returns `user_action_required`, stop and direct the user to the trusted local configuration
+flow; do not ask for its endpoint, username, database, bucket, password, token, or access key.
 
 Use `safa resource show ALIAS --json` for a non-interactive safe summary. Run
 `safa resource inspect ALIAS --json` only when the user explicitly asks for protected inventory or
