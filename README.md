@@ -155,6 +155,7 @@ Not yet shipped:
 
 - arbitrary remote mutation, sudo grants, and execution approval;
 - complete credential enrollment/recovery and tamper-evident persistent audit history;
+- Broker-mediated website login and constrained browser sessions for Playwright-capable Agents;
 - verified runtime download/rollback and a public Skill package;
 - Linux and Windows native runtimes.
 
@@ -194,6 +195,7 @@ The owl guardian represents a local, watchful security boundary. Source-ready as
 and [GitHub avatar candidate](docs/assets/safa-github-avatar.png).
 
 - [Product architecture](docs/architecture.md)
+- [Brokered browser access roadmap](docs/browser-access-roadmap.md)
 - [Runtime distribution and bootstrap](docs/distribution.md)
 - [Platform support matrix](docs/platform-support.md)
 - [CLI contract](contracts/cli-v1.md)

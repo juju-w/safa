@@ -219,3 +219,16 @@ leave a plaintext intermediate. This workflow is not part of the current preview
 5. Produce signed macOS Runtime assets and a verified manifest.
 6. Release the Skill only after the end-to-end resolver and rollback path pass review.
 7. Choose and implement another platform Runtime only when that work is actually scheduled.
+
+## 11. Future browser-session capability
+
+Website authentication can reuse the encrypted resource directory and native Broker, but it must
+not be implemented as a command that returns a password, cookie, TOTP code, or unrestricted browser
+endpoint. A future `service.http` capability may create an origin-bound, expiring browser context in
+which a trusted bridge performs authentication and the Agent receives only constrained session
+authority.
+
+Because raw Playwright/CDP control can read form values and export authenticated storage, this is a
+new security adapter with its own hostile-page and compromised-Agent threat model—not a thin
+autofill wrapper. It remains outside the current preview. The proposed trust flow, staged delivery,
+and ship criteria are documented in [Brokered browser access roadmap](browser-access-roadmap.md).
