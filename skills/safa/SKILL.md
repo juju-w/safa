@@ -41,15 +41,17 @@ safa resource add ALIAS --from-ssh-config SSH_ALIAS --json
 ```
 
 Both names are logical aliases, not endpoints. The command creates `draft/needs_setup`; report that
-setup is still required before execution. When the user explicitly asks to complete setup, use:
+state only when trusted verification cannot finish. Normal success verifies and activates the
+resource in the same add workflow. When a retained draft is remediated and the user explicitly asks
+to continue, resume it through edit:
 
 ```bash
-safa resource setup ALIAS --from-ssh-config SSH_ALIAS --json
+safa resource edit ALIAS --from-ssh-config SSH_ALIAS --json
 ```
 
-Setup uses macOS user presence, a pre-existing trusted `known_hosts` entry, and an existing local
-OpenSSH identity or agent. It verifies the registered host platform and records a bounded read-only
-hardware/system inventory snapshot. It supports direct routes, including an already running local
+Add/edit use macOS user presence, a pre-existing trusted `known_hosts` entry, and an existing local
+OpenSSH identity or agent. They verify the registered host platform and record a bounded read-only
+hardware/system inventory snapshot. They support direct routes, including an already running local
 Core Tunnel listener. If SAFA returns a host-identity, authentication, tunnel, or route remediation, report it;
 never collect the missing secret or bypass the failure with raw SSH.
 
@@ -78,10 +80,10 @@ The current preview exposes bounded, non-sudo argument execution only. Shell pro
 sudo, grants, and approval are roadmap capabilities; do not invent those commands or bypass SAFA.
 
 Resource-directory lifecycle is the one supported local mutation family. Use `resource edit` only
-when the user asks to refresh an SSH-config mapping, `resource setup` only when the user asks to
-activate its existing local OpenSSH route, and `resource disable/remove` only on an explicit request.
-Use `resource enable` only when the user explicitly asks to restore a previously disabled resource.
-Every operation relies on the macOS-owned user-presence prompt; never repeat-spam or bypass a denial.
+when the user asks to refresh or resume configuration. Change access state only on an explicit
+request with `resource edit ALIAS --state disabled|active --json`; use `resource remove` only on an
+explicit deletion request. There are no separate resource setup, disable, or enable commands. Every
+operation relies on the macOS-owned user-presence prompt; never repeat-spam or bypass a denial.
 
 ## Handle lifecycle states
 

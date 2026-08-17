@@ -10,10 +10,11 @@ safa doctor --json
 safa setup status --json
 safa resource list|ls --json [--state STATE]
 safa resource show ALIAS --json [--details]
-safa resource add|edit ALIAS --json [--from-ssh-config SSH_ALIAS]
+safa resource add ALIAS --json [--from-ssh-config SSH_ALIAS]
   [--template TEMPLATE] [--type RESOURCE_TYPE]
-safa resource setup ALIAS --json [--from-ssh-config SSH_ALIAS]
-safa resource disable|enable|remove ALIAS --json
+safa resource edit ALIAS --json [--from-ssh-config SSH_ALIAS]
+  [--template TEMPLATE] [--type RESOURCE_TYPE] [--state active|disabled]
+safa resource remove ALIAS --json
 safa exec ALIAS --json --intent TEXT [--expected-effect TEXT] [--rollback TEXT]
   [--timeout SECONDS] [--output-limit BYTES] -- ARG...
 ```
@@ -21,9 +22,10 @@ safa exec ALIAS --json --intent TEXT [--expected-effect TEXT] [--rollback TEXT]
 Resource lifecycle occurs in a local, system-authenticated workflow. There are no endpoint,
 username, password, key, token, sudo-password, host-key, recovery-secret, secret-show, or approval
 flags in the Agent-facing CLI. Add/edit resolve a logical alias through the broker's local OpenSSH
-configuration and create or refresh a draft. Setup imports a prior `known_hosts` trust entry and an
-available existing OpenSSH identity-file/agent route, verifies the direct route, and atomically marks
-the draft active. It does not accept password, key-path, host-key, or approval input. `ProxyJump` and
+configuration, create a private draft, import a prior `known_hosts` trust entry and an available
+existing OpenSSH identity-file/agent route, verify the direct route, and atomically mark the draft
+active in one workflow. A remediable failure may retain the draft; rerun edit to resume it. Add/edit
+do not accept password, key-path, host-key, or approval input. `ProxyJump` and
 `ProxyCommand` routes require later reviewed route support. The adapter accepts `host.linux`,
 `host.macos`, and `host.windows`; NAS is a role rather than a platform. Windows targets must expose
 OpenSSH and are verified with `whoami`. This is target support from the macOS Runtime, not a
@@ -32,8 +34,10 @@ Initial SSH activation verifies the platform and persists a bounded hardware/sys
 The built-in service template names are `mysql`, `postgresql`, `sqlserver`, `mongodb`, `s3`, `minio`,
 `oss`, `redis`, `kafka`, `rabbitmq`, `elasticsearch`, `neo4j`, and `http`. Until the signed local
 configuration client and the corresponding protocol adapter are present, service add returns
-`user_action_required` and exposes no operation capability. Setup/disable/enable/remove are available only with macOS user presence.
-Enable restores only a disabled resource; it does not recreate a removed resource.
+`user_action_required` and exposes no operation capability. Add/edit/remove are available only with
+macOS user presence. Use `edit --state disabled|active` to change access state; active also resumes a
+draft, and it does not recreate a removed resource. Separate resource setup/disable/enable commands
+do not exist.
 
 `resource list` and default `show` expose only a safe summary. `resource show --details` is a protected read and
 requires a macOS Touch ID/login prompt; denial returns no protected detail. It may return non-secret

@@ -136,8 +136,9 @@ produces no alias candidates.
 Implemented in `safa-runtime`:
 
 - safe resource discovery by logical alias;
-- user-authorized resource add/edit/setup/disable/enable/remove;
-- SSH-config imports entering `draft/needs_setup` until host identity and authentication succeed;
+- user-authorized resource list/show/add/edit/remove, with setup and state changes owned by add/edit;
+- SSH-config imports verified and activated in one workflow, retaining a resumable draft only when
+  remediation is required;
 - first-connection Linux/macOS/Windows probes that atomically record bounded hardware and system
   inventory in the encrypted directory;
 - encrypted inventory and Keychain password storage;
