@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://safa.dev/contracts/runtime-manifest-v1.schema.json",
+  "title": "SAFA runtime release manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "skill_version",
+    "cli_schema_min",
+    "cli_schema_max",
+    "runtimes"
+  ],
+  "properties": {
+    "schema": {
+      "const": "dev.safa.runtime-manifest/v1"
+    },
+    "skill_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "cli_schema_min": {
+      "type": "string",
+      "pattern": "^dev\\.safa\\.cli/v[1-9][0-9]*$"
+    },
+    "cli_schema_max": {
+      "type": "string",
+      "pattern": "^dev\\.safa\\.cli/v[1-9][0-9]*$"
+    },
+    "runtimes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/runtime"
+      }
+    }
+  },
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "architecture",
+        "version",
+        "url",
+        "sha256",
+        "archive_format",
+        "signing"
+      ],
+      "properties": {
+        "platform": {
+          "enum": ["macos", "linux", "windows"]
+        },
+        "architecture": {
+          "enum": ["arm64", "x86_64"]
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "archive_format": {
+          "enum": ["zip", "tar.zst"]
+        },
+        "minimum_os_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signing": {
+          "$ref": "#/$defs/signing"
+        }
+      }
+    },
+    "signing": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "team_identifier", "bundle_identifier", "notarization_required"],
+          "properties": {
+            "kind": {
+              "const": "apple-code-signing"
+            },
+            "team_identifier": {
+              "type": "string",
+              "minLength": 1
+            },
+            "bundle_identifier": {
+              "type": "string",
+              "minLength": 1
+            },
+            "notarization_required": {
+              "const": true
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "public_key_id"],
+          "properties": {
+            "kind": {
+              "enum": ["minisign", "sigstore"]
+            },
+            "public_key_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "publisher"],
+          "properties": {
+            "kind": {
+              "const": "authenticode"
+            },
+            "publisher": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

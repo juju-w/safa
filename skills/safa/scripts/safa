@@ -1,0 +1,59 @@
+#!/bin/sh
+set -eu
+
+emit_error() {
+  error_code="$1"
+  message="$2"
+  exit_code="$3"
+  printf '%s\n' "{\"schema\":\"dev.safa.cli/v1\",\"command\":\"launcher\",\"status\":\"failed\",\"request_id\":null,\"data\":{\"error\":{\"code\":\"${error_code}\",\"message\":\"${message}\",\"retryable\":false}},\"warnings\":[],\"next_action\":null}"
+  exit "$exit_code"
+}
+
+if [ "$(uname -s)" != "Darwin" ]; then
+  emit_error "unsupported_platform" "SAFA requires macOS." 45
+fi
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+runtime_app="${script_dir}/../assets/SAFA.app"
+cli_path="${runtime_app}/Contents/MacOS/safa"
+broker_app="${runtime_app}/Contents/Library/Helpers/SAFABrokerAgent.app"
+broker_path="${broker_app}/Contents/MacOS/safa-broker"
+askpass_path="${runtime_app}/Contents/Library/Helpers/safa-askpass"
+
+if [ ! -d "$runtime_app" ] || [ ! -x "$cli_path" ] || [ ! -x "$broker_path" ] || [ ! -x "$askpass_path" ]; then
+  printf '%s\n' '{"schema":"dev.safa.cli/v1","command":"launcher","status":"user_action_required","request_id":null,"data":{"error":{"code":"runtime_missing","message":"The signed SAFA companion runtime has not been assembled in this development Skill.","retryable":false}},"warnings":[],"next_action":{"kind":"install_verified_runtime","safe_for_agent":false}}'
+  exit 22
+fi
+
+for component in "$runtime_app" "$broker_app" "$cli_path" "$broker_path" "$askpass_path"; do
+  if ! /usr/bin/codesign --verify --strict "$component" >/dev/null 2>&1; then
+    emit_error "runtime_signature_invalid" "The SAFA Runtime package failed code-signature verification." 45
+  fi
+done
+
+signature_field() {
+  component="$1"
+  field="$2"
+  /usr/bin/codesign --display --verbose=4 "$component" 2>&1 \
+    | /usr/bin/sed -n "s/^${field}=//p" \
+    | /usr/bin/head -n 1
+}
+
+cli_identifier=$(signature_field "$cli_path" "Identifier")
+broker_identifier=$(signature_field "$broker_path" "Identifier")
+askpass_identifier=$(signature_field "$askpass_path" "Identifier")
+cli_team=$(signature_field "$cli_path" "TeamIdentifier")
+broker_team=$(signature_field "$broker_path" "TeamIdentifier")
+askpass_team=$(signature_field "$askpass_path" "TeamIdentifier")
+
+if [ "$cli_identifier" != "dev.safa.cli" ] \
+  || [ "$broker_identifier" != "dev.safa.broker" ] \
+  || [ "$askpass_identifier" != "dev.safa.askpass" ]; then
+  emit_error "runtime_identity_invalid" "The SAFA Runtime package has an unexpected component identity." 45
+fi
+
+if [ -z "$cli_team" ] || [ "$cli_team" != "$broker_team" ] || [ "$cli_team" != "$askpass_team" ]; then
+  emit_error "runtime_publisher_invalid" "The SAFA Runtime components do not share one Developer Team identity." 45
+fi
+
+exec "$cli_path" "$@"
