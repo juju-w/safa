@@ -181,6 +181,11 @@ protected. A trusted local flow may mark an abstract logical edge Agent-visible 
 aliases and the relation type are safe; physical routes, network coordinates, evidence, and
 credential bindings remain protected or Broker-only. An Agent-created relationship is an asserted
 desired claim until Broker verification promotes a separate observed or derived edge.
+For resource-to-resource `hosted-on`, `depends-on`, and `backed-by` relations, the encrypted
+resource profile is canonical and persists origin; legacy records without origin decode as
+`import`. Reconciliation materializes one stable desired/asserted graph edge. Matching topology
+link/unlink and resource lifecycle updates keep the profile and graph consistent in one serialized
+Broker transaction.
 
 ## Query and mutation contracts
 
@@ -201,6 +206,11 @@ The Agent XPC surface uses separate explicit DTOs instead of the legacy dynamic 
   be silently retargeted. `edit --state disabled|active` changes access state.
 - `remove`: requires device-owner authentication and a revisioned broker transaction; removal
   refuses to break a live relationship.
+
+The macOS Runtime may reuse one successful add/edit/setup authorization within that operation class
+for at most five minutes. This is an in-memory Broker lease, not a stored password or Agent token.
+It does not cover remove, disable, enable, protected inspection, credential use, sudo, or arbitrary
+execution; a denial, sensitive state action, or Broker restart clears it.
 
 Setup, verification, activation, disabling, and enabling remain internal lifecycle stages rather
 than public resource commands. `ProxyJump` and `ProxyCommand` routes fail closed pending reviewed

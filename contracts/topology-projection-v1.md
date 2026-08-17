@@ -83,6 +83,17 @@ Routes are represented by explicit nodes and edges rather than a free-form `via`
 keeps multi-hop routes queryable and prevents a textual route description from becoming executable
 configuration.
 
+For resource-to-resource declarations, the encrypted resource profile is canonical. Its
+`hosted-on`, `depends-on`, and `backed-by` relationships materialize as stable
+`runs-on`, `depends-on`, and `backed-by` desired/asserted graph edges. Matching topology
+link/unlink operations and resource lifecycle changes update both representations in one serialized
+Broker transaction.
+
+A successful bounded SSH setup probe or bounded remote execution refreshes one
+`runtime.local can-reach RESOURCE` observed/verified edge for five minutes. A transport failure
+(including OpenSSH exit 255) creates no such evidence. This evidence answers reachability questions;
+it never selects credentials, grants execution authority, or replaces normal policy and approval.
+
 ## 4. Agent projection
 
 The base Agent projection is a bounded JSON node table plus typed edge table. It contains only
@@ -156,6 +167,8 @@ safa topology unlink FROM RELATION TO --json
 macOS user presence and edit only `desired/asserted` edges. They have no flags for layer,
 verification, evidence, endpoints, routes, usernames, or credentials. Dense comparison and cycle
 detection remain Broker algorithms rather than extra public verbs.
+Successive desired `link` operations may reuse one separate in-memory approval for no more than five
+minutes. `unlink` always requires fresh authorization and clears the link lease.
 
 A link endpoint is normally an existing resource alias. To keep the surface small, `link` may also
 create a missing reviewed context node when its alias is exactly one semantic segment under

@@ -39,8 +39,9 @@ Initial SSH activation verifies the platform and persists a bounded hardware/sys
 The built-in service template names are `mysql`, `postgresql`, `sqlserver`, `mongodb`, `s3`, `minio`,
 `oss`, `redis`, `kafka`, `rabbitmq`, `elasticsearch`, `neo4j`, and `http`. Until the signed local
 configuration client and the corresponding protocol adapter are present, service add returns
-`user_action_required` and exposes no operation capability. Add/edit/remove are available only with
-macOS user presence. Use `edit --state disabled|active` to change access state; active also resumes a
+`user_action_required` and exposes no operation capability. Add/edit/setup may reuse a separate,
+Broker-memory authorization for at most five minutes. Remove, disable, and enable always require
+fresh macOS user presence and clear it. Use `edit --state disabled|active` to change access state; active also resumes a
 draft, and it does not recreate a removed resource. Separate resource setup/disable/enable commands
 do not exist.
 
@@ -50,8 +51,13 @@ fresh Broker-verified path; `not-found` is a negative result for the bounded gra
 `indeterminate` means limits prevented a conclusion. Do not infer connectivity from a diagram or
 from a desired/asserted edge. `link` and `unlink` are protected logical mutations and run only after
 an explicit user request plus macOS user presence.
+Successive desired `link` operations may reuse their own five-minute in-memory authorization;
+`unlink` always requires fresh authorization and clears it.
 `link` may create a missing semantic context node only as `site.NAME`, `domain.NAME`,
 `network.NAME`, `runtime.NAME`, or `route.NAME`; IP/CIDR/DNS-shaped aliases are invalid.
+Successful bounded setup probes and executions refresh five-minute verified
+`runtime.local can-reach RESOURCE` evidence. Transport failures do not. This evidence is descriptive
+only and never grants permission or selects credentials.
 
 `resource list` and default `show` expose only a safe summary. `resource show --details` is a protected read and
 requires a macOS Touch ID/login prompt; denial returns no protected detail. It may return non-secret

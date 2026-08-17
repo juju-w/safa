@@ -166,8 +166,10 @@ prompt and, only after approval, may return non-secret endpoint and inventory de
 rate-limit response contains no resource detail object. Detailed show never returns a password, token,
 private/public key, host fingerprint, credential identifier, or Keychain locator.
 
-`resource add/edit/remove` are protected mutations and each triggers a macOS-owned Touch ID/login
-prompt. Add/edit send only logical aliases, safe template/type choices, and an optional
+`resource add/edit/remove` are protected mutations. Similar add/edit/setup operations may reuse one
+in-memory, Broker-local authorization for at most five minutes; remove, disable, and enable always
+require fresh macOS user presence and clear that lease. Add/edit send only logical aliases, safe
+template/type choices, and an optional
 active/disabled state to the broker. The broker resolves OpenSSH connection settings locally. Add
 creates a private draft and, in the same workflow, imports prior `known_hosts` trust plus an
 available existing OpenSSH identity/agent locator, verifies the expected account and platform, runs
@@ -191,6 +193,8 @@ After authorization, `link` may create a missing abstract context alias only in 
 forms `site.NAME`, `domain.NAME`, `network.NAME`, `runtime.NAME`, or `route.NAME`. `NAME` must start
 with a lowercase letter and contain only lowercase letters, digits, or hyphens. IP/CIDR/DNS-shaped
 context is rejected. Ordinary resource endpoints must already exist in the resource directory.
+Successive `link` operations may reuse their own five-minute in-memory authorization; `unlink`
+always requires fresh user presence and clears it.
 The SSH config adapter accepts `host.linux`, `host.macos`, and `host.windows` when the
 target exposes OpenSSH. This does not claim that a Windows-native SAFA Runtime exists. Built-in
 resource template identifiers are `ssh`, `mysql`, `postgresql`, `sqlserver`, `mongodb`, `s3`,

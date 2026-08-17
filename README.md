@@ -152,7 +152,9 @@ safa topology path app.production database.primary --json
 
 </details>
 
-Resource add/edit/remove and protected details require native macOS user authorization. Arbitrary
+Protected resource changes and details require native macOS user authorization. Similar resource
+setup or desired topology-link actions can reuse separate Broker-memory authorization for up to five
+minutes; destructive/state changes still require a fresh prompt. Arbitrary
 shell execution, sudo, mutation approval, and non-SSH protocol operations are not current Agent
 capabilities. The canonical command and envelope definitions live in the
 [CLI contract](contracts/cli-v1.md).
