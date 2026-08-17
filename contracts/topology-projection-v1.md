@@ -1,15 +1,15 @@
 # Topology Projection v1
 
-**Status**: Design approved; Runtime implementation pending.
+**Status**: Runtime v1 implemented; publication remains on hold.
 
 SAFA models infrastructure topology as a directed, typed, attributed multigraph. A rendered
 diagram, tree, Mermaid document, or prose description is never the authoritative representation.
 Those formats lose direction, parallel edges, provenance, freshness, or security state and are
 also sensitive to visual layout and textual ordering.
 
-This contract defines the platform-neutral graph and the bounded projections that an Agent may
-receive. It does not add a public CLI command. CLI and native IPC bindings require separate
-conformance fixtures before they are exposed.
+This contract defines the platform-neutral graph, bounded Agent projections, and the intentionally
+small CLI surface that exposes them. Native IPC uses explicit v1 DTOs; it does not send dynamic
+maps across the trust boundary.
 
 ## 1. Trust layers
 
@@ -93,7 +93,7 @@ agent-visible aliases and attributes and is deterministically serialized.
   "schema": "dev.safa.topology/v1",
   "graph_revision": 42,
   "task": "reachability",
-  "ordering": "rooted-bfs-then-alias",
+  "ordering": "source-rooted-breadth-first",
   "roots": ["host.compute-a", "service.data-api"],
   "nodes": [
     {"alias": "host.compute-a", "kind": "resource", "resource_kind": "host"},
@@ -105,21 +105,19 @@ agent-visible aliases and attributes and is deterministically serialized.
       "from": "host.compute-a",
       "relation": "can-reach",
       "to": "service.data-api",
-      "layer": "derived",
+      "layer": "observed",
       "verification": "verified",
       "freshness": "fresh"
     }
   ],
-  "proofs": [
-    {
-      "question": "can-reach",
-      "from": "host.compute-a",
-      "to": "service.data-api",
-      "result": true,
-      "edge_ids": ["edge-7f4a"],
-      "computed_by": "broker"
-    }
-  ],
+  "answer": {
+    "outcome": "confirmed",
+    "source": "host.compute-a",
+    "target": "service.data-api",
+    "affected_aliases": [],
+    "proof_edge_ids": ["edge-7f4a"]
+  },
+  "matrix": null,
   "truncated": false
 }
 ```
@@ -140,7 +138,26 @@ identity. The projector then chooses an ordering and representation for the ques
 No format is universal. The projection declares its task and ordering so the Agent does not have to
 infer how the sequence was produced.
 
-## 5. Query and retrieval rules
+The Agent reads `answer.outcome` first. It inspects structural evidence only when it must explain
+the answer. `confirmed` is reserved for a fresh Broker-verified reachability path; `not-found`
+means no such path exists in the bounded graph; `indeterminate` means bounds prevented a conclusion.
+
+## 5. Simple CLI surface
+
+```text
+safa topology show [ALIAS] --json
+safa topology path FROM TO --json
+safa topology impact ALIAS --json
+safa topology link FROM RELATION TO --json
+safa topology unlink FROM RELATION TO --json
+```
+
+`show`, `path`, and `impact` are non-interactive safe projections. `link` and `unlink` require
+macOS user presence and edit only `desired/asserted` edges. They have no flags for layer,
+verification, evidence, endpoints, routes, usernames, or credentials. Dense comparison and cycle
+detection remain Broker algorithms rather than extra public verbs.
+
+## 6. Query and retrieval rules
 
 The Broker, not the LLM, computes exact neighborhood, reachability, path, cycle, and dependency-set
 operations. The Agent receives the result and the supporting node/edge IDs.
@@ -154,7 +171,7 @@ later, but cannot establish connectivity or execution authority. Any omitted mat
 Projection output must be invariant to persistence order. Tests must permute stored node and edge
 order and require identical normalized projections, graph-query results, and proof paths.
 
-## 6. Disclosure and mutation
+## 7. Disclosure and mutation
 
 Agent-visible logical topology is an explicit, reviewed subset. It may include aliases, abstract
 site/network names, resource placement, service dependencies, and sanitized reachability state. It
@@ -166,14 +183,14 @@ relation vocabulary, endpoint existence, visibility, cycles where prohibited, an
 commit. Connectivity becomes verified only after a trusted adapter or bounded probe produces fresh
 evidence. Stale or failed evidence is visible as state, never silently treated as success.
 
-## 7. Visual representations
+## 8. Visual representations
 
 SVG, Mermaid, and other diagrams are derived artifacts for human review. A multimodal Agent may
 receive one as an auxiliary view only when it also receives the canonical textual projection and
 the exact Broker proof. Layout, color, proximity, arrow routing, and node placement carry no
 authority. A diagram parse or model interpretation can never produce a verified edge.
 
-## 8. Research basis
+## 9. Research basis
 
 - [Talk like a Graph](https://arxiv.org/abs/2310.04560) finds that graph-task accuracy varies with
   encoding, task, and graph structure rather than having one universal textual format.
@@ -190,10 +207,10 @@ authority. A diagram parse or model interpretation can never produce a verified 
   in current multimodal models, reinforcing that visual layout must not determine operational
   truth.
 
-## 9. Compatibility analysis
+## 10. Compatibility analysis
 
-This is an additive design contract. It changes no existing `dev.safa.cli/v1` command, field,
-status, exit code, or Runtime manifest. Existing resource relationships remain protected by default;
-Agent visibility requires an explicit trusted-local classification. Runtime DTO bindings and
-representative conformance fixtures are intentionally pending together so no implementation may
-claim topology support from this document alone.
+This is an additive v1 contract. It changes no existing command, field, status, exit code, or
+Runtime manifest. Topology commands emit the existing `dev.safa.cli/v1` envelope and place the
+projection under `data.topology`. Existing resource relationships remain protected by default;
+Agent visibility requires an explicit trusted-local classification. Representative fixtures live
+under `conformance/cli-v1/`.

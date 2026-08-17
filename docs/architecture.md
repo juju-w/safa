@@ -179,7 +179,8 @@ or turn a diagram interpretation into route or credential authority.
 
 The normative graph, trust, projection, and disclosure rules are in
 [`topology-projection-v1.md`](../contracts/topology-projection-v1.md). Visual output remains a human
-or auxiliary multimodal view and is never the sole machine input for an operational decision.
+or auxiliary multimodal view and is never the sole machine input for an operational decision. See
+the [topology algorithm and Agent decision diagrams](topology.md) for a worked visual explanation.
 
 ## 8. Distribution and releases
 

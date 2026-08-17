@@ -15,6 +15,11 @@ safa resource add ALIAS --json [--from-ssh-config SSH_ALIAS]
 safa resource edit ALIAS --json [--from-ssh-config SSH_ALIAS]
   [--template TEMPLATE] [--type RESOURCE_TYPE] [--state active|disabled]
 safa resource remove ALIAS --json
+safa topology show [ALIAS] --json
+safa topology path FROM TO --json
+safa topology impact ALIAS --json
+safa topology link FROM RELATION TO --json
+safa topology unlink FROM RELATION TO --json
 safa exec ALIAS --json --intent TEXT [--expected-effect TEXT] [--rollback TEXT]
   [--timeout SECONDS] [--output-limit BYTES] -- ARG...
 ```
@@ -38,6 +43,13 @@ configuration client and the corresponding protocol adapter are present, service
 macOS user presence. Use `edit --state disabled|active` to change access state; active also resumes a
 draft, and it does not recreate a removed resource. Separate resource setup/disable/enable commands
 do not exist.
+
+Topology queries are the preferred way to answer placement, connectivity, and dependency-impact
+questions. Read `data.topology.answer.outcome` before structural fields. Only `confirmed` proves a
+fresh Broker-verified path; `not-found` is a negative result for the bounded graph and
+`indeterminate` means limits prevented a conclusion. Do not infer connectivity from a diagram or
+from a desired/asserted edge. `link` and `unlink` are protected logical mutations and run only after
+an explicit user request plus macOS user presence.
 
 `resource list` and default `show` expose only a safe summary. `resource show --details` is a protected read and
 requires a macOS Touch ID/login prompt; denial returns no protected detail. It may return non-secret

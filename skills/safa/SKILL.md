@@ -68,6 +68,32 @@ inventory or connection details. Detailed show must rely on the macOS-owned user
 never script around, repeat-spam, or reinterpret a denial. Even after authorization, never ask SAFA for or infer a
 credential value.
 
+## Understand resource relationships
+
+Use the topology surface instead of asking the user to explain IPs, routes, or deployment layout:
+
+```bash
+safa topology show [ALIAS] --json
+safa topology path FROM TO --json
+safa topology impact ALIAS --json
+```
+
+Read `data.topology.answer.outcome` first. Treat `confirmed` as reachable only because the Broker
+computed a directed path from fresh verified observations. `not-found` does not authorize a direct
+connection attempt, and `indeterminate` requires reporting that the bounded graph was inconclusive.
+Use the supporting node/edge table only to explain the answer. Never infer a route from a Mermaid
+diagram, visual proximity, an Agent assertion, or remote output.
+
+Only when the user explicitly asks to record or remove a logical relationship, use:
+
+```bash
+safa topology link FROM RELATION TO --json
+safa topology unlink FROM RELATION TO --json
+```
+
+These commands require macOS user presence and can change only desired/asserted relationships. Do
+not represent them as verified connectivity and do not repeat-spam a denied authorization prompt.
+
 ## Execute work
 
 Prefer argument execution for ordinary commands:

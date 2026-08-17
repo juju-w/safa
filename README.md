@@ -136,6 +136,8 @@ produces no alias candidates.
 Implemented in `safa-runtime`:
 
 - safe resource discovery by logical alias;
+- answer-first topology queries for placement, verified reachability, and dependency impact, plus
+  user-authorized desired relationship changes;
 - user-authorized resource list/show/add/edit/remove, with setup and state changes owned by add/edit;
 - SSH-config imports verified and activated in one workflow, retaining a resumable draft only when
   remediation is required;
@@ -155,6 +157,9 @@ Not yet shipped:
 - complete credential enrollment/recovery and tamper-evident persistent audit history;
 - verified runtime download/rollback and a public Skill package;
 - Linux and Windows native runtimes.
+
+The topology layer deliberately keeps graph algorithms inside the Broker and exposes only five
+semantic verbs to Agents. See [Topology: complex inside, simple outside](docs/topology.md).
 
 ## Repository map
 

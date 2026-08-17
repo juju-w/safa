@@ -28,6 +28,12 @@ safa resource edit ALIAS --json [--from-ssh-config SSH_ALIAS]
   [--template TEMPLATE] [--type RESOURCE_TYPE] [--state active|disabled]
 safa resource remove ALIAS --json
 
+safa topology show [ALIAS] --json
+safa topology path FROM TO --json
+safa topology impact ALIAS --json
+safa topology link FROM RELATION TO --json
+safa topology unlink FROM RELATION TO --json
+
 safa exec ALIAS --json \
   --intent TEXT [--expected-effect TEXT] [--rollback TEXT] \
   [--timeout SECONDS] [--output-limit BYTES] -- ARG...
@@ -173,6 +179,14 @@ disabled|active` changes access state, with `active` also resuming a draft. `Pro
 Removal uses the same serialized revisioned transaction and is rejected while another live resource
 references the target. There are no public `resource setup`, `resource disable`, or `resource enable`
 commands.
+
+Topology query commands return a bounded `dev.safa.topology/v1` object under `data.topology`.
+Callers read `answer.outcome` first and use nodes, edges, and proof edge IDs only for explanation.
+`path` returns `confirmed` only for a directed path of fresh Broker-verified evidence; an
+Agent-created claim cannot prove reachability. `link` and `unlink` require macOS user presence and
+change desired/asserted logical edges only. Valid relations are `located-in`, `member-of`,
+`runs-on`, `depends-on`, `backed-by`, `replicates-to`, `routed-via`, and `can-reach`. There are no
+flags for trust state, evidence, endpoint, username, route coordinates, or credentials.
 The SSH config adapter accepts `host.linux`, `host.macos`, and `host.windows` when the
 target exposes OpenSSH. This does not claim that a Windows-native SAFA Runtime exists. Built-in
 resource template identifiers are `ssh`, `mysql`, `postgresql`, `sqlserver`, `mongodb`, `s3`,
