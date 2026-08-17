@@ -134,3 +134,6 @@ is not a substitute for provenance verification.
 
 No Runtime package or exact manifest is published yet. The current launcher therefore returns
 `runtime_missing`/`user_action_required` instead of downloading an unverified development artifact.
+For local development only, the Runtime repository can pre-provision a signed app and a local lock
+containing its exact version, architecture, Team ID, and Code Directory hashes. This path performs
+no download and makes no notarization claim.
