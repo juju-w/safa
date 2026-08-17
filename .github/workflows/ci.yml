@@ -37,8 +37,13 @@ jobs:
           for fixture in conformance/cli-v1/*.json; do
             python3 -m json.tool "$fixture" >/dev/null
           done
-      - name: Validate launcher syntax
-        run: sh -n skills/safa/scripts/safa
+      - name: Validate launcher syntax across available shells
+        run: |
+          sh -n skills/safa/scripts/safa
+          bash -n skills/safa/scripts/safa
+          if command -v zsh >/dev/null 2>&1; then
+            zsh -n skills/safa/scripts/safa
+          fi
       - name: Validate fail-closed launcher behavior
         run: tests/launcher_contract.sh
       - name: Check whitespace

@@ -17,6 +17,9 @@ cd <skill-directory> && ./scripts/safa doctor --json
 ```
 
 Resolve `<skill-directory>` to the directory containing this `SKILL.md`. Parse only the JSON envelope.
+Set the process working directory to that existing Skill directory before launching the shell. If the
+shell reports `getcwd` before SAFA starts, retry from the Skill directory instead of treating the
+shell warning as Runtime output.
 If the runtime reports `user_action_required`, explain that a trusted local action is needed. Follow
 only an explicit returned action. Do not collect the missing value in chat.
 
