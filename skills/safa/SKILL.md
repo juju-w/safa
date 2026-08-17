@@ -93,6 +93,10 @@ safa topology unlink FROM RELATION TO --json
 
 These commands require macOS user presence and can change only desired/asserted relationships. Do
 not represent them as verified connectivity and do not repeat-spam a denied authorization prompt.
+Use an existing resource alias whenever possible. A missing abstract context may be introduced by
+`link` only as `site.NAME`, `domain.NAME`, `network.NAME`, `runtime.NAME`, or `route.NAME`, where
+`NAME` is one lowercase semantic segment beginning with a letter. Never place an IP address, CIDR,
+hostname, endpoint, account, database name, or bucket name in a context alias.
 
 ## Execute work
 

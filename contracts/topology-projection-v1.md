@@ -157,6 +157,13 @@ macOS user presence and edit only `desired/asserted` edges. They have no flags f
 verification, evidence, endpoints, routes, usernames, or credentials. Dense comparison and cycle
 detection remain Broker algorithms rather than extra public verbs.
 
+A link endpoint is normally an existing resource alias. To keep the surface small, `link` may also
+create a missing reviewed context node when its alias is exactly one semantic segment under
+`site.*`, `domain.*`, `network.*`, `runtime.*`, or `route.*`. The segment starts with a letter and
+contains only lowercase letters, digits, and hyphens. This excludes IP addresses, CIDRs, and
+multi-label hostnames. Context creation is covered by the same macOS authorization; `unlink` never
+creates a node.
+
 ## 6. Query and retrieval rules
 
 The Broker, not the LLM, computes exact neighborhood, reachability, path, cycle, and dependency-set
@@ -179,8 +186,8 @@ never includes physical coordinates, CIDRs, endpoint details, usernames, credent
 locators, host fingerprints, raw probe output, or policy internals.
 
 An Agent may propose additions or corrections to desired logical edges. The Broker validates the
-relation vocabulary, endpoint existence, visibility, cycles where prohibited, and revision before
-commit. Connectivity becomes verified only after a trusted adapter or bounded probe produces fresh
+relation vocabulary, registered resource or constrained context endpoint, visibility, placement and
+route cycles, and revision before commit. Connectivity becomes verified only after a trusted adapter or bounded probe produces fresh
 evidence. Stale or failed evidence is visible as state, never silently treated as success.
 
 ## 8. Visual representations

@@ -40,6 +40,11 @@ edges are preserved because two independent probes can support the same logical 
 Limits on hops, nodes, and edges prevent a large graph from flooding an Agent context; if limits
 matter, the answer becomes `indeterminate` or the projection sets `truncated: true`.
 
+For abstract grouping, the same protected `link` command can create one constrained semantic node:
+`site.school`, `network.office-lan`, `domain.production`, `runtime.k3s-main`, or
+`route.jump-path`. It cannot create an IP-, CIDR-, or DNS-shaped context node. This avoids a second
+context-management command while keeping protected network coordinates out of Agent-visible state.
+
 ## The model-facing decision tree
 
 ```mermaid
@@ -67,6 +72,7 @@ connectivity.
 | “计算节点能访问 MySQL 吗？” | `safa topology path host.compute service.mysql --json` | `confirmed`, `not-found`, or `indeterminate` |
 | “NAS 挂了影响什么？” | `safa topology impact storage.reports --json` | `affected_aliases` |
 | “记一下 worker 依赖 API” | `safa topology link service.worker depends-on service.api --json` | mutation status |
+| “计算节点属于办公网” | `safa topology link host.compute member-of network.office-lan --json` | mutation status |
 
 The table uses fictitious aliases. Real inventory never belongs in this repository.
 

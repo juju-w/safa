@@ -50,6 +50,8 @@ fresh Broker-verified path; `not-found` is a negative result for the bounded gra
 `indeterminate` means limits prevented a conclusion. Do not infer connectivity from a diagram or
 from a desired/asserted edge. `link` and `unlink` are protected logical mutations and run only after
 an explicit user request plus macOS user presence.
+`link` may create a missing semantic context node only as `site.NAME`, `domain.NAME`,
+`network.NAME`, `runtime.NAME`, or `route.NAME`; IP/CIDR/DNS-shaped aliases are invalid.
 
 `resource list` and default `show` expose only a safe summary. `resource show --details` is a protected read and
 requires a macOS Touch ID/login prompt; denial returns no protected detail. It may return non-secret

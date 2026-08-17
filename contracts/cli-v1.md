@@ -187,6 +187,10 @@ Agent-created claim cannot prove reachability. `link` and `unlink` require macOS
 change desired/asserted logical edges only. Valid relations are `located-in`, `member-of`,
 `runs-on`, `depends-on`, `backed-by`, `replicates-to`, `routed-via`, and `can-reach`. There are no
 flags for trust state, evidence, endpoint, username, route coordinates, or credentials.
+After authorization, `link` may create a missing abstract context alias only in the single-segment
+forms `site.NAME`, `domain.NAME`, `network.NAME`, `runtime.NAME`, or `route.NAME`. `NAME` must start
+with a lowercase letter and contain only lowercase letters, digits, or hyphens. IP/CIDR/DNS-shaped
+context is rejected. Ordinary resource endpoints must already exist in the resource directory.
 The SSH config adapter accepts `host.linux`, `host.macos`, and `host.windows` when the
 target exposes OpenSSH. This does not claim that a Windows-native SAFA Runtime exists. Built-in
 resource template identifiers are `ssh`, `mysql`, `postgresql`, `sqlserver`, `mongodb`, `s3`,
