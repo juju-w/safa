@@ -19,7 +19,7 @@ method. Registering a type does not grant access and does not claim its adapter 
 | access methods | authorized | Open identifiers; do not imply adapter availability |
 | endpoint/user/route | authorized | Encrypted connection metadata |
 | typed metadata | allowlist/authorized | Unknown keys always default private |
-| relationships | authorized | Returned with target aliases, never raw resource IDs |
+| relationships | tiered | Agent-visible logical edges are allowlisted; protected graph detail requires authorization |
 | credential bindings | broker only | Opaque IDs only; never in Agent DTOs |
 | credential values/locators | Keychain/broker only | Never resource metadata |
 
@@ -175,6 +175,13 @@ relationship is rejected with the referencing alias so a trusted setup flow can 
 retarget that dependency. Removal never leaves a live resource pointing at a deleted target and
 never silently rewrites another resource's topology.
 
+Relationships participate in the typed topology graph defined by
+[`topology-projection-v1.md`](topology-projection-v1.md). The default relationship record is
+protected. A trusted local flow may mark an abstract logical edge Agent-visible when both endpoint
+aliases and the relation type are safe; physical routes, network coordinates, evidence, and
+credential bindings remain protected or Broker-only. An Agent-created relationship is an asserted
+desired claim until Broker verification promotes a separate observed or derived edge.
+
 ## Query and mutation contracts
 
 The Agent XPC surface uses separate explicit DTOs instead of the legacy dynamic broker map:
@@ -184,8 +191,7 @@ The Agent XPC surface uses separate explicit DTOs instead of the legacy dynamic 
 - `list`: safe summaries, optionally filtered by lifecycle state; never prompts.
 - `show`: one safe summary by canonical or alternate alias; never prompts.
 - `show --details`: resolves the canonical resource, rate-limits prompts, and asks macOS for
-  device-owner authentication. Only an approved request receives `ResourceDetailsV1`; `inspect`
-  remains a hidden preview compatibility alias.
+  device-owner authentication. Only an approved request receives `ResourceDetailsV1`.
 - `add` / `edit`: require device-owner authentication and accept only logical aliases, safe
   template/type choices, and an optional active/disabled state. The broker resolves private
   connection fields locally. Add creates a private draft, then imports prior `known_hosts` trust

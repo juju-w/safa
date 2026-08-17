@@ -150,6 +150,37 @@ details path unless an individual key is source-code allowlisted.
 Adding a type requires a contract definition and platform-independent conformance fixtures before a
 runtime adapter is considered supported.
 
+### 7.1 Topology is data, not a drawing
+
+SAFA does not use Mermaid, an arrow diagram, a tree, or a screenshot as the topology source of
+truth. Infrastructure is not a tree: a service can run on one host, depend on a database on another,
+replicate to storage in a third site, and be reachable through several routes at once.
+
+The encrypted authority is a directed, typed, attributed multigraph. It separates desired claims,
+Broker-observed facts, and deterministic derived paths. The Agent receives only a reviewed logical
+projection with aliases; endpoints, CIDRs, ports, usernames, route coordinates, evidence records,
+and credential bindings remain protected.
+
+The Runtime chooses a bounded projection for each task:
+
+| Question | Agent input |
+|---|---|
+| What exists or where is it placed? | node table plus typed edge list |
+| Can A reach B and through what? | adjacency list plus a Broker-computed proof path |
+| What breaks if B fails? | reverse adjacency list plus a computed affected set |
+| Compare one relation across a small dense set | bounded relation matrix with a stable legend |
+| Show a person the architecture | diagram derived from the same projection |
+
+Storage order is normalized, while task projections use stable, declared ordering. Large graphs are
+reduced to a connected question-relevant subgraph; the model is not asked to reconstruct the whole
+graph from a token dump. Exact connectivity, path, and cycle computations belong to the Broker.
+The LLM plans, explains, and proposes desired relationship changes, but cannot self-verify an edge
+or turn a diagram interpretation into route or credential authority.
+
+The normative graph, trust, projection, and disclosure rules are in
+[`topology-projection-v1.md`](../contracts/topology-projection-v1.md). Visual output remains a human
+or auxiliary multimodal view and is never the sole machine input for an operational decision.
+
 ## 8. Distribution and releases
 
 Runtime and Skill releases are separate:
