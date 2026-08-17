@@ -4,9 +4,9 @@
 
 # SAFA
 
-**Secure Access for Agents.** Let an AI agent discover private infrastructure by logical alias and
-run bounded operations without putting reusable credentials into prompts, logs, shell history, or a
-repository.
+**Secure Access for Agents.** SAFA lets an AI Agent discover private resources by logical alias and
+request bounded operations without placing reusable credentials in prompts, process arguments,
+logs, shell history, or a repository.
 
 [![CI](https://github.com/juju-w/safa/actions/workflows/ci.yml/badge.svg)](https://github.com/juju-w/safa/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/juju-w/safa?style=flat)](https://github.com/juju-w/safa/stargazers)
@@ -16,26 +16,16 @@ repository.
 ![Windows planned](https://img.shields.io/badge/Windows-planned-lightgrey)
 
 > [!IMPORTANT]
-> SAFA is an unpublished diagnostic preview. The Swift/macOS runtime implements the bounded
-> diagnostic path, but no signed runtime release, public installer, tag, or marketplace Skill has
-> been published. Linux and Windows remain planned work.
+> SAFA is an unpublished macOS diagnostic preview. No signed Runtime release, public installer,
+> tag, or marketplace package is available yet. The installation command below describes the
+> intended release experience, not current production guidance.
 
-## Stop pasting infrastructure secrets into chat
+## What SAFA does
 
-Imagine a service alert arrives:
-
-> **You:** Find out why `report.prod` is alerting and whether the service is unhealthy.
-
-Without a local access boundary, the conversation often becomes:
-
-> **Agent:** What is the machine's IP and SSH port? Which username and password should I use? This
-> check may need sudo—please send the sudo password too.
-
-That puts infrastructure inventory and reusable credentials into chat history, process context,
-logs, or model-visible tools.
-
-With SAFA, private setup registers `report.prod` locally. The Agent sees the alias and safe
-capabilities, then asks the native runtime to perform a bounded diagnostic:
+Infrastructure work often begins with an Agent asking for an IP address, SSH key, password, sudo
+password, database credential, or private network route. SAFA keeps that setup in a native local
+security boundary instead. The Agent works with an alias such as `report.prod`; the Runtime resolves
+the protected connection and credential only after applying local policy.
 
 ```bash
 safa exec report.prod --json \
@@ -43,64 +33,75 @@ safa exec report.prod --json \
   systemctl is-active report-api
 ```
 
-The native runtime resolves the protected endpoint and credential, enforces policy, pins remote
-identity, bounds/redacts output, and returns a stable JSON result. The Agent cannot retrieve the
-stored password or private key. Integrity or identity failures stop the action instead of falling
-back to raw SSH.
+The result is a bounded JSON envelope. Remote stdout and stderr remain explicitly untrusted, and the
+Agent has no command that retrieves the stored password or private key.
 
-## One Skill and one native Runtime package per platform
+## How it works
 
 ```mermaid
 flowchart LR
-    Agent["AI Agent"] --> Skill["safa Skill\nworkflow + safety rules"]
-    Skill --> Resolver["Bundled resolver\nplatform + architecture"]
-    Resolver --> Lock["Exact manifest\nversion + hash + signature policy"]
-    Lock --> Mac["one macOS Runtime package\nCLI · Broker · AskPass"]
-    Lock -. planned .-> Linux["one Linux Runtime package\nCLI · daemon · helpers"]
-    Lock -. planned .-> Windows["one Windows Runtime package\nCLI · service · helpers"]
-    Mac --> Resources["SSH · database · S3 · cache · service"]
-    Linux -.-> Resources
-    Windows -.-> Resources
+    Agent["AI Agent"] --> Skill["SAFA Skill\nworkflow + safety rules"]
+    Skill --> Resolver["verified Runtime resolver"]
+    Resolver --> CLI["thin native CLI\nno vault authority"]
+    CLI -->|"authenticated local IPC"| Broker["native Broker\npolicy + vault authority"]
+    Broker --> OS["OS credential store\n+ user authorization"]
+    Broker --> Target["registered resource"]
+    Target -->|"bounded, redacted evidence"| Broker
+    Broker --> CLI --> Agent
 ```
 
-Each platform produces one user-installable Runtime archive. CLI, Broker/daemon, and credential
-helper remain separate processes inside that package because the Agent-facing CLI must not inherit
-vault authority. The external CLI and JSON contract is shared; credential stores, local IPC, process
-identity, user authorization, and service lifecycle remain native to each operating system.
+The Agent-facing CLI and the vault-authoritative Broker are separate processes. Open source code is
+part of the threat model: security depends on native process identity, operating-system credential
+storage, user authorization, strict target identity, policy, and bounded output—not hidden source.
 
-Native implementations live in [`juju-w/safa-runtime`](https://github.com/juju-w/safa-runtime).
+Core guarantees of the current design:
+
+- reusable credentials and vault keys never enter Agent-facing JSON;
+- resources are selected by safe logical alias rather than copied endpoint details;
+- SSH targets use pinned host identity and isolated client configuration;
+- temporary password delivery is child-bound, short-lived, and single-use;
+- output is bounded and matching credential bytes are redacted before return;
+- verifier or authorization failures stop the operation instead of falling back to raw access.
+
+See [Product architecture](docs/architecture.md) for the complete trust boundaries and limitations.
 
 ## Installation model
 
-The intended public command is:
+The intended public installation command is:
 
 ```bash
 npx skills add juju-w/safa --skill safa -g -a codex
 ```
 
-This command is not active release guidance yet. The source repository is public, but the runtime
-manifest intentionally contains no release entry during the publication hold.
+The Skill package contains instructions, a small platform resolver, references, icons, and an exact
+Runtime manifest. On first use, the resolver selects the matching native Runtime, verifies its
+digest and platform signature, installs it in the current-user scope, and invokes the CLI. The Skill
+installer itself does not receive a secret or run an npm-style `postinstall` hook.
 
-The [`skills` CLI](https://github.com/vercel-labs/skills) discovers and copies or symlinks Skill
-files; it does not run an npm-style `postinstall` hook. SAFA therefore uses a safe two-stage flow:
+Runtime bootstrap is deliberately disabled during the publication hold. See
+[Runtime distribution and bootstrap](docs/distribution.md) for the verification and rollback model.
 
-1. `npx skills add` installs `SKILL.md`, the small resolver, references, icons, and a locked manifest.
-2. The first `safa doctor --json` invocation detects platform/architecture and checks for a verified
-   native runtime.
-3. If absent, the resolver may download only the exact manifest asset over HTTPS, verify SHA-256 and
-   the platform signing identity, and install it under the current user's application-support scope.
-4. The resolver invokes the native CLI; it never reads credentials or interprets remote commands.
+## Command surface
 
-This still gives the user a one-command Skill installation experience while avoiding arbitrary code
-execution during Skill copying. An enterprise/offline installation may pre-provision the same
-verified runtime; the resolver then reuses it after verification.
+The preview keeps the Agent workflow small:
 
-See [Runtime distribution and bootstrap](docs/distribution.md) for the exact trust and update model.
+```bash
+safa doctor --json
+safa resource list --json
+safa resource show report.prod --json
+safa topology show report.prod --json
+safa topology path airflow.prod crawler.browser --json
+safa exec report.prod --json --intent "Check service state" -- systemctl is-active report-api
+```
+
+Resource add/edit/remove and protected details require native macOS user authorization. Arbitrary
+shell execution, sudo, mutation approval, and non-SSH protocol operations are not current Agent
+capabilities. The canonical command and envelope definitions live in the
+[CLI contract](contracts/cli-v1.md).
 
 ### Shell completion
 
-The native CLI generates completion for `zsh`, `bash`, and `fish`. For Oh My Zsh, after the `safa`
-launcher is on `PATH`:
+The native CLI generates static completion for `zsh`, `bash`, and `fish`. For Oh My Zsh:
 
 ```bash
 mkdir -p ~/.oh-my-zsh/completions
@@ -108,98 +109,42 @@ safa --generate-completion-script zsh > ~/.oh-my-zsh/completions/_safa
 exec zsh
 ```
 
-Commands, flags, states, resource types, and templates are completed statically. Existing resource
-aliases are read from the safe resource-list projection without Touch ID; endpoints, usernames,
-inventory details, and credentials are never completion candidates. An unavailable Broker simply
-produces no alias candidates.
+Only safe aliases are completed dynamically. Endpoints, usernames, inventory details, and
+credentials are never completion candidates.
 
-## What SAFA protects
+## Current scope
 
-- **Normalized private resource directory** — kind, versioned template, host platform, and roles are
-  independent; hosts, databases, object stores, caches, messaging, and services share typed aliases,
-  metadata, relationships, and opaque credential references.
-- **Two-level discovery** — list/show exposes only allowlisted safe metadata; protected details
-  requires native user authorization and still never returns credentials.
-- **Native credentials** — the current macOS runtime uses Data Protection Keychain and Secure
-  Enclave primitives where supported; future platforms must use their own protected stores without
-  a plaintext compatibility fallback.
-- **Authenticated local boundary** — the runtime verifies local peer identity before credential use.
-- **Strict remote identity** — SSH execution uses isolated configuration and a pinned host key.
-- **One-shot delivery** — temporary password delivery is child-bound, short-lived, and single-use.
-- **Bounded evidence** — execution limits time/output, preserves the remote exit code, and redacts
-  matching credential bytes before returning data.
-- **Least privilege** — different resource aliases can use different accounts and roles, reducing
-  the blast radius of an Agent mistake or a compromised target.
+| Area | Status |
+|---|---|
+| macOS native Runtime | Swift preview implemented; signed public package not released |
+| Resource directory | Host registration, encrypted inventory, safe summaries, authorized details |
+| Topology | Placement, reachability, impact, and user-authorized logical relationship changes |
+| Remote operation | Bounded non-sudo SSH diagnostics only |
+| Linux and Windows native Runtimes | Planned; not yet selected or scaffolded |
+| Database, object storage, cache, messaging, and HTTP adapters | Typed registration only; operations gated |
+| Brokered browser sessions | Future security design only |
 
-## Current macOS diagnostic MVP
+The [Platform support matrix](docs/platform-support.md) is authoritative for platform claims.
 
-Implemented in `safa-runtime`:
+## Two repositories, one contract
 
-- safe resource discovery by logical alias;
-- answer-first topology queries for placement, verified reachability, and dependency impact, plus
-  user-authorized desired relationship changes;
-- user-authorized resource list/show/add/edit/remove, with setup and state changes owned by add/edit;
-- SSH-config imports verified and activated in one workflow, retaining a resumable draft only when
-  remediation is required;
-- first-connection Linux/macOS/Windows probes that atomically record bounded hardware and system
-  inventory in the encrypted directory;
-- encrypted inventory and Keychain password storage;
-- strict pinned-host SSH configuration;
-- argument-constrained diagnostics such as `systemctl is-active`, fixed-field process/container
-  metrics, `df`, `free`, and `uptime`;
-- child-bound AskPass, output redaction, and sanitized audit events;
-- signed per-user broker activation through `SMAppService` in a GUI-less app container;
-- synthetic contract, integration, and security tests that contact no real server.
+| Repository | Owns |
+|---|---|
+| [`juju-w/safa`](https://github.com/juju-w/safa) | Agent Skill, public CLI/resource contracts, product documentation, conformance fixtures, and exact Runtime manifests |
+| [`juju-w/safa-runtime`](https://github.com/juju-w/safa-runtime) | Native CLI/Broker/helper implementations, operating-system security adapters, tests, signing, and Runtime packaging |
 
-Not yet shipped:
+The product repository defines public behavior. Native Runtimes implement that behavior and consume
+the same conformance fixtures; they do not create a second Agent contract.
 
-- arbitrary remote mutation, sudo grants, and execution approval;
-- complete credential enrollment/recovery and tamper-evident persistent audit history;
-- Broker-mediated website login and constrained browser sessions for Playwright-capable Agents;
-- verified runtime download/rollback and a public Skill package;
-- Linux and Windows native runtimes.
-
-The topology layer deliberately keeps graph algorithms inside the Broker and exposes only five
-semantic verbs to Agents. See [Topology: complex inside, simple outside](docs/topology.md).
-
-## Repository map
-
-```text
-safa/
-├── skills/safa/       # Agent instructions, resolver, references, icons
-├── contracts/         # Canonical CLI/resource/distribution contracts
-├── manifests/         # Reviewed exact-version runtime locks (empty during release hold)
-├── docs/              # Product architecture, platform matrix, distribution model
-└── tests/             # Skill and resolver contract validation
-
-safa-runtime/
-└── Sources, Apps, Tests       # Swift/macOS runtime
-```
-
-Contract changes start here and are consumed by runtime conformance tests. Runtime builds produce
-signed assets; reviewed manifests flow back here before a Skill release can reference them.
-
-## Distribution roadmap
-
-1. **[skills.sh](https://www.skills.sh/)** — first public discovery target after verified macOS
-   bootstrap and rollback pass an independent forward test.
-2. **OpenAI, Claude Code, and GitHub Copilot ecosystems** — reuse the same Skill and locked runtime
-   contract without platform-specific secret workflows.
-3. **SkillHub and regional mirrors** — add only when provenance, signatures, and exact-version update
-   behavior remain intact.
-
-## Design and specification
-
-The owl guardian represents a local, watchful security boundary. Source-ready assets include the
-[transparent mascot](docs/assets/safa-mascot.webp), [square icon master](docs/assets/safa-icon-master.png),
-and [GitHub avatar candidate](docs/assets/safa-github-avatar.png).
+## Documentation
 
 - [Product architecture](docs/architecture.md)
-- [Brokered browser access roadmap](docs/browser-access-roadmap.md)
+- [Topology model and Agent projections](docs/topology.md)
 - [Runtime distribution and bootstrap](docs/distribution.md)
 - [Platform support matrix](docs/platform-support.md)
-- [CLI contract](contracts/cli-v1.md)
+- [Research references and influence map](docs/references.md)
+- [Brokered browser access roadmap](docs/browser-access-roadmap.md)
 - [Resource directory contract](contracts/resource-directory-v1.md)
-- [Native runtime implementation](https://github.com/juju-w/safa-runtime)
+- [Native Runtime repository](https://github.com/juju-w/safa-runtime)
 
 SAFA is licensed under the [MIT License](LICENSE).

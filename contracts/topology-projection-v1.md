@@ -199,6 +199,9 @@ authority. A diagram parse or model interpretation can never produce a verified 
 
 ## 9. Research basis
 
+Full bibliographic attribution and the mapping from each result to a SAFA design choice are in
+[Research References](../docs/references.md).
+
 - [Talk like a Graph](https://arxiv.org/abs/2310.04560) finds that graph-task accuracy varies with
   encoding, task, and graph structure rather than having one universal textual format.
 - [Can Graph Descriptive Order Affect Solving Graph Problems with LLMs?](https://aclanthology.org/2025.acl-long.321/)
