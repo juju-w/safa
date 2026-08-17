@@ -22,8 +22,7 @@ flowchart TB
     Product --> ProductDocs["Product and threat-model documentation"]
 
     Runtime --> Swift["Swift macOS runtime"]
-    Runtime --> RustLinux["Rust Linux runtime (planned)"]
-    Runtime --> RustWindows["Rust Windows runtime (planned)"]
+    Runtime -. future .-> Other["Additional native runtimes\nimplementation not selected"]
     Runtime --> RuntimeTests["Platform tests, signing, packaging"]
 ```
 
@@ -61,6 +60,11 @@ ordinary Skill file and is deliberately narrow. On first invocation it selects, 
 one native Runtime package in the current user's scope, and invokes its CLI. It cannot read vault
 data, interpret remote commands, approve work, or weaken the Broker's authorization decision.
 
+The launcher is a script, not a portable native binary. The current POSIX shell entry serves the
+macOS Runtime. Another platform entry is added only with that platform's reviewed Runtime. Platform
+detection belongs here; credential access and protected operations remain in the selected native
+Runtime.
+
 ## 4. Stable external contract
 
 All platforms expose the same conceptual surface:
@@ -80,8 +84,8 @@ not part of the Agent-facing contract.
 | Platform | Implementation | Credential authority | Local IPC / identity | Status |
 | --- | --- | --- | --- | --- |
 | macOS | Swift | Keychain with access control and user presence | XPC, code identity, SMAppService | Preview implementation |
-| Linux | Rust | Secret Service/kernel keyring adapter; no plaintext fallback | Unix socket, `SO_PEERCRED`, systemd user service | Planned/scaffold only |
-| Windows | Rust | DPAPI/Credential Manager adapter | Named Pipe ACL, process/user identity | Planned |
+| Linux | Not selected | Secret Service/keyring adapter required; no plaintext fallback | Unix socket + native authorization design required | Planned only |
+| Windows | Not selected | DPAPI/Credential Manager required | Named Pipe + ACL design required | Planned only |
 
 Platform adapters implement a small set of capabilities: secure storage, user authorization,
 trusted local IPC, process identity, host-key/endpoint policy, and lifecycle management. Protocol,
@@ -170,13 +174,9 @@ leave a plaintext intermediate. This workflow is not part of the current preview
 
 1. Freeze and version the current CLI/JSON/resource contracts in `safa`.
 2. Keep the working Swift implementation intact while moving product-owned Skill material here.
-3. Add the Rust workspace and Linux platform boundary without claiming Linux support.
-4. Introduce shared conformance fixtures consumed by both Swift and Rust CI.
-5. Introduce a non-shipping Rust CLI shell for parsing, version negotiation, stable envelopes, and
-   fail-closed backend discovery; it does not replace the working Swift/macOS CLI yet.
-6. Implement and security-review the native Broker client and credential/IPC adapter for each
-   platform. The eventual Rust frontend must not move vault or authorization authority into the CLI.
-7. Replace a platform's installed CLI only after command parity, signing, IPC identity, and shared
-   conformance gates pass on that platform.
-8. Produce signed macOS runtime assets and a verified manifest.
-9. Release the Skill only after the end-to-end resolver and rollback path pass review.
+3. Keep the universal Skill entry as a small script resolver; do not introduce a shared native
+   launcher binary.
+4. Introduce shared conformance fixtures consumed by each implemented platform Runtime CI.
+5. Produce signed macOS Runtime assets and a verified manifest.
+6. Release the Skill only after the end-to-end resolver and rollback path pass review.
+7. Choose and implement another platform Runtime only when that work is actually scheduled.

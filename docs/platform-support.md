@@ -4,7 +4,7 @@ This matrix describes implemented and planned capability, not marketing intent.
 
 | Capability | macOS 14.4+ | Linux | Windows |
 | --- | --- | --- | --- |
-| Native runtime | Swift preview; Rust CLI shell not packaged | Rust CLI contract shell; protected backend planned | Rust CLI contract shell; protected backend planned |
+| Native runtime | Swift preview | Not implemented; language not selected | Not implemented; language not selected |
 | Secure credential store | Keychain | Secret Service/keyring adapter planned | DPAPI/Credential Manager planned |
 | Native user authorization | Implemented for protected resource lifecycle | Planned | Planned |
 | Trusted broker IPC | XPC design/implementation | Unix socket + peer identity planned | Named Pipe + ACL planned |

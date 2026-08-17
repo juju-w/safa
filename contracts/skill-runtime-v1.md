@@ -37,6 +37,11 @@ The surrounding Skill installer only copies or symlinks Skill files. It MUST NOT
 execution or authorization boundary, and SAFA MUST NOT depend on an npm-style lifecycle hook. The
 launcher performs bootstrap explicitly on first invocation.
 
+The launcher is a script, not a native cross-platform Runtime. The current `scripts/safa` entry is
+POSIX shell because the implemented Runtime is macOS-only. Another platform entry is added only
+with that platform's reviewed Runtime. The script contains no credentials, does not interpret
+protected commands, and does not replace the native CLI/Broker boundary.
+
 ## Version negotiation
 
 The Skill manifest declares:

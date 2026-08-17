@@ -78,8 +78,8 @@ The intended public command is:
 npx skills add juju-w/safa --skill safa -g -a codex
 ```
 
-This command is not active release guidance yet. The repository is private during pre-release and
-the runtime manifest intentionally contains no release entry.
+This command is not active release guidance yet. The source repository is public, but the runtime
+manifest intentionally contains no release entry during the publication hold.
 
 The [`skills` CLI](https://github.com/vercel-labs/skills) discovers and copies or symlinks Skill
 files; it does not run an npm-style `postinstall` hook. SAFA therefore uses a safe two-stage flow:
@@ -147,8 +147,7 @@ safa/
 └── tests/             # Skill and resolver contract validation
 
 safa-runtime/
-├── Sources, Apps, Tests       # Swift/macOS runtime
-└── Platforms/Rust            # Linux/Windows runtime foundation
+└── Sources, Apps, Tests       # Swift/macOS runtime
 ```
 
 Contract changes start here and are consumed by runtime conformance tests. Runtime builds produce

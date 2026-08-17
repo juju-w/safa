@@ -27,7 +27,7 @@ separation:
 
 ```mermaid
 flowchart LR
-    Resolver["Skill resolver"] --> CLI["thin safa CLI\nno vault entitlement"]
+    Resolver["Shell resolver\nplatform selection only"] --> CLI["platform-native safa CLI\nno vault entitlement"]
     CLI -->|"authenticated local IPC\nno plaintext credential"| Broker["Broker / daemon\npolicy + vault authority"]
     Broker --> Vault["OS credential store"]
     Broker --> Helper["one-shot credential helper"]
@@ -41,6 +41,11 @@ identity claims, resolves protected data itself, and never exposes a raw-secret 
 
 Open source is compatible with this design. Runtime signing keys, vault keys, and user credentials
 are not source code. Security must survive complete knowledge of the implementation.
+
+The resolver is intentionally a script rather than a compiled cross-platform CLI. The current
+`scripts/safa` POSIX shell entry serves macOS. It consumes the locked manifest and passes the
+original argument vector to the native Runtime. Another platform entry is designed only when that
+platform Runtime exists; the repository does not carry speculative launcher implementations.
 
 ## 3. Why bootstrap is not an install hook
 
