@@ -4,10 +4,11 @@
 
 # SAFA
 
-**Secure Access for Agents.** SAFA is an Agent Skill backed by a native security Runtime. A user
-describes an infrastructure problem in natural language; the Skill discovers the relevant private
-resource, understands its relationships, selects a bounded diagnostic, and returns evidence without
-asking the user to paste a reusable credential into the conversation.
+**Secure Access for Agents.** SAFA lets AI agents diagnose registered infrastructure without ever
+seeing reusable credentials. Its Agent Skill discovers the right private resource and selects a
+bounded diagnostic; the native security Runtime authorizes access and returns sanitized evidence.
+
+[Website](https://juju-w.github.io/safa/) · [Agent scenarios](docs/scenarios.md) · [Architecture](docs/architecture.md)
 
 [![CI](https://github.com/juju-w/safa/actions/workflows/ci.yml/badge.svg)](https://github.com/juju-w/safa/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/juju-w/safa?style=flat)](https://github.com/juju-w/safa/stargazers)
