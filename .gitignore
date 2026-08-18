@@ -1,0 +1,12 @@
+# local tooling / scratch
+.claude/
+.specify/
+_to_delete/
+website/audit-2026-08-18/
+
+# skill package staging
+skills/safa/scripts/.agents/
+skills/safa/scripts/skills-lock.json
+
+# machine-specific replay output — never commit real infrastructure output
+demo/output/
