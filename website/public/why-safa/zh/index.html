@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050a18" />
+    <meta name="description" content="为什么 AI Agent 永远不该拿到你的 SSH 密钥：可复用凭据进入模型上下文意味着什么，以及 SAFA 的安全访问模式——进程隔离、白名单策略、用户在场授权、脱敏 TOON 证据。" />
+    <meta name="author" content="SAFA" />
+    <link rel="canonical" href="https://juju-w.github.io/safa/why-safa/zh/" />
+    <link rel="alternate" hreflang="en" href="https://juju-w.github.io/safa/why-safa/" />
+    <link rel="alternate" hreflang="zh" href="https://juju-w.github.io/safa/why-safa/zh/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="为什么你的 AI Agent 永远不该拿到 SSH 密钥" />
+    <meta property="og:description" content="AI Agent 开始做运维了——把密钥交给它恰恰是错的方向。这是 SAFA 的安全访问模式：把凭据留在本机原生边界内，只给 Agent 别名、白名单操作和用户批准、脱敏的证据。" />
+    <meta property="og:url" content="https://juju-w.github.io/safa/why-safa/zh/" />
+    <meta property="og:image" content="https://juju-w.github.io/safa/assets/hero-aurora.webp" />
+    <title>为什么你的 AI Agent 永远不该拿到 SSH 密钥 — SAFA</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "为什么你的 AI Agent 永远不该拿到 SSH 密钥",
+      "description": "AI Agent 正在接管运维，最常见的直觉是把 SSH 密钥或密码交给它。本文解释为什么可复用凭据放在 Agent 上下文里必然失败，并介绍 SAFA 的安全访问模式：进程分离的凭据边界、安全别名、白名单策略、macOS 用户在场授权与脱敏的 TOON 证据。",
+      "url": "https://juju-w.github.io/safa/why-safa/zh/",
+      "image": "https://juju-w.github.io/safa/assets/hero-aurora.webp",
+      "datePublished": "2026-08-19",
+      "dateModified": "2026-08-19",
+      "inLanguage": "zh-CN",
+      "author": { "@type": "Organization", "name": "SAFA" },
+      "publisher": { "@type": "Organization", "name": "SAFA", "logo": { "@type": "ImageObject", "url": "https://juju-w.github.io/safa/assets/safa-icon-64.png" } }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "应该把 SSH 密钥交给我的 AI Agent 吗？", "acceptedAnswer": { "@type": "Answer", "text": "不应该。可复用凭据一旦交给 Agent，就会进入聊天记录、模型上下文和工具日志；它授予的是一个宽泛、可复用、无法逐操作审计的会话，还能被提示注入窃取。安全模式是把凭据留在本机原生边界内，只给 Agent 安全别名、白名单操作和经用户批准的脱敏证据。" } },
+        { "@type": "Question", "name": "SAFA 如何让凭据远离 Agent？", "acceptedAnswer": { "@type": "Answer", "text": "通过进程分离：面向 Agent 的 CLI 只做解析与展示、不持有任何凭据权；Broker 拥有策略、凭据与传输；另有窄权限的助手进程负责凭据投递与可信配置。Agent 只能拿到安全逻辑别名和有界的 TOON 证据。" } },
+        { "@type": "Question", "name": "SAFA Agent 能做什么操作？", "acceptedAnswer": { "@type": "Answer", "text": "只有白名单内的只读命令（df、uptime、free、ps、systemctl is-active、docker ps/stats）可以自动执行。sudo 在预览版中被拒绝；提权与受保护操作由 macOS 用户在场授权（Touch ID）把关。Agent 的自我风险评估只是建议，永远不能替代用户授权。" } },
+        { "@type": "Question", "name": "SAFA 是开源的吗？", "acceptedAnswer": { "@type": "Answer", "text": "是的，MIT 协议。Skill、契约与文档在 github.com/juju-w/safa，原生 Swift/macOS Runtime 在 github.com/juju-w/safa-runtime。当前是 macOS 源码预览；Linux 与 Windows 运行时在规划中。" } }
+      ]
+    }
+    </script>
+    <style>
+      :root { color: #eef6ff; background: #050a18; font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --text: #f5f9ff; --muted: #9db0cb; --cyan: #7fe5ff; --mint: #62edc3; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; min-height: 100vh; color: var(--text); background: #050a18; -webkit-font-smoothing: antialiased; line-height: 1.85; }
+      .wrap { max-width: 780px; margin: 0 auto; padding: 48px 24px 96px; }
+      .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 40px; color: inherit; text-decoration: none; font-weight: 750; }
+      .brand img { width: 30px; height: 30px; border-radius: 8px; }
+      .lang { float: right; font-size: 0.82rem; }
+      h1 { margin: 0 0 12px; font-size: clamp(1.8rem, 4.6vw, 2.9rem); line-height: 1.25; letter-spacing: -0.02em; }
+      .dek { color: #b7c9df; font-size: 1.06rem; line-height: 1.8; margin: 0 0 28px; }
+      .meta { color: #71839c; font-size: 0.8rem; margin-bottom: 44px; display: flex; flex-wrap: wrap; gap: 8px 16px; }
+      .meta a { color: var(--cyan); text-decoration: none; }
+      h2 { margin: 48px 0 14px; font-size: 1.42rem; letter-spacing: -0.02em; }
+      h3 { margin: 30px 0 10px; font-size: 1.1rem; }
+      p { margin: 14px 0; color: #c9d7e8; }
+      ul, ol { color: #c9d7e8; }
+      li { margin: 8px 0; }
+      a { color: var(--cyan); }
+      strong { color: #eaf3fd; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.86em; background: rgba(131, 184, 241, 0.12); padding: 2px 6px; border-radius: 6px; color: #91f2c8; }
+      pre { overflow-x: auto; padding: 14px 16px; border-radius: 12px; background: rgba(2, 8, 22, 0.85); border: 1px solid rgba(122, 168, 220, 0.14); }
+      pre code { background: none; padding: 0; color: #b9cfe8; line-height: 1.6; }
+      blockquote { margin: 20px 0; padding: 14px 18px; border-left: 3px solid var(--mint); border-radius: 0 12px 12px 0; background: rgba(45, 138, 105, 0.12); color: #cfe3d8; }
+      blockquote p { margin: 6px 0; color: #cfe3d8; }
+      .callout { margin: 24px 0; padding: 16px 18px; border: 1px solid rgba(255, 205, 120, 0.32); border-radius: 12px; background: rgba(92, 66, 20, 0.16); color: #e8d5ae; }
+      .callout strong { color: #ffe3a3; }
+      table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.88rem; }
+      th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(122, 168, 220, 0.16); }
+      th { color: #9db8d4; font-weight: 650; }
+      td { color: #c9d7e8; }
+      .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 44px; }
+      .cta a { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; }
+      .cta .primary { color: #031321; background: #8be8ff; border: 1px solid rgba(233, 252, 255, 0.82); }
+      .cta .secondary { color: #eaf4ff; border: 1px solid rgba(143, 184, 233, 0.32); }
+      footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid rgba(122, 178, 236, 0.14); color: #71839c; font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="lang" href="../" hreflang="en">English</a>
+      <a class="brand" href="https://juju-w.github.io/safa/"><img src="https://juju-w.github.io/safa/assets/safa-icon-64.png" alt="SAFA icon" /><span>SAFA</span></a>
+      <h1>为什么你的 AI Agent 永远不该拿到 SSH 密钥</h1>
+      <p class="dek">AI Agent 开始做运维了——跑诊断、重启服务、查数据库。最常见的直觉是把密钥或密码交给 Agent。这个直觉恰恰是错的方向。下面这个访问模式，既让 Agent 有用，也让凭据够不着。</p>
+      <div class="meta"><span>SAFA — 面向智能体的安全访问层</span><span>2026-08-19</span><span><a href="https://github.com/juju-w/safa">github.com/juju-w/safa</a></span><span><a href="https://juju-w.github.io/safa/live-demo/">看真实排查</a></span></div>
+
+      <h2>问题：Agent 开始做运维了，访问模型却不对</h2>
+      <p>2025-2026 年，编程 Agent 和运维 Agent 不再是新鲜事。Claude Code、Codex 和同类工具经常 SSH 上服务器、跑 <code>kubectl</code>、tail 日志、查数据库。让 Agent 碰基础设施的标准 onboarding 方式是：<em>把主机地址贴给它、把用户名贴给它、让它指向你的私钥、让它用你的 ssh config。</em></p>
+      <p>这相当于因为承包商说要看看恒温器，就把大楼的总钥匙交给他。请求本身合理，凭据却严重超配——而且数字钥匙不像物理钥匙：它<strong>可复制、可复用、可被引用</strong>。</p>
+      <blockquote><p>非人类身份（NHI）安全是增长最快的安全细分之一：Agent 持有的每一个凭据，都是攻击者能通过一次提示注入窃取、复用或外泄的凭据。</p></blockquote>
+      <p>业界研究也指向同一结论。Anthropic 发布了关于自己 Agent 如何被沙箱化、凭据如何被挡在模型之外的系统性 containment 工作；NCC Group 对主流编程 Agent 的安全审计逐一标出了凭据处理缺口；浏览器 Agent 的研究展示了它们如何频繁弄丢 Cookie 与会话令牌。贯穿始终的一条线是一致的：<strong>可复用秘密一旦进入模型视野，就是负债，不是能力。</strong></p>
+
+      <h2>为什么"把钥匙交给 Agent"必然失败</h2>
+      <p>失败模式不是假设，而且会叠加：</p>
+      <ul>
+        <li><strong>提示注入把访问变成外泄。</strong> Agent 会读远程输出：日志、横幅、报错信息。如果一台被攻陷的服务能让模型做出动作，持证的 Agent 就成了全权限武器。把远程输出当不可信数据不是偏执，是唯一安全默认。</li>
+        <li><strong>可复用凭据是单点故障。</strong> 一把贴进聊天或被工具记录的 SSH 密钥，是永久的、不会因使用而失效的秘密。它对 Agent 能做什么没有任何逐操作限制。</li>
+        <li><strong>没有逐操作授权。</strong> 一把钥匙说"账号能做什么就能做什么"，而不是"读这一台主机的磁盘占用"。Agent 的请求与动作之间没有策略层。</li>
+        <li><strong>没有脱敏。</strong> 命令输出可能把连接信息、环境变量或秘密回显进对话、模型上下文和聊天记录。</li>
+        <li><strong>不可审计。</strong> "Agent 碰过服务器"不是审计记录。谁在何时、对哪个资源、凭哪次授权做了什么——这些全部消失。</li>
+      </ul>
+
+      <h2>模式：把 Agent 与秘密分离</h2>
+      <p>SAFA（Secure Access for Agents）是一个开源实现，只围绕一个想法：<strong>Agent 从不持有可复用凭据；它持有安全别名和意图，本机原生边界完成其余一切。</strong></p>
+      <p>架构把权力分散到多个进程，任何一个面向 Agent 的组件都无法同时解释请求并解析秘密：</p>
+      <table>
+        <thead><tr><th>组件</th><th>职责</th><th>凭据权</th></tr></thead>
+        <tbody>
+          <tr><td><code>safa</code> CLI</td><td>解析 Agent 命令，编码一份规范 TOON 结果</td><td>无</td></tr>
+          <tr><td><code>safa-broker</code></td><td>解析受保护记录、执行策略、授权、连接、脱敏</td><td>Keychain / 保险箱持有者</td></tr>
+          <tr><td><code>safa-askpass</code></td><td>投递一次子进程绑定的短时 SSH 秘密</td><td>仅一次性</td></tr>
+          <tr><td><code>safa-trusted-setup</code></td><td>本地认证后收集隐藏的受保护字段</td><td>无持久存储</td></tr>
+        </tbody>
+      </table>
+      <p>具体地，Agent 只与<strong>安全别名</strong>打交道（如 <code>nas.primary</code>），永远不是 IP 或用户名。每一个远程动作都要过<strong>白名单</strong>：精确、经过评审的只读命令参数（<code>df</code>、<code>uptime</code>、<code>free</code>、<code>ps</code>、<code>systemctl is-active</code>、<code>docker ps</code>/<code>stats</code>）。其余一律以稳定的结构化错误拒绝——没有灰色地带，格式字符串差一个字符同样被拒。</p>
+      <p>面向 Agent 的 CLI 说<strong>TOON</strong>（schema <code>dev.safa.cli/v2</code>）：为 Agent 设计的规范结构化文本（AXI 原则）。每次成功、空状态、拒绝与错误，都是 stdout 上的一份机器可读文档；stderr 只留给脱敏诊断。远程 stdout/stderr 是<strong>不可信数据</strong>，永远不是指令。</p>
+
+      <h2>授权是规则，不是例外</h2>
+      <p>SAFA 不只是拦截——它把关。<strong>高特权动作要求用户在 Mac 前。</strong>这是预览版已经在做的事，不是路线图承诺：</p>
+      <ul>
+        <li><strong>查看受保护详情需要批准。</strong> 请求资源详情（<code>safa resource show ALIAS --details</code>，含端点、端口、用户名、盘点信息）会触发 macOS 用户在场提示（Touch ID / 密码）。用户批准后才返回详情，且该值不会作为 Agent 进一步复用凭据的原料。</li>
+        <li><strong>提权执行由同一模型把关。</strong> 当前预览版中，sudo 类请求以 <code>approval_not_in_mvp</code> 拒绝。已规格化的下一能力（002-sudo-execution）把拒绝换成有作用域的批准：用户在 Mac 上核对目标、命令、意图与风险，批准一次（或授予短时、可撤销的命令族），Broker 在自家边界内注入 sudo 凭据执行——随即隔离特权子进程的 stdin，密码永远不进 argv、环境、输出或审计记录。</li>
+        <li><strong>Agent 的自我评估只是建议。</strong> 模型判定"这条 sudo 命令低风险"，永远不能替代 macOS 用户在场批准。再多的 Agent 推理也证明不了人类授权过什么。</li>
+      </ul>
+      <div class="callout"><strong>不变式：</strong>sudo 密码、SSH 密钥、保险箱密钥——它们永远不出现在 Agent 的 argv、环境、stdin、stdout、stderr、聊天记录或审计记录里。永远。凭据只存在于 Broker 边界内，存续时间为一次有界操作。</div>
+
+      <h2>真实证据，不是营销演示</h2>
+      <p><a href="https://juju-w.github.io/safa/live-demo/">真实演示</a>是一次对真实注册资源的真实录制会话，逐步回放并附带真实 TOON 输出。那次会话中，Agent：</p>
+      <ul>
+        <li>只凭安全别名发现了 11 个注册资源；</li>
+        <li>运行白名单诊断（<code>df</code>、<code>uptime</code>、<code>free</code>、<code>ps</code>），找到了真正的信号：<strong>swap 已用 95%（10 GiB 用了 9.5 GiB），而内存仍有富余</strong>——一次未回收的历史内存峰值，正是"NAS 变慢"报告的真实原因；</li>
+        <li>如实报告一个真实矛盾（systemd 对运行中的服务报告 <code>inactive</code>，因为它们是厂商栈/容器管理的），而不是编造结论；</li>
+        <li>对 <code>sudo</code>、对白名单外命令、对未注册资源分别被拒——全部是稳定、可解析的错误。</li>
+      </ul>
+      <p>回放里的每个数字都是原样。Agent 从未看到 IP、用户名或密钥。</p>
+
+      <h2>它站在哪里</h2>
+      <p>SAFA 占的是一个具体、仍然稀少的生态位：<strong>本地优先、开源、Agent 原生的基础设施访问</strong>。企业零信任平台（Teleport 的 agentic identity、P0 的授权控制面、BastionZero、Apono）用服务器、租户和部署团队解决类似问题。云厂商在推 Agent 身份原语（Entra Agent ID、AWS AgentCore）。SAFA 是个人规模的、可审查的实现：Skill 教任何有能力的 Agent 这套工作流，原生 Runtime 是你自己 Mac 上的真实安全边界，契约、一致性夹具与威胁模型全部公开。</p>
+      <p>它也是一个诚实的预览版：目前仅 macOS、今天只有非 sudo 只读执行、带作用域批准的 sudo 已规格化待交付、数据库/对象存储/缓存适配器已登记但尚未可操作。真正要紧的保证——没有凭据返回路径、失败关闭的校验、不可信的远程输出、明确的操作范围——从第一次提交就设计在内，不是后来补的。</p>
+
+      <h2>开始使用</h2>
+      <p>在 macOS 上：<code>npx skills add juju-w/safa --skill safa</code>，登记一次资源，然后直接提问。见<a href="https://juju-w.github.io/safa/">产品</a>、<a href="https://juju-w.github.io/safa/how-it-works/">架构解释</a>与<a href="https://juju-w.github.io/safa/live-demo/">真实排查</a>。</p>
+      <div class="cta">
+        <a class="primary" href="https://juju-w.github.io/safa/live-demo/">看真实排查</a>
+        <a class="secondary" href="https://github.com/juju-w/safa">在 GitHub 查看</a>
+      </div>
+
+      <h2>FAQ</h2>
+      <h3>应该把 SSH 密钥交给我的 AI Agent 吗？</h3>
+      <p>不应该。可复用凭据会进入聊天记录和模型上下文，授予一个不可审计的宽泛会话，还能被提示注入窃取。把秘密留在原生边界内，给 Agent 别名和有界、经批准的动作。</p>
+      <h3>SAFA 如何让凭据远离 Agent？</h3>
+      <p>进程分离：CLI 没有凭据权，Broker 拥有策略/凭据/传输，窄权限助手负责凭据投递与可信配置。Agent 只拿到安全别名和有界 TOON 证据。</p>
+      <h3>SAFA Agent 能做什么？</h3>
+      <p>白名单只读诊断自动执行。提权与受保护操作由 macOS 用户在场批准（Touch ID）把关。预览版拒绝 sudo；带作用域、经批准的 sudo 是已规格化的下一能力。</p>
+      <h3>SAFA 是开源的吗？</h3>
+      <p>是——MIT 协议。Skill/契约在 github.com/juju-w/safa，原生 Swift/macOS Runtime 在 github.com/juju-w/safa-runtime。当前是 macOS 源码预览。</p>
+
+      <footer>
+        <span>SAFA — 面向智能体的安全访问层 · MIT License</span>
+        <span><a href="https://github.com/juju-w/safa">GitHub</a> · <a href="https://juju-w.github.io/safa/sitemap.xml">Sitemap</a></span>
+      </footer>
+    </div>
+  </body>
+</html>

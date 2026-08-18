@@ -7,6 +7,8 @@
     <meta name="description" content="Why AI agents should never hold your SSH keys, and the secure-access pattern that gives agents bounded, authorized, sanitized infrastructure access instead: safe aliases, allow-list policy, macOS user-presence approval, credential isolation, and redacted TOON evidence." />
     <meta name="author" content="SAFA" />
     <link rel="canonical" href="https://juju-w.github.io/safa/why-safa/" />
+    <link rel="alternate" hreflang="zh" href="https://juju-w.github.io/safa/why-safa/zh/" />
+    <link rel="alternate" hreflang="en" href="https://juju-w.github.io/safa/why-safa/" />
     <meta property="og:type" content="article" />
     <meta property="og:title" content="Why Your AI Agent Should Never Hold Your SSH Keys" />
     <meta property="og:description" content="AI agents are doing ops now. The instinct to hand them a key is exactly the wrong move. Here is the secure-access pattern behind SAFA: keep the credential in a native local boundary, give the agent aliases, allow-listed actions, and user-approved, sanitized evidence." />
@@ -51,6 +53,7 @@
       .wrap { max-width: 780px; margin: 0 auto; padding: 48px 24px 96px; }
       .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 40px; color: inherit; text-decoration: none; font-weight: 750; }
       .brand img { width: 30px; height: 30px; border-radius: 8px; }
+      .lang { float: right; font-size: 0.82rem; }
       h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.12; letter-spacing: -0.03em; }
       .dek { color: #b7c9df; font-size: 1.08rem; line-height: 1.7; margin: 0 0 28px; }
       .meta { color: #71839c; font-size: 0.8rem; margin-bottom: 44px; display: flex; flex-wrap: wrap; gap: 8px 16px; }
@@ -82,6 +85,7 @@
   </head>
   <body>
     <div class="wrap">
+      <a class="lang" href="./zh/" hreflang="zh">中文版</a>
       <a class="brand" href="https://juju-w.github.io/safa/"><img src="https://juju-w.github.io/safa/assets/safa-icon-64.png" alt="SAFA icon" /><span>SAFA</span></a>
       <h1>Why Your AI Agent Should Never Hold Your SSH Keys</h1>
       <p class="dek">AI agents are doing operations work now — running diagnostics, restarting services, checking databases. The most common instinct is to hand the agent a key or a password. That instinct is exactly the wrong move. Here is the access pattern that keeps the agent useful and the credentials unreachable.</p>
