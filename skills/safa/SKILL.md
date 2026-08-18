@@ -79,8 +79,8 @@ or HTTP resource, the Agent may select a built-in `--template` only after an exp
 If SAFA returns `user_action_required`, stop and direct the user to the trusted local configuration
 flow; do not ask for its endpoint, username, database, bucket, password, token, or access key.
 
-Use `safa resource show ALIAS` for a non-interactive safe summary. Run
-`safa resource show ALIAS --details` only when the user explicitly asks for protected
+Use `./scripts/safa resource show ALIAS` for a non-interactive safe summary. Run
+`./scripts/safa resource show ALIAS --details` only when the user explicitly asks for protected
 inventory or connection details. Detailed show must rely on the macOS-owned user-presence prompt;
 never script around, repeat-spam, or reinterpret a denial. Even after authorization, never ask SAFA for or infer a
 credential value.

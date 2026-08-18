@@ -94,7 +94,9 @@ Required common fields:
 - `schema`, `command`, and `status` are always present;
 - `request_id` is present only for a real Broker request that can be correlated later;
 - collections declare exact returned row counts through TOON array headers;
-- paged or bounded collections include `count.total`, `count.returned`, and `count.truncated`;
+- a single paged or bounded collection includes `count.total`, `count.returned`, and
+  `count.truncated`; topology projections bound node and edge tables together and instead include
+  `count.nodes`, `count.edges`, and `count.truncated`;
 - `warnings` and `next` are omitted when empty, avoiding repeated ambient boilerplate;
 - `next[].safe_for_agent` is authoritative. A suggestion with `false` requires a user or trusted
   local action and must not be invoked automatically. `true` means only that the command may be

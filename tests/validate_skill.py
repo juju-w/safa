@@ -38,7 +38,7 @@ if len(contents.splitlines()) > 500:
     fail("SKILL.md exceeds the 500-line progressive-disclosure limit")
 if "./scripts/safa doctor" not in contents:
     fail("Skill must start workflows through the bundled launcher")
-if re.search(r"(?m)^safa(?:\s|$)", contents):
+if re.search(r"(?m)^safa(?:\s|$)", contents) or re.search(r"`safa\s+", contents):
     fail("Skill command examples must not bypass the bundled launcher")
 
 required_files = [
