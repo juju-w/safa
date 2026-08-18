@@ -51,7 +51,7 @@ publication remains held.
 
 - [X] T017 Complete `checklists/release-readiness.md` with zero unresolved Source Preview P0/P1
   defects and truthful developer-toolchain prerequisites.
-- [ ] T018 Open a Draft PR for review; do not tag, create a GitHub Release, upload a binary, or deploy
+- [X] T018 Open a Draft PR for review; do not tag, create a GitHub Release, upload a binary, or deploy
   a marketplace package.
 - [ ] T019 Obtain explicit owner approval before merging/promoting the Source Preview through
   skills.sh discovery or the planned GitHub Pages site.
