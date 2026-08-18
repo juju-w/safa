@@ -32,6 +32,20 @@ emit_runtime_missing() {
   exit 1
 }
 
+emit_runtime_upgrade_required() {
+  printf '%s\n' \
+    'schema: dev.safa.cli/v2' \
+    'command: launcher' \
+    'status: user_action_required' \
+    'error:' \
+    '  code: runtime.lock_upgrade_required' \
+    '  message: The verified local Runtime lock predates the required CLI schema binding.' \
+    '  retryable: false' \
+    'next[1]{command,reason,safe_for_agent}:' \
+    '  reinstall the verified SAFA Runtime,A local user must refresh the verified local lock,false'
+  exit 1
+}
+
 if [ "$(uname -s)" != "Darwin" ]; then
   emit_error "unsupported_platform" "SAFA requires macOS." 45
 fi
@@ -69,7 +83,7 @@ lock_field() {
 
 lock_schema=$(lock_field schema) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 runtime_version=$(lock_field runtime_version) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
-locked_cli_schema=$(lock_field cli_schema) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_cli_schema=$(lock_field cli_schema) || emit_runtime_upgrade_required
 locked_platform=$(lock_field platform) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 locked_architecture=$(lock_field architecture) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 locked_team=$(lock_field team_identifier) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
@@ -180,4 +194,38 @@ if [ "$version_output" != "$runtime_version" ]; then
   emit_error "runtime_version_invalid" "The SAFA Runtime version does not match its local lock." 45
 fi
 
-exec "$cli_path" "$@"
+runtime_user=$(/usr/bin/id -un) \
+  || emit_error "runtime_environment_invalid" "The local Runtime user could not be resolved." 45
+runtime_tmp=$(/usr/bin/getconf DARWIN_USER_TEMP_DIR 2>/dev/null) \
+  || emit_error "runtime_environment_invalid" "The local Runtime temporary directory could not be resolved." 45
+case "$runtime_tmp" in
+  /*) ;;
+  *) emit_error "runtime_environment_invalid" "The local Runtime temporary directory is invalid." 45 ;;
+esac
+
+if [ -n "${SSH_AUTH_SOCK:-}" ]; then
+  case "$SSH_AUTH_SOCK" in
+    /*)
+      exec /usr/bin/env -i \
+        HOME="$HOME" \
+        LANG=C \
+        LC_ALL=C \
+        LOGNAME="$runtime_user" \
+        PATH="$PATH" \
+        SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
+        TMPDIR="$runtime_tmp" \
+        USER="$runtime_user" \
+        "$cli_path" "$@"
+      ;;
+  esac
+fi
+
+exec /usr/bin/env -i \
+  HOME="$HOME" \
+  LANG=C \
+  LC_ALL=C \
+  LOGNAME="$runtime_user" \
+  PATH="$PATH" \
+  TMPDIR="$runtime_tmp" \
+  USER="$runtime_user" \
+  "$cli_path" "$@"
