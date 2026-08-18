@@ -138,6 +138,9 @@ export function Prototype() {
             <a className="button button-secondary" href={siteHref("how-it-works/")}>
               <ShieldCheck weight="fill" aria-hidden="true" /> {t.learnHow}
             </a>
+            <a className="button button-secondary" href={siteHref("why-safa/")}>
+              <ArrowRight weight="bold" aria-hidden="true" /> {t.whySafa}
+            </a>
           </div>
           <div className="install-command" aria-label={`${t.install}: ${INSTALL_COMMAND}`}>
             <span>{t.install}</span>

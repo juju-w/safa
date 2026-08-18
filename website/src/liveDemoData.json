@@ -39,7 +39,7 @@
         "eyebrow": "The authorized path",
         "title": "Privileged actions: approve once, then execute",
         "body": "SAFA is not only about refusal. When the user grants an elevated action through the macOS authorization prompt (Touch ID), the same Broker executes it under the same bounded rules — without the Agent ever seeing the password.",
-        "status": "Design target — specified in 002-sudo-execution, not yet in the 0.1.0 preview. The preview refuses sudo (as shown above); the authorized flow below is what ships next.",
+        "status": "User-presence approval is SAFA's current model: viewing protected details (resource show --details) already requires macOS authorization (Touch ID / password). Privileged execution follows the same approval path — in this preview sudo is refused; approved sudo with scoped grants ships next.",
         "steps": [
           {
             "title": "Agent requests",
@@ -87,7 +87,7 @@
           "resultNote": "The Agent receives bounded, redacted TOON evidence. The sudo password never appears in argv, output, or audit records.",
           "result": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: a1f0-4b2e-...\nresource: nas.primary\nintent: Restart the jellyfin media service\nexecution:\n  termination: exit\n  remote_exit_code: 0\n  stdout: jellyfin restarted (bounded, redacted)\n  stderr: (empty)",
           "replay": "Replay",
-          "designNote": "Interactive preview of the design target (specs/002-sudo-execution). The 0.1.0 preview refuses sudo; this flow ships next."
+          "designNote": "This is the same authorization model SAFA already uses for protected actions like viewing resource details — approved sudo execution follows and ships next."
         }
       }
     },
@@ -130,7 +130,7 @@
         "eyebrow": "授权路径",
         "title": "高级操作：授权一次，然后执行",
         "body": "SAFA 不只是拦截。当用户通过 macOS 授权提示（Touch ID）批准一个提权操作时，同一个 Broker 会在同样的边界约束下执行它——Agent 依然看不到密码。",
-        "status": "设计目标——见 002-sudo-execution 规格，当前 0.1.0 预览未开放。预览版会拒绝 sudo（如上所示）；下面的授权流是下一个交付能力。",
+        "status": "用户在场授权是 SAFA 的现状：查看受保护详情（resource show --details）就需要 macOS 授权（Touch ID / 密码）。提权执行走同一个授权模型——预览版中 sudo 以拒绝守卫，带作用域授权的 sudo 将在下一版本交付。",
         "steps": [
           {
             "title": "Agent 发起请求",
@@ -178,7 +178,7 @@
           "resultNote": "Agent 拿到的仍然只有有限、脱敏的 TOON 证据。sudo 密码不会出现在 argv、输出或审计记录里。",
           "result": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: a1f0-4b2e-...\nresource: nas.primary\nintent: 重启 jellyfin 媒体服务\nexecution:\n  termination: exit\n  remote_exit_code: 0\n  stdout: jellyfin restarted (有界、脱敏)\n  stderr: (空)",
           "replay": "重新播放",
-          "designNote": "设计目标（specs/002-sudo-execution）的交互预览。0.1.0 预览版会拒绝 sudo；此流程将在下一版本交付。"
+          "designNote": "这是 SAFA 现用于受保护操作（如查看资源详情）的授权模型——sudo 执行将沿用该模型，并在下一版本交付。"
         }
       }
     }
