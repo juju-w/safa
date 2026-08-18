@@ -4,8 +4,8 @@ import { useGitHubStats } from "./githubStats";
 import { GITHUB_URL, type Language, siteHref } from "./site";
 
 const navigation = {
-  en: { product: "Product", security: "Security", how: "How it works", live: "Live demo", switchLanguage: "Switch language to" },
-  zh: { product: "产品", security: "安全机制", how: "工作原理", live: "真实演示", switchLanguage: "切换语言：" },
+  en: { product: "Product", security: "Security", how: "How it works", docs: "Docs", live: "Live demo", switchLanguage: "Switch language to" },
+  zh: { product: "产品", security: "安全机制", how: "工作原理", docs: "文档", live: "真实演示", switchLanguage: "切换语言：" },
 } as const;
 
 export function useLanguage() {
@@ -33,6 +33,7 @@ export function SiteNav({ language, onLanguageChange }: { language: Language; on
         <a href={siteHref()}>{t.product}</a>
         <a href={siteHref("#security")}>{t.security}</a>
         <a href={siteHref("how-it-works/")}>{t.how}</a>
+        <a className="nav-docs" href={siteHref("docs/")}>{t.docs}</a>
         <a className="nav-live" href={siteHref("live-demo/")}>{t.live}</a>
         <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
       </nav>

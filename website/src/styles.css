@@ -527,3 +527,8 @@ html[lang="zh-CN"] .hero-acronym { letter-spacing: 0.12em; }
 @media (max-width: 680px) {
   .articles-grid { grid-template-columns: 1fr; }
 }
+/* homepage docs link + nav docs */
+.docs-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: fit-content; margin: 18px auto 0; padding: 9px 16px; border: 1px solid rgba(127, 229, 255, 0.4); border-radius: 999px; color: var(--cyan); font-size: 0.82rem; font-weight: 700; transition: border-color 180ms ease, background 180ms ease; }
+.docs-link:hover { border-color: rgba(127, 229, 255, 0.75); background: rgba(63, 142, 202, 0.14); }
+.docs-link svg { width: 15px; height: 15px; }
+.nav-docs { color: #c9e2ff !important; font-weight: 700; }
