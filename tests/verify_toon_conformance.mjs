@@ -7,6 +7,17 @@ import process from 'node:process'
 import { pathToFileURL } from 'node:url'
 
 const EXPECTED_SPEC_VERSION = '4.1.1'
+const REQUIRED_PRODUCT_FIXTURES = [
+  'execution-truncated.failed',
+  'home.completed',
+  'policy-denied.failed',
+  'protected-user-action.required',
+  'resource-list.empty',
+  'setup.no-op',
+  'topology-path.completed',
+  'transport.failed',
+  'usage-error.failed',
+]
 const [referenceRoot, specRoot, fixtureRoot] = process.argv.slice(2)
 if (!referenceRoot || !specRoot || !fixtureRoot) {
   process.stderr.write(
@@ -28,6 +39,11 @@ function sortedFiles(root, suffix) {
       return entry.isFile() && entry.name.endsWith(suffix) ? [candidate] : []
     })
     .sort()
+}
+
+for (const fixture of REQUIRED_PRODUCT_FIXTURES) {
+  assert.ok(fs.existsSync(path.join(fixtureRoot, `${fixture}.json`)), `missing ${fixture}.json`)
+  assert.ok(fs.existsSync(path.join(fixtureRoot, `${fixture}.toon`)), `missing ${fixture}.toon`)
 }
 
 assert.equal(

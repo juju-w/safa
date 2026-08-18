@@ -14,7 +14,7 @@ method. Registering a type does not grant access and does not claim its adapter 
 | template ID/version | public | Immutable built-in schema/adapter binding |
 | host platform | public | Hosts only: `linux`, `macos`, or `windows` |
 | roles | public | Orthogonal safe purposes such as `nas` or `gpu` |
-| resource type | public | Additive CLI v1 compatibility projection only |
+| resource type | public | Namespaced v2 type discriminator such as `host.linux` or `database.mysql` |
 | display name | authorized | Encrypted; may contain internal context |
 | access methods | authorized | Open identifiers; do not imply adapter availability |
 | endpoint/user/route | authorized | Encrypted connection metadata |
@@ -65,7 +65,7 @@ neo4j
 http
 ```
 
-Additive CLI v1 compatibility resource types:
+Resource type identifiers:
 
 ```text
 host.linux
