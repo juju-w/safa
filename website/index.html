@@ -74,6 +74,31 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>SAFA — Secure Access for Agents</h1>
+      <p>Let AI agents diagnose servers, services, and infrastructure without giving them passwords, private keys, or reusable credentials.</p>
+      <h2>How it works</h2>
+      <ol>
+        <li>Register a resource once on your Mac.</li>
+        <li>Ask naturally: “Why is production down?”</li>
+        <li>SAFA finds the resource, checks topology, requests approval, and returns bounded, sanitized evidence.</li>
+      </ol>
+      <h2>Key guarantees</h2>
+      <ul>
+        <li>The Agent receives safe logical aliases, never IPs, usernames, or keys.</li>
+        <li>Reusable credentials and vault keys never enter Agent-facing output.</li>
+        <li>Only allow-listed, read-only operations can run automatically; sudo is refused.</li>
+        <li>Remote output is treated as untrusted data, never as instructions.</li>
+      </ul>
+      <h2>Frequently asked questions</h2>
+      <h3>Does the AI agent ever see my credentials?</h3>
+      <p>No. Reusable credentials and vault keys never enter Agent-facing output. The native macOS Runtime resolves them locally behind policy, authorization, and redaction.</p>
+      <h3>What platforms does SAFA support?</h3>
+      <p>SAFA is currently a macOS source preview (Swift 6). Linux and Windows native runtimes are planned but not yet implemented or claimed as supported.</p>
+      <h3>How do I install it?</h3>
+      <p>On macOS: npx skills add juju-w/safa --skill safa, then register a resource once. The launcher installs and verifies the native Runtime.</p>
+      <p><a href="https://github.com/juju-w/safa">View on GitHub</a> · <a href="https://juju-w.github.io/safa/how-it-works/">How it works</a> · <a href="https://juju-w.github.io/safa/live-demo/">Live demo</a></p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

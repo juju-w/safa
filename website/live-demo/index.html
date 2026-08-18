@@ -41,6 +41,19 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>SAFA Live Demo — A Real Diagnosis, Replayed</h1>
+      <p>A real replayed SAFA session: a home NAS slowness report investigated end-to-end through the signed native Runtime on 2026-08-19. Every command really ran against a registered resource; the Agent never saw an IP, a password, or a private key.</p>
+      <h2>The finding</h2>
+      <p>Disk and CPU were fine. The real signal was swap: 10 GiB with 9.5 GiB (95%) in use while physical memory had ~7.3 GiB available — an unreclaimed historical memory spike. systemd reported jellyfin and postgresql inactive while their processes ran (vendor stack / container-managed).</p>
+      <h2>Boundary refusals demonstrated</h2>
+      <ul>
+        <li>sudo commands are refused: approval_not_in_mvp.</li>
+        <li>Off-allow-list commands (e.g. journalctl) are refused: allow-list is exact matching.</li>
+        <li>Unregistered resources are refused: resource_not_found.</li>
+      </ul>
+      <p>Credentials stayed on the Mac. The Agent only ever saw bounded, sanitized evidence.</p>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
