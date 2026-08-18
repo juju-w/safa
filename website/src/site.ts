@@ -19,6 +19,7 @@ export const homeCopy = {
     github: "View on GitHub",
     seeDemo: "See a real diagnosis",
     readArticle: "Read",
+    allDocs: "All documentation",
     articlesEyebrow: "Deep dives",
     articlesTitle: "From the blog",
     articles: [
@@ -107,6 +108,7 @@ export const homeCopy = {
     github: "在 GitHub 查看源码",
     seeDemo: "看一次真实排查",
     readArticle: "阅读",
+    allDocs: "全部文档",
     articlesEyebrow: "深度阅读",
     articlesTitle: "文章",
     articles: [

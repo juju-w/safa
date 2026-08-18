@@ -178,6 +178,7 @@ export function Prototype() {
         <div className="section-heading centered">
           <p className="eyebrow">{t.articlesEyebrow}</p>
           <h2 id="articles-heading">{t.articlesTitle}</h2>
+          <a className="docs-link" href={siteHref("docs/")}><ArrowRight weight="bold" aria-hidden="true" /> {t.allDocs}</a>
         </div>
         <div className="articles-grid">
           {t.articles.map((article) => (
