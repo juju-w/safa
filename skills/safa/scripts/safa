@@ -69,6 +69,7 @@ lock_field() {
 
 lock_schema=$(lock_field schema) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 runtime_version=$(lock_field runtime_version) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_cli_schema=$(lock_field cli_schema) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 locked_platform=$(lock_field platform) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 locked_architecture=$(lock_field architecture) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 locked_team=$(lock_field team_identifier) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
@@ -78,9 +79,10 @@ locked_askpass_cdhash=$(lock_field askpass_cdhash) || emit_error "runtime_lock_i
 locked_trusted_setup_cdhash=$(lock_field trusted_setup_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 
 if [ "$lock_schema" != "dev.safa.local-runtime-lock/v1" ] \
+  || [ "$locked_cli_schema" != "dev.safa.cli/v2" ] \
   || [ "$locked_platform" != "macos" ] \
   || [ "$locked_architecture" != "$architecture" ]; then
-  emit_error "runtime_lock_incompatible" "The local Runtime lock does not match this platform." 45
+  emit_error "runtime_lock_incompatible" "The local Runtime is not compatible with this launcher." 45
 fi
 
 if ! printf '%s\n' "$runtime_version" \

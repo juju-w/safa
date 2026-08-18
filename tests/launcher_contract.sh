@@ -32,10 +32,20 @@ case "$(uname -s)" in
     data_root="${test_home}/Library/Application Support/SAFA"
     mkdir -p "$data_root"
     architecture=$(uname -m)
-    printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"0.1.0\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"ABCDEFGHIJ\",\"app_cdhash\":\"0000000000000000000000000000000000000000\",\"broker_cdhash\":\"0000000000000000000000000000000000000000\",\"askpass_cdhash\":\"0000000000000000000000000000000000000000\",\"trusted_setup_cdhash\":\"0000000000000000000000000000000000000000\"}" \
+    printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"0.1.0\",\"cli_schema\":\"dev.safa.cli/v1\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"ABCDEFGHIJ\",\"app_cdhash\":\"0000000000000000000000000000000000000000\",\"broker_cdhash\":\"0000000000000000000000000000000000000000\",\"askpass_cdhash\":\"0000000000000000000000000000000000000000\",\"trusted_setup_cdhash\":\"0000000000000000000000000000000000000000\"}" \
       > "${data_root}/runtime.local.json"
     chmod 600 "${data_root}/runtime.local.json"
 
+    set +e
+    output=$(HOME="$test_home" "$launcher" doctor 2>&1)
+    result=$?
+    set -e
+
+    printf '%s\n' "$output" | grep -Fx 'status: failed' >/dev/null
+    printf '%s\n' "$output" | grep -Fx '  code: runtime_lock_incompatible' >/dev/null
+    [ "$result" -eq 1 ]
+
+    /usr/bin/sed -i '' 's#dev.safa.cli/v1#dev.safa.cli/v2#' "${data_root}/runtime.local.json"
     set +e
     output=$(HOME="$test_home" "$launcher" doctor 2>&1)
     result=$?
