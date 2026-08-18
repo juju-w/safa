@@ -34,6 +34,10 @@ if metadata["name"] != skill_directory.name or not re.fullmatch(r"[a-z0-9-]+", m
     fail("Skill name must match its lowercase hyphenated directory")
 if not isinstance(metadata["description"], str) or not metadata["description"].strip():
     fail("Skill description must be a non-empty string")
+description = metadata["description"]
+for trigger in ["SSH", "Docker", "K3s", "database", "NAS", "down", "alerting", "topology"]:
+    if trigger.casefold() not in description.casefold():
+        fail(f"Skill description must preserve the concrete recall trigger: {trigger}")
 if len(contents.splitlines()) > 500:
     fail("SKILL.md exceeds the 500-line progressive-disclosure limit")
 if "./scripts/safa doctor" not in contents:
@@ -49,5 +53,14 @@ required_files = [
 for required_file in required_files:
     if not required_file.is_file():
         fail(f"missing {required_file}")
+
+agent_metadata = yaml.safe_load((skill_directory / "agents" / "openai.yaml").read_text(encoding="utf-8"))
+interface = agent_metadata.get("interface", {}) if isinstance(agent_metadata, dict) else {}
+short_description = interface.get("short_description")
+default_prompt = interface.get("default_prompt")
+if not isinstance(short_description, str) or not 25 <= len(short_description) <= 64:
+    fail("agents/openai.yaml short_description must be 25-64 characters")
+if not isinstance(default_prompt, str) or f"${metadata['name']}" not in default_prompt:
+    fail("agents/openai.yaml default_prompt must explicitly invoke the Skill")
 
 print(f"validated {skill_directory}")

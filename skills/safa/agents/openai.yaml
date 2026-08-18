@@ -1,6 +1,6 @@
 interface:
-  display_name: "SAFA"
-  short_description: "Secure macOS access for infrastructure agents"
+  display_name: "SAFA — Secure Agent Access"
+  short_description: "Diagnose servers without revealing passwords or keys"
   icon_small: "./assets/safa-icon-64.png"
   icon_large: "./assets/safa-icon-512.png"
-  default_prompt: "Use $safa to inspect or operate a registered server without exposing credentials."
+  default_prompt: "Use $safa to diagnose why a registered server or service is down, slow, full, unreachable, or alerting without asking me for reusable credentials."

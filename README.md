@@ -4,11 +4,14 @@
 
 # SAFA
 
-**Secure Access for Agents.** SAFA lets AI agents diagnose registered infrastructure without ever
-seeing reusable credentials. Its Agent Skill discovers the right private resource and selects a
-bounded diagnostic; the native security Runtime authorizes access and returns sanitized evidence.
+**Ask your Agent why production is down—not for the server password.** SAFA lets AI agents diagnose
+registered servers, services, databases, NAS devices, and infrastructure without ever receiving a
+reusable credential. Register a resource once on your Mac; after that, ask natural questions such as
+“why is this API returning 502?”, “can the crawler reach MySQL?”, or “what breaks if the NAS is
+offline?” SAFA discovers the right alias, computes the relevant topology answer, authorizes one
+bounded diagnostic, and returns sanitized evidence.
 
-[Website](https://juju-w.github.io/safa/) · [Agent scenarios](docs/scenarios.md) · [Architecture](docs/architecture.md)
+[Website](https://juju-w.github.io/safa/) · [How it works](https://juju-w.github.io/safa/how-it-works/) · [Agent scenarios](docs/scenarios.md) · [Architecture](docs/architecture.md)
 
 [![CI](https://github.com/juju-w/safa/actions/workflows/ci.yml/badge.svg)](https://github.com/juju-w/safa/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/juju-w/safa?style=flat)](https://github.com/juju-w/safa/stargazers)
