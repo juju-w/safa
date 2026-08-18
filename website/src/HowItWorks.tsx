@@ -18,7 +18,7 @@ import {
   Vault,
   WarningCircle,
 } from "@phosphor-icons/react";
-import { motion, useReducedMotion, useScroll } from "motion/react";
+import { motion, useScroll } from "motion/react";
 import React, { useEffect } from "react";
 import { SiteFooter, SiteNav, useLanguage } from "./SiteChrome";
 import { GITHUB_URL, siteHref } from "./site";
@@ -26,25 +26,18 @@ import { GITHUB_URL, siteHref } from "./site";
 const copy = {
   en: {
     eyebrow: "How SAFA works",
-    title: "The Agent sees the task. SAFA handles the secret.",
     body: "SAFA is a local security boundary for infrastructure work. Your Agent can discover a registered resource, reason over its topology, and request one bounded operation without receiving the password, private key, token, or protected route behind it.",
     back: "Back to product",
     github: "Inspect the architecture",
-    principleEyebrow: "The practical difference",
-    principleTitle: "Stop turning an outage into a credential-sharing exercise.",
-    without: "Without SAFA",
-    withoutSteps: ["Agent asks which host to use", "You paste an IP, username, or key path", "Secrets and connection details enter chat history", "The Agent opens a broad, reusable session"],
-    with: "With SAFA",
-    withSteps: ["You ask why a named service is failing", "The Skill finds a safe resource alias", "The Runtime resolves the protected route locally", "Only the approved diagnostic runs"],
     flowEyebrow: "One request, five boundaries",
     flowTitle: "From natural-language intent to bounded evidence.",
     flowBody: "Each layer has one job. The Skill plans; the native Runtime owns credentials, policy, authorization, and the connection.",
     flow: [
-      { title: "1. You describe the problem", body: "“Why is api.production returning 502?” No IP or password is needed." },
-      { title: "2. The Skill discovers context", body: "It finds the registered alias and asks the topology surface for placement, path, or impact." },
-      { title: "3. Policy narrows the action", body: "The Runtime binds the request to one resource, command, scope, and expiry." },
-      { title: "4. Your Mac authorizes", body: "When user presence is required, macOS shows the exact action before Touch ID approval." },
-      { title: "5. Evidence comes back", body: "The Runtime executes, bounds, redacts, and labels remote output as untrusted evidence." },
+      { title: "You describe the problem", body: "“Why is api.production returning 502?” No IP or password is needed." },
+      { title: "The Skill discovers context", body: "It finds the registered alias and asks the topology surface for placement, path, or impact." },
+      { title: "Policy narrows the action", body: "The Runtime binds the request to one resource, command, scope, and expiry." },
+      { title: "Your Mac authorizes", body: "When user presence is required, macOS shows the exact action before Touch ID approval." },
+      { title: "Evidence comes back", body: "The Runtime executes, bounds, redacts, and labels remote output as untrusted evidence." },
     ],
     boundaryEyebrow: "Credential isolation",
     boundaryTitle: "Credentials never cross into the Agent-visible channel.",
@@ -82,28 +75,44 @@ const copy = {
     laterItems: ["Controlled mutation, sudo, and expiring grants", "Native database, object-store, cache, and HTTP adapters", "Origin-bound browser sessions without credential export", "Independent Linux and Windows native Runtimes"],
     finalTitle: "The goal is simple: ask the Agent about your systems, not how to log in to them.",
     finalBody: "SAFA is still a preview. The architecture, Skill, topology contract, and security boundaries are open for review now.",
+    map: {
+      aria: "Agent and native security boundary",
+      agent: "Agent",
+      agentDetail: "intent + safe aliases",
+      skill: "Skill",
+      skillDetail: "context + plan",
+      runtime: "SAFA Runtime",
+      runtimeDetail: "policy + authorization",
+      resource: "Resource",
+      resourceDetail: "one bounded action",
+    },
+    credentialRail: {
+      aria: "Credential flow",
+      mac: "Mac",
+      keychain: "Keychain",
+      runtime: "Runtime",
+      resource: "Resource",
+      note: "credential handle stays inside this rail",
+    },
+    graph: {
+      title: "Directed typed multigraph",
+      note: "desired claims ≠ observed facts · verified paths expire · large graphs become bounded task projections",
+    },
   },
   zh: {
     eyebrow: "SAFA 如何工作",
-    title: "智能体只看见任务，凭证由 SAFA 在本机处理。",
     body: "SAFA 是智能体与私有基础设施之间的一道本机安全边界。智能体可以发现已登记的资源、理解拓扑并申请一次有限操作，但不会拿到背后的密码、私钥、Token 或真实访问路径。",
     back: "返回产品页",
     github: "查看完整架构",
-    principleEyebrow: "最直观的区别",
-    principleTitle: "排查一次故障，不应该先变成一场凭证交接。",
-    without: "没有 SAFA",
-    withoutSteps: ["智能体先问应该登录哪台机器", "你把 IP、用户名或密钥路径贴进对话", "凭证和连接信息进入聊天记录", "智能体获得一个宽泛、可复用的会话"],
-    with: "使用 SAFA",
-    withSteps: ["你直接问某个服务为什么异常", "Skill 找到安全的资源别名", "Runtime 在本机解析受保护的访问路径", "最终只执行经过授权的排查操作"],
     flowEyebrow: "一次请求，经过五道边界",
     flowTitle: "从自然语言问题，到有限、可审计的证据。",
     flowBody: "每一层只负责一件事：Skill 负责规划；原生 Runtime 负责凭证、策略、授权和连接。",
     flow: [
-      { title: "1. 你描述问题", body: "“api.production 为什么返回 502？”不需要先提供 IP 或密码。" },
-      { title: "2. Skill 获取上下文", body: "它找到已登记的资源别名，再查询部署位置、访问路径或故障影响。" },
-      { title: "3. 策略收窄操作", body: "Runtime 把请求绑定到一个资源、一个命令、明确范围和有效期。" },
-      { title: "4. 由你的 Mac 授权", body: "需要本人确认时，macOS 会先展示完整操作，再通过 Touch ID 授权。" },
-      { title: "5. 返回排查证据", body: "Runtime 执行操作，对输出限长、脱敏，并明确标记为不可信远端数据。" },
+      { title: "你描述问题", body: "“api.production 为什么返回 502？”不需要先提供 IP 或密码。" },
+      { title: "Skill 获取上下文", body: "它找到已登记的资源别名，再查询部署位置、访问路径或故障影响。" },
+      { title: "策略收窄操作", body: "Runtime 把请求绑定到一个资源、一个命令、明确范围和有效期。" },
+      { title: "由你的 Mac 授权", body: "需要本人确认时，macOS 会先展示完整操作，再通过 Touch ID 授权。" },
+      { title: "返回排查证据", body: "Runtime 执行操作，对输出限长、脱敏，并明确标记为不可信远端数据。" },
     ],
     boundaryEyebrow: "凭证隔离",
     boundaryTitle: "凭证不会进入智能体可见通道。",
@@ -141,6 +150,29 @@ const copy = {
     laterItems: ["受控修改、sudo 和短时授权", "数据库、对象存储、缓存和 HTTP 原生适配器", "不导出凭证的站点绑定浏览器会话", "独立的 Linux 和 Windows 原生 Runtime"],
     finalTitle: "最终目标很简单：让你问智能体“系统怎么了”，而不是先解释“该怎么登录”。",
     finalBody: "SAFA 目前仍是预览版，但架构、Skill、拓扑协议和安全边界已经开源，可以直接审阅。",
+    map: {
+      aria: "Agent and native security boundary",
+      agent: "Agent",
+      agentDetail: "intent + safe aliases",
+      skill: "Skill",
+      skillDetail: "context + plan",
+      runtime: "SAFA Runtime",
+      runtimeDetail: "policy + authorization",
+      resource: "Resource",
+      resourceDetail: "one bounded action",
+    },
+    credentialRail: {
+      aria: "Credential flow",
+      mac: "Mac",
+      keychain: "Keychain",
+      runtime: "Runtime",
+      resource: "Resource",
+      note: "credential handle stays inside this rail",
+    },
+    graph: {
+      title: "Directed typed multigraph",
+      note: "desired claims ≠ observed facts · verified paths expire · large graphs become bounded task projections",
+    },
   },
 } as const;
 
@@ -149,7 +181,6 @@ const flowIcons = [Robot, Graph, ShieldCheck, Fingerprint, TerminalWindow];
 export function HowItWorks() {
   const { language, setLanguage } = useLanguage();
   const t = copy[language];
-  const reducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
 
   useEffect(() => {
@@ -161,154 +192,142 @@ export function HowItWorks() {
       <motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }} aria-hidden="true" />
       <SiteNav language={language} onLanguageChange={setLanguage} />
 
-      <section className="how-hero" aria-labelledby="how-title">
-        <motion.img
-          className="hero-backdrop"
-          src={siteHref("assets/hero-aurora.webp")}
-          alt=""
-          initial={reducedMotion ? false : { opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 0.48, scale: 1 }}
-          transition={{ duration: 0.9 }}
-        />
-        <div className="hero-shade" aria-hidden="true" />
-        <div className="how-hero-content">
-          <p className="eyebrow">{t.eyebrow}</p>
-          <h1 id="how-title">{t.title}</h1>
-          <p>{t.body}</p>
-          <div className="hero-actions">
-            <a className="button button-primary" href="#request-flow"><Path weight="bold" aria-hidden="true" /> {t.eyebrow}</a>
-            <a className="button button-secondary" href={GITHUB_URL} target="_blank" rel="noreferrer"><GithubLogo weight="fill" aria-hidden="true" /> {t.github}</a>
-          </div>
+      <header className="how-intro" aria-labelledby="how-title">
+        <div className="how-intro-copy">
           <a className="back-link" href={siteHref()}><ArrowRight aria-hidden="true" /> {t.back}</a>
+          <p className="eyebrow">{t.eyebrow}</p>
+          <h1 id="how-title">{t.flowTitle}</h1>
+          <p>{t.body}</p>
+          <a className="text-link" href={GITHUB_URL} target="_blank" rel="noreferrer"><GithubLogo weight="fill" aria-hidden="true" /> {t.github}</a>
         </div>
-        <div className="how-hero-visual" aria-label="Agent and native security boundary">
-          <div><Robot weight="duotone" /><span>Agent</span><small>intent + evidence</small></div>
+        <div className="how-system-map" aria-label={t.map.aria}>
+          <div><Robot weight="duotone" /><span>{t.map.agent}</span><small>{t.map.agentDetail}</small></div>
           <ArrowRight aria-hidden="true" />
-          <div className="boundary-node"><ShieldCheck weight="duotone" /><span>SAFA Runtime</span><small>policy + authorization</small></div>
+          <div><Graph weight="duotone" /><span>{t.map.skill}</span><small>{t.map.skillDetail}</small></div>
           <ArrowRight aria-hidden="true" />
-          <div><TerminalWindow weight="duotone" /><span>Resource</span><small>bounded action</small></div>
+          <div className="boundary-node"><ShieldCheck weight="duotone" /><span>{t.map.runtime}</span><small>{t.map.runtimeDetail}</small></div>
+          <ArrowRight aria-hidden="true" />
+          <div><TerminalWindow weight="duotone" /><span>{t.map.resource}</span><small>{t.map.resourceDetail}</small></div>
         </div>
-      </section>
+      </header>
 
-      <section className="how-section principle-section" aria-labelledby="principle-title">
-        <div className="section-heading centered">
-          <p className="eyebrow">{t.principleEyebrow}</p>
-          <h2 id="principle-title">{t.principleTitle}</h2>
-        </div>
-        <div className="comparison-grid">
-          <article className="comparison-risk">
-            <span className="comparison-label"><WarningCircle weight="fill" /> {t.without}</span>
-            <ol>{t.withoutSteps.map((item) => <li key={item}>{item}</li>)}</ol>
-          </article>
-          <article className="comparison-safe">
-            <span className="comparison-label"><ShieldCheck weight="fill" /> {t.with}</span>
-            <ol>{t.withSteps.map((item) => <li key={item}>{item}</li>)}</ol>
-          </article>
-        </div>
-      </section>
+      <div className="how-guide">
+        <aside className="how-toc">
+          <nav aria-label={t.eyebrow}>
+            <a href="#request-flow"><span>01</span>{t.flowEyebrow}</a>
+            <a href="#credentials"><span>02</span>{t.boundaryEyebrow}</a>
+            <a href="#topology"><span>03</span>{t.topologyEyebrow}</a>
+            <a href="#security-model"><span>04</span>{t.securityEyebrow}</a>
+            <a href="#roadmap"><span>05</span>{t.roadmapEyebrow}</a>
+          </nav>
+        </aside>
 
-      <section className="how-section" id="request-flow" aria-labelledby="flow-title">
-        <div className="section-heading">
-          <p className="eyebrow">{t.flowEyebrow}</p>
-          <h2 id="flow-title">{t.flowTitle}</h2>
-          <p>{t.flowBody}</p>
-        </div>
-        <div className="request-flow">
-          {t.flow.map((step, index) => {
-            const Icon = flowIcons[index];
-            return (
-              <motion.article key={step.title} initial={reducedMotion ? false : { opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.35 }} transition={{ delay: index * 0.06 }}>
-                <span><Icon weight="duotone" aria-hidden="true" /></span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </motion.article>
-            );
-          })}
-        </div>
-      </section>
+        <article className="how-article">
+          <section className="how-chapter" id="request-flow" aria-labelledby="flow-title">
+            <div className="chapter-heading">
+              <p className="eyebrow">01</p>
+              <h2 id="flow-title">{t.flowEyebrow}</h2>
+              <p>{t.flowBody}</p>
+            </div>
+            <div className="request-timeline">
+              {t.flow.map((step, index) => {
+                const Icon = flowIcons[index];
+                return (
+                  <div key={step.title}>
+                    <span className="timeline-number">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="timeline-icon"><Icon weight="duotone" aria-hidden="true" /></span>
+                    <div><h3>{step.title}</h3><p>{step.body}</p></div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
 
-      <section className="how-section boundary-section" id="credentials" aria-labelledby="boundary-title">
-        <div className="section-heading centered">
-          <p className="eyebrow">{t.boundaryEyebrow}</p>
-          <h2 id="boundary-title">{t.boundaryTitle}</h2>
-          <p>{t.boundaryBody}</p>
-        </div>
-        <div className="boundary-layout">
-          <article>
-            <span className="zone-icon"><Robot weight="duotone" /></span>
-            <h3>{t.agentZone}</h3>
-            <ul>{t.agentItems.map((item) => <li key={item}><CheckCircle weight="fill" />{item}</li>)}</ul>
-          </article>
-          <article className="native-boundary">
-            <span className="zone-icon"><Vault weight="duotone" /></span>
-            <h3>{t.nativeZone}</h3>
-            <ul>{t.nativeItems.map((item) => <li key={item}><LockKey weight="fill" />{item}</li>)}</ul>
-          </article>
-          <article className="never-zone">
-            <span className="zone-icon"><EyeSlash weight="duotone" /></span>
-            <h3>{t.neverTitle}</h3>
-            <ul>{t.neverItems.map((item) => <li key={item}><EyeSlash weight="fill" />{item}</li>)}</ul>
-          </article>
-        </div>
-        <div className="credential-rail" aria-label="Credential flow">
-          <span><Laptop /> Mac</span><ArrowRight /><span><Vault /> Keychain</span><ArrowRight /><span><ShieldCheck /> Runtime</span><ArrowRight /><span><Database /> Resource</span>
-          <strong><Key /> credential handle stays inside this rail</strong>
-        </div>
-      </section>
+          <section className="how-chapter boundary-section" id="credentials" aria-labelledby="boundary-title">
+            <div className="chapter-heading">
+              <p className="eyebrow">02 · {t.boundaryEyebrow}</p>
+              <h2 id="boundary-title">{t.boundaryTitle}</h2>
+              <p>{t.boundaryBody}</p>
+            </div>
+            <div className="boundary-layout">
+              <div>
+                <span className="zone-icon"><Robot weight="duotone" /></span>
+                <h3>{t.agentZone}</h3>
+                <ul>{t.agentItems.map((item) => <li key={item}><CheckCircle weight="fill" />{item}</li>)}</ul>
+              </div>
+              <div className="native-boundary">
+                <span className="zone-icon"><Vault weight="duotone" /></span>
+                <h3>{t.nativeZone}</h3>
+                <ul>{t.nativeItems.map((item) => <li key={item}><LockKey weight="fill" />{item}</li>)}</ul>
+              </div>
+              <div className="never-zone">
+                <span className="zone-icon"><EyeSlash weight="duotone" /></span>
+                <h3>{t.neverTitle}</h3>
+                <ul>{t.neverItems.map((item) => <li key={item}><EyeSlash weight="fill" />{item}</li>)}</ul>
+              </div>
+            </div>
+            <div className="credential-rail" aria-label={t.credentialRail.aria}>
+              <span><Laptop /> {t.credentialRail.mac}</span><ArrowRight /><span><Vault /> {t.credentialRail.keychain}</span><ArrowRight /><span><ShieldCheck /> {t.credentialRail.runtime}</span><ArrowRight /><span><Database /> {t.credentialRail.resource}</span>
+              <strong><Key /> {t.credentialRail.note}</strong>
+            </div>
+          </section>
 
-      <section className="how-section topology-section" id="topology" aria-labelledby="topology-title">
-        <div className="section-heading">
-          <p className="eyebrow">{t.topologyEyebrow}</p>
-          <h2 id="topology-title">{t.topologyTitle}</h2>
-          <p>{t.topologyBody}</p>
-        </div>
-        <div className="topology-grid">
-          {t.topologyQuestions.map((item, index) => (
-            <article key={item.command}>
-              <span>{index === 0 ? <Graph /> : index === 1 ? <Network /> : <Path />}</span>
-              <h3>{item.question}</h3>
-              <code>safa {item.command}</code>
-              <p>{item.outcome}</p>
-            </article>
-          ))}
-        </div>
-        <div className="topology-note"><Graph weight="duotone" /><p><strong>Directed typed multigraph</strong><span>desired claims ≠ observed facts · verified paths expire · large graphs become bounded task projections</span></p></div>
-      </section>
+          <section className="how-chapter topology-section" id="topology" aria-labelledby="topology-title">
+            <div className="chapter-heading">
+              <p className="eyebrow">03 · {t.topologyEyebrow}</p>
+              <h2 id="topology-title">{t.topologyTitle}</h2>
+              <p>{t.topologyBody}</p>
+            </div>
+            <div className="topology-grid">
+              {t.topologyQuestions.map((item, index) => (
+                <div key={item.command}>
+                  <span>{index === 0 ? <Graph /> : index === 1 ? <Network /> : <Path />}</span>
+                  <h3>{item.question}</h3>
+                  <code>safa {item.command}</code>
+                  <p>{item.outcome}</p>
+                </div>
+              ))}
+            </div>
+            <div className="topology-note"><Graph weight="duotone" /><p><strong>{t.graph.title}</strong><span>{t.graph.note}</span></p></div>
+          </section>
 
-      <section className="how-section security-detail" id="security-model" aria-labelledby="security-title">
-        <div className="section-heading centered">
-          <p className="eyebrow">{t.securityEyebrow}</p>
-          <h2 id="security-title">{t.securityTitle}</h2>
-        </div>
-        <div className="invariant-grid">
-          {t.invariants.map((item, index) => {
-            const Icon = [Key, WarningCircle, ShieldCheck, TerminalWindow][index];
-            return <article key={item.title}><Icon weight="duotone" /><h3>{item.title}</h3><p>{item.body}</p></article>;
-          })}
-        </div>
-        <p className="preview-note"><WarningCircle weight="fill" />{t.previewNote}</p>
-      </section>
+          <section className="how-chapter security-detail" id="security-model" aria-labelledby="security-title">
+            <div className="chapter-heading">
+              <p className="eyebrow">04 · {t.securityEyebrow}</p>
+              <h2 id="security-title">{t.securityTitle}</h2>
+            </div>
+            <div className="invariant-grid">
+              {t.invariants.map((item, index) => {
+                const Icon = [Key, WarningCircle, ShieldCheck, TerminalWindow][index];
+                return <div key={item.title}><Icon weight="duotone" /><h3>{item.title}</h3><p>{item.body}</p></div>;
+              })}
+            </div>
+            <p className="preview-note"><WarningCircle weight="fill" />{t.previewNote}</p>
+          </section>
 
-      <section className="how-section roadmap-section" id="roadmap" aria-labelledby="roadmap-title">
-        <div className="section-heading centered">
-          <p className="eyebrow">{t.roadmapEyebrow}</p>
-          <h2 id="roadmap-title">{t.roadmapTitle}</h2>
-        </div>
-        <div className="roadmap-grid">
-          {[
-            { title: t.now, items: t.nowItems, icon: CheckCircle, className: "roadmap-now" },
-            { title: t.next, items: t.nextItems, icon: ShieldCheck, className: "roadmap-next" },
-            { title: t.later, items: t.laterItems, icon: Browser, className: "roadmap-later" },
-          ].map(({ title, items, icon: Icon, className }) => (
-            <article className={className} key={title}><Icon weight="duotone" /><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></article>
-          ))}
-        </div>
-      </section>
+          <section className="how-chapter roadmap-section" id="roadmap" aria-labelledby="roadmap-title">
+            <div className="chapter-heading">
+              <p className="eyebrow">05 · {t.roadmapEyebrow}</p>
+              <h2 id="roadmap-title">{t.roadmapTitle}</h2>
+            </div>
+            <div className="roadmap-list">
+              {[
+                { title: t.now, items: t.nowItems, icon: CheckCircle, className: "roadmap-now" },
+                { title: t.next, items: t.nextItems, icon: ShieldCheck, className: "roadmap-next" },
+                { title: t.later, items: t.laterItems, icon: Browser, className: "roadmap-later" },
+              ].map(({ title, items, icon: Icon, className }) => (
+                <div className={className} key={title}><Icon weight="duotone" /><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></div>
+              ))}
+            </div>
+          </section>
 
-      <section className="final-cta how-final-cta">
-        <div><ShieldCheck weight="fill" aria-hidden="true" /><span><strong>{t.finalTitle}</strong><small>{t.finalBody}</small></span></div>
-        <a className="button button-primary" href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub <ArrowRight aria-hidden="true" /></a>
-      </section>
+          <section className="how-endnote">
+            <ShieldCheck weight="fill" aria-hidden="true" />
+            <div><strong>{t.finalTitle}</strong><p>{t.finalBody}</p></div>
+            <a className="text-link" href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub <ArrowRight aria-hidden="true" /></a>
+          </section>
+        </article>
+      </div>
 
       <SiteFooter language={language} />
     </main>
