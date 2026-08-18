@@ -174,6 +174,23 @@ export function Prototype() {
         </div>
       </section>
 
+      <section className="articles-section" aria-labelledby="articles-heading">
+        <div className="section-heading centered">
+          <p className="eyebrow">{t.articlesEyebrow}</p>
+          <h2 id="articles-heading">{t.articlesTitle}</h2>
+        </div>
+        <div className="articles-grid">
+          {t.articles.map((article) => (
+            <a className="article-card" key={article.url} href={siteHref(article.url)}>
+              <span className="article-meta">{article.date}</span>
+              <h3>{article.title}</h3>
+              <p>{article.summary}</p>
+              <span className="article-link"><ArrowRight aria-hidden="true" /> {t.readArticle ?? "Read"}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <section className="demo-section" id="diagnosis-demo" ref={demoRef} aria-labelledby="demo-heading">
         <div className="section-heading">
           <p className="eyebrow">{t.navHow}</p>
