@@ -131,7 +131,7 @@ export function Prototype() {
           <p className="hero-slogan">{t.heroSlogan}</p>
           <p className="hero-body">{t.heroBody}</p>
           <div className="hero-actions">
-            <a className="button button-primary" href="#diagnosis-demo">
+            <a className="button button-primary" href={siteHref("live-demo/")}>
               <Play weight="fill" aria-hidden="true" /> {t.seeDemo}
             </a>
             <a className="button button-secondary" href={siteHref("how-it-works/")}>
@@ -174,7 +174,14 @@ export function Prototype() {
         <div className="section-heading">
           <p className="eyebrow">{t.navHow}</p>
           <h2 id="demo-heading">{t.demoTitle}</h2>
-          <button className="replay-button" type="button" onClick={replay}><Play weight="fill" aria-hidden="true" /> {t.replay}</button>
+          <div className="heading-actions">
+            <a className="live-session-link" href={siteHref("live-demo/")}>
+              <TerminalWindow weight="fill" aria-hidden="true" />
+              <span><strong>{t.liveSessionTitle}</strong><small>{t.liveSessionBody}</small></span>
+              <ArrowRight aria-hidden="true" />
+            </a>
+            <button className="replay-button" type="button" onClick={replay}><Play weight="fill" aria-hidden="true" /> {t.replay}</button>
+          </div>
         </div>
 
         <motion.div className="agent-window">
