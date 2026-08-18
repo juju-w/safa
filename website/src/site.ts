@@ -23,7 +23,7 @@ export const homeCopy = {
     articlesEyebrow: "Deep dives",
     articlesTitle: "From the blog",
     articles: [
-      { title: "Why Your AI Agent Should Never Hold Your SSH Keys", summary: "Agents are doing ops now — and handing them a key is exactly the wrong move. Process separation, allow-list policy, and user-presence authorization, with real evidence.", url: "why-safa/", date: "2026-08-19" },
+      { title: "Why Your AI Agent Should Never Hold Your SSH Keys", summary: "Agents are doing ops now — and handing them a key is exactly the wrong move. Process separation, allow-list policy, and user-presence authorization, with real evidence. · 中文版", url: "why-safa/", date: "2026-08-19" },
       { title: "The SAFA Access Pattern: Every Resource, Topology, No Plaintext Password", summary: "How hosts, databases, object storage, caches, and services are registered with credentials that never become plaintext; trusted-setup password entry; jump routes and pinned identity; topology from evidence. · 中文版", url: "why-safa/access-patterns/", date: "2026-08-19" },
     ],
     learnHow: "How SAFA works",
