@@ -68,3 +68,23 @@ jobs:
           else
             git show --check --format= HEAD
           fi
+
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - name: Install website dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build
+      - name: Test Sites package
+        run: npm run test:sites
