@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         main: path.resolve(root, "index.html"),
         howItWorks: path.resolve(root, "how-it-works/index.html"),
+        liveDemo: path.resolve(root, "live-demo/index.html"),
       },
     },
   },

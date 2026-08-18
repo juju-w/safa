@@ -1,0 +1,309 @@
+{
+  "copy": {
+    "en": {
+      "eyebrow": "Live demo",
+      "title": "A real diagnosis, replayed.",
+      "body": "This page replays an actual SAFA session: a home NAS that “got slower”, investigated end-to-end through the signed native Runtime. Every command below really ran against a registered resource; the Agent never saw an IP, a password, or a private key.",
+      "metaLabel": "Session",
+      "metaRuntime": "SAFA Runtime 0.1.0 · macOS",
+      "metaDate": "2026-08-19",
+      "metaSanitized": "Hostnames, aliases, and process names sanitized; measurements are verbatim.",
+      "back": "Back to product",
+      "github": "Inspect the repository",
+      "replay": "Replay",
+      "stepsLabel": "Session steps",
+      "thinkingLabel": "What the Agent is thinking",
+      "commandLabel": "What the Agent runs",
+      "outputLabel": "What the Runtime returns",
+      "readingLabel": "Reading the evidence",
+      "copyCommand": "Copy command",
+      "copied": "Copied",
+      "boundaryTitle": "The boundary: three requests the Runtime refused",
+      "boundaryBody": "During the same session the Agent tried three things a normal SSH workflow would happily do. SAFA refused all of them — this is the whole point.",
+      "findingTitle": "The finding",
+      "findingBody": "Disk and CPU were fine. The real signal was swap: 10 GiB with 9.5 GiB (95%) in use while physical memory had ~7.3 GiB available.",
+      "conclusionTitle": "What the Agent reported",
+      "conclusionBody": "The NAS is not disk-full and not CPU-bound. The load it “feels” is the cost of paging: at some earlier point a memory spike (media transcode, containers, database, several sync/download services) pushed 95% of swap into use, and those pages were never reclaimed. Reads of swapped-out pages now go to disk.",
+      "conclusionPoints": [
+        "Root filesystem at 54% — not full.",
+        "Load 2.1 on a 12-core box — not CPU-bound.",
+        "Swap 95% used while RAM has headroom — historical memory spike, unreclaimed pages.",
+        "jellyfin and postgresql report inactive to systemd yet their processes run — they are managed by the NAS vendor stack / containers, so systemd state is not authoritative for them.",
+        "Nothing was restarted, deleted, or escalated. Only allow-listed read-only commands ran; credentials never left the Runtime."
+      ],
+      "nextTitle": "Next steps",
+      "nextBody": "Confirm whether a large media-transcode or download batch ran recently. Container-level memory and logs need an additional reviewed read-only capability before the Agent can look at them.",
+      "replayHint": "Replay this exact session on your own machine with the checked-in script.",
+      "finalLine": "Credentials stayed on the Mac. The Agent only ever saw bounded, sanitized evidence."
+    },
+    "zh": {
+      "eyebrow": "真实演示",
+      "title": "一次真实排查的完整回放。",
+      "body": "本页回放一次真实的 SAFA 会话：一台“变慢了”的家庭 NAS，通过已签名的原生 Runtime 端到端排查。这里的每一条命令都真的在已登记资源上执行过；Agent 全程没有看到 IP、密码或私钥。",
+      "metaLabel": "会话信息",
+      "metaRuntime": "SAFA Runtime 0.1.0 · macOS",
+      "metaDate": "2026-08-19",
+      "metaSanitized": "主机名、别名与进程名已脱敏；所有数值为原始记录。",
+      "back": "返回产品页",
+      "github": "查看源码仓库",
+      "replay": "重新播放",
+      "stepsLabel": "排查步骤",
+      "thinkingLabel": "Agent 的判断",
+      "commandLabel": "Agent 执行的命令",
+      "outputLabel": "Runtime 返回的证据",
+      "readingLabel": "如何解读",
+      "copyCommand": "复制命令",
+      "copied": "已复制",
+      "boundaryTitle": "边界：三个被 Runtime 拒绝的请求",
+      "boundaryBody": "同一会话里，Agent 尝试了三件普通 SSH 流程会照做不误的事，SAFA 全部拒绝——这正是它的意义。",
+      "findingTitle": "关键发现",
+      "findingBody": "磁盘和 CPU 都正常。真正的信号是 swap：10 GiB 已用 9.5 GiB（95%），而物理内存还有约 7.3 GiB 可用。",
+      "conclusionTitle": "Agent 的最终汇报",
+      "conclusionBody": "NAS 磁盘没满、CPU 也没过载。它“感觉变慢”的代价来自换页：早前某个时刻的内存峰值（媒体转码、容器、数据库以及多个同步/下载服务）把 95% 的 swap 打满，之后换出页从未被回收，读取换出页时就要读盘。",
+      "conclusionPoints": [
+        "根分区 54%——没有满。",
+        "12 核机器 load 2.1——不是 CPU 瓶颈。",
+        "swap 已用 95% 而内存仍有富余——历史内存峰值留下的未回收换出页。",
+        "jellyfin 和 postgresql 在 systemd 视角为 inactive，但进程确实在跑——它们由 NAS 厂商栈/容器管理，systemd 状态对它们不具权威性。",
+        "没有重启、删除或提权任何东西。只执行了白名单内的只读命令；凭证从未离开 Runtime。"
+      ],
+      "nextTitle": "下一步建议",
+      "nextBody": "确认近期是否跑过大批量媒体转码或下载任务。容器级内存与日志需要先评审并开放对应的只读能力，Agent 才能继续深入。",
+      "replayHint": "想在这台机器上重放同一会话，请使用仓库中附带的回放脚本。",
+      "finalLine": "凭证始终留在 Mac 上。Agent 只拿到了有限、经过脱敏的证据。"
+    }
+  },
+  "steps": [
+    {
+      "id": "doctor",
+      "kind": "check",
+      "title": {
+        "en": "Runtime ready",
+        "zh": "Runtime 就绪"
+      },
+      "thinking": {
+        "en": "Before touching anything, verify the local Runtime is healthy. The launcher verifies the signed install, the lock file, and the Broker before any command runs.",
+        "zh": "动手前先确认本机 Runtime 正常。launcher 会先校验签名安装、锁文件和 Broker，任何一步不对都不会继续。"
+      },
+      "command": "./scripts/safa doctor",
+      "output": "schema: dev.safa.cli/v2\ncommand: doctor\nstatus: completed\nbroker: ready\nvault: ready",
+      "reading": {
+        "en": "Broker (policy + credential authority) and vault (encrypted resource directory) are both ready. Note what is not in this output: no endpoints, no credentials.",
+        "zh": "Broker（策略与凭证持有者）和 vault（加密资源目录）都已就绪。注意输出里没有任何端点或凭据信息。"
+      }
+    },
+    {
+      "id": "resource-list",
+      "kind": "check",
+      "title": {
+        "en": "Discover resources",
+        "zh": "发现资源"
+      },
+      "thinking": {
+        "en": "I don't know this machine's alias in SAFA. List registered resources — I may only use an alias SAFA returns, never an IP.",
+        "zh": "我不知道这台机器在 SAFA 里的别名。先列出注册资源——只能使用 SAFA 返回的别名，绝不用 IP。"
+      },
+      "command": "./scripts/safa resource list",
+      "output": "schema: dev.safa.cli/v2\ncommand: resource.list\nstatus: completed\ncount:\n  total: 11\n  returned: 11\n  truncated: false\nresources[11]{alias,kind,state,health}:\n  node-01,host,active,ready\n  node-02,host,active,ready\n  node-03,host,active,ready\n  node-04,host,active,ready\n  node-05,host,active,ready\n  data.home,host,active,ready\n  desk.win,host,active,ready\n  router.home,host,active,ready\n  virt.host,host,active,ready\n  nas.primary,host,active,ready\n  lab.node,host,active,ready\nnext[1]{command,reason,safe_for_agent}:\n  safa resource show <alias>,Inspect one safe resource summary,true",
+      "reading": {
+        "en": "Eleven registered resources. nas.primary is the NAS. The list exposes exactly four safe fields — no IP, user, or key.",
+        "zh": "共注册 11 个资源。nas.primary 就是 NAS。列表只暴露 4 个安全字段——没有 IP、用户名或密钥。"
+      }
+    },
+    {
+      "id": "resource-show",
+      "kind": "check",
+      "title": {
+        "en": "Safe summary of nas.primary",
+        "zh": "读取 nas.primary 安全摘要"
+      },
+      "thinking": {
+        "en": "Confirm what kind of resource this is and which capabilities it exposes before deciding how to investigate.",
+        "zh": "先确认资源类型和支持的能力，再决定怎么排查。"
+      },
+      "command": "./scripts/safa resource show nas.primary",
+      "output": "schema: dev.safa.cli/v2\ncommand: resource.show\nstatus: completed\nresource:\n  alias: nas.primary\n  resource_type: host.linux\n  kind: host\n  template_id: ssh\n  state: active\n  health: ready\n  capabilities[1]: exec\n  metadata[2]{key,value}:\n    host.docker.available,true\n    host.os.family,linux",
+      "reading": {
+        "en": "Linux host, healthy, supports read-only exec, and runs Docker. No connection details exposed.",
+        "zh": "Linux 主机、健康、支持只读 exec，并且有 Docker。没有暴露任何连接细节。"
+      }
+    },
+    {
+      "id": "topology",
+      "kind": "check",
+      "title": {
+        "en": "Topology: what is co-located",
+        "zh": "拓扑：与哪些服务同站点"
+      },
+      "thinking": {
+        "en": "If the NAS misbehaves, who is affected? Ask the topology surface instead of asking the user to explain the network layout.",
+        "zh": "如果 NAS 出问题，会影响谁？直接查拓扑，而不是让用户解释网络布局。"
+      },
+      "command": "./scripts/safa topology show nas.primary --limit 64",
+      "output": "schema: dev.safa.cli/v2\ncommand: topology.show\nstatus: completed\ngraph_revision: 56\ntask: placement\nanswer:\n  outcome: found\n  source: nas.primary\ncount:\n  nodes: 6\n  edges: 5\nroots[1]: nas.primary\nnodes[6]{alias,kind,resource_kind}:\n  nas.primary,resource,host\n  site.home,site,null\n  data.home,resource,host\n  desk.win,resource,host\n  router.home,resource,host\n  virt.host,resource,host\nedges[5]{id,from,relation,to}:\n  c150b9b0-...,nas.primary,located-in,site.home\n  ...",
+      "reading": {
+        "en": "nas.primary sits in site.home with the router, virtualization host, database host, and a workstation. This is a placement answer — co-location, not a verified network path. SAFA keeps those distinct; the Agent must not invent a route.",
+        "zh": "nas.primary 位于 site.home，与路由器、虚拟化主机、数据库主机和一台工作站同站点。这是布局答案——只说明同站点，不是已验证的网络路径。SAFA 区分得很清楚，Agent 不能据此编造路由。"
+      }
+    },
+    {
+      "id": "df",
+      "kind": "check",
+      "title": {
+        "en": "Disk: root at 54%",
+        "zh": "磁盘：根分区 54%"
+      },
+      "thinking": {
+        "en": "The user suspects a full disk. Check root capacity first. This is an allow-listed read-only command, so it runs automatically.",
+        "zh": "用户怀疑磁盘满。先看根分区容量。这是白名单内的只读命令，自动放行。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Check root filesystem capacity during a slowness report\" -- df -h /",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: d4f2c8e1-...\nresource: nas.primary\nintent: Check root filesystem capacity during a slowness report\nexecution:\n  termination: exit\n  remote_exit_code: 0\n  stdout:\n    content_type: text\n    text: \"Filesystem      Size  Used Avail Use% Mounted on\\n/dev/nvme0n1p3  9.6G  4.9G  4.2G  54% /\\n\"\n    truncated: false\n  stderr:\n    content_type: text\n    text: \"\"",
+      "reading": {
+        "en": "54% used — not a full disk. Keep looking.",
+        "zh": "54%——磁盘没有满。继续查。"
+      }
+    },
+    {
+      "id": "uptime",
+      "kind": "check",
+      "title": {
+        "en": "Load: uptime is healthy",
+        "zh": "负载：uptime 正常"
+      },
+      "thinking": {
+        "en": "Disk is fine. Check CPU load next.",
+        "zh": "磁盘没问题。接着看 CPU 负载。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Check load average and uptime for a slowness report\" -- uptime",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: e9b1a7c3-...\nexecution:\n  remote_exit_code: 0\n  stdout.text: \" 01:21:34 up 95 days, 13:48,  0 users,  load average: 2.10, 1.96, 2.07\\n\"",
+      "reading": {
+        "en": "95 days uptime, load 2.1 on a 12-core machine — CPU is not the bottleneck either.",
+        "zh": "开机 95 天，12 核机器 load 2.1——CPU 也不是瓶颈。"
+      }
+    },
+    {
+      "id": "free",
+      "kind": "finding",
+      "title": {
+        "en": "Memory: swap is 95% full",
+        "zh": "内存：swap 已用 95%"
+      },
+      "thinking": {
+        "en": "Disk and CPU are both fine. Memory and swap are the next suspect — “slowness” is often paging.",
+        "zh": "磁盘、CPU 都正常。下一个怀疑对象是内存和 swap——“变慢”经常是换页。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Check memory and swap pressure\" -- free -h",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: 4d1a202f-...\nexecution:\n  remote_exit_code: 0\n  stdout.text: \"               total        used        free      shared  buff/cache   available\\nMem:            15Gi       6.0Gi       745Mi       632Mi       8.3Gi       7.3Gi\\nSwap:           10Gi       9.5Gi       1.0Gi\\n\"",
+      "reading": {
+        "en": "Swap: 10 GiB total, 9.5 GiB in use (95%) — while physical memory still has ~7.3 GiB available. The system hit a memory spike at some earlier point and the swapped-out pages were never reclaimed. Reading those pages back means hitting disk: the classic “gets slower over time” pattern.",
+        "zh": "swap 10 GiB 已用 9.5 GiB（95%），而物理内存还有约 7.3 GiB 可用。说明系统早前经历过内存峰值，换出页一直没被回收。访问换出页就要读盘——这正是“越用越卡”的典型特征。"
+      },
+      "emphasis": "swap"
+    },
+    {
+      "id": "ps-mem",
+      "kind": "check",
+      "title": {
+        "en": "Who holds memory: no live hotspot",
+        "zh": "内存占用者：当前没有热点"
+      },
+      "thinking": {
+        "en": "Confirm whether swap pressure is still growing or is residue from an earlier spike.",
+        "zh": "确认 swap 压力是还在增长，还是早前峰值留下的残留。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Find which processes hold the most memory to explain swap usage\" -- ps -eo pid,ppid,user,stat,comm,%cpu,%mem --sort=-%mem",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: 0b4a1c6e-...\nexecution:\n  remote_exit_code: 0\n  stdout.text: \"    PID    PPID USER     STAT COMMAND         %CPU %MEM\\n 644549   12425 postgres Ss   postgres           0.2  1.6\\n1627628       1 root     Sl   nas-app-02         1.0  1.3\\n1636647 1636628 root     Ssl+ jellyfin          0.0  0.9\\n 798175       1 root     Ssl  antivirus-scan     0.2  0.7\\n3035257 3035218 root     Ssl  uptime-kuma        0.6  0.7\\n3809693 3809673 ...     Ssl  nextcloud          0.0  0.6\\n  12317       1 root     Ssl  nas-app-03         0.1  0.6\\n  13057       1 root     Ssl  dockerd            0.5  0.5\\n 493080       1 root     S<sl zfs-v3             1.0  0.5\\n  ...\\n\"",
+      "reading": {
+        "en": "No single process is large (top is postgres at 1.6%). Current memory use is low — consistent with unreclaimed swap residue, not a live leak. This NAS runs a large resident service set: vendor apps, jellyfin, nextcloud, postgres, mariadb, sync and download clients, media transcode.",
+        "zh": "单个进程都不大（最高 postgres 1.6%）。当前内存使用很低——与“未回收的换出页残留”一致，而不是正在泄漏。这台 NAS 常驻服务非常多：厂商应用、Jellyfin、Nextcloud、Postgres、MariaDB、同步与下载客户端、媒体转码。"
+      }
+    },
+    {
+      "id": "systemctl-jellyfin",
+      "kind": "finding",
+      "title": {
+        "en": "Service state: a genuine contradiction",
+        "zh": "服务状态：一个真实的矛盾"
+      },
+      "thinking": {
+        "en": "Is a specific service actually down? Check with the allow-listed systemd state query.",
+        "zh": "某个服务是不是真的挂了？用白名单内的 systemd 状态查询确认。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Verify whether the jellyfin media service is running\" -- systemctl is-active jellyfin",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: remote_execution_failed\nrequest_id: d8587949-...\nexecution:\n  termination: exit\n  remote_exit_code: 3\n  stdout.text: \"inactive\\n\"\n  stderr: \"\"",
+      "reading": {
+        "en": "systemd says inactive (exit 3) — yet the ps output above shows a jellyfin process. The same is true for postgresql. These services are not managed by systemd (vendor stack / containers), so systemd state is not authoritative for them. I will report the contradiction instead of concluding the service is down.",
+        "zh": "systemd 报告 inactive（exit 3）——但上面的 ps 里明明有 jellyfin 进程。postgresql 同理。这些服务不受 systemd 管理（厂商栈/容器），systemd 状态对它们不具权威性。我会如实报告这个矛盾，而不是下“服务挂了”的结论。"
+      },
+      "emphasis": "note"
+    },
+    {
+      "id": "systemctl-postgres",
+      "kind": "finding",
+      "title": {
+        "en": "Service state: postgresql, same story",
+        "zh": "服务状态：postgresql 同样如此"
+      },
+      "thinking": {
+        "en": "Check the database service the same way to confirm the pattern.",
+        "zh": "用同样方式确认数据库服务，验证这个模式。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Verify whether the postgresql database service is running\" -- systemctl is-active postgresql",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: remote_execution_failed\nrequest_id: 7370ff23-...\nexecution:\n  termination: exit\n  remote_exit_code: 3\n  stdout.text: \"inactive\\n\"\n  stderr: \"\"",
+      "reading": {
+        "en": "Same pattern: inactive to systemd, process alive. systemd is simply not the manager for these units on this NAS.",
+        "zh": "同样的模式：systemd 视角 inactive，但进程在跑。systemd 并不是这些单元的管理者。"
+      }
+    },
+    {
+      "id": "denied-sudo",
+      "kind": "boundary",
+      "title": {
+        "en": "Boundary: sudo is refused",
+        "zh": "边界：sudo 被拒绝"
+      },
+      "thinking": {
+        "en": "A normal SSH session could try to restart the service with sudo. SAFA has no sudo path in this MVP — it must refuse, and it does.",
+        "zh": "普通 SSH 会话可以直接 sudo 重启服务。当前 MVP 没有 sudo 能力——SAFA 必须拒绝，它也确实是这么做的。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Restart the jellyfin service with elevated rights\" -- sudo systemctl restart jellyfin",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: failed\nerror:\n  code: approval_not_in_mvp\n  message: The diagnostic MVP permits only bounded read-only commands.\n  retryable: false",
+      "emphasis": "deny"
+    },
+    {
+      "id": "denied-off-allowlist",
+      "kind": "boundary",
+      "title": {
+        "en": "Boundary: off-allowlist command is refused",
+        "zh": "边界：白名单外命令被拒绝"
+      },
+      "thinking": {
+        "en": "Reading logs is a normal diagnostic, but journalctl is not in the allow-list. “Looks like a log read” is not a reason to allow it.",
+        "zh": "看日志是常规排查，但 journalctl 不在白名单里。“看起来像读日志”不能成为放行的理由。"
+      },
+      "command": "./scripts/safa exec nas.primary --intent \"Inspect system logs\" -- journalctl -n 4000 --no-pager",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: failed\nerror:\n  code: approval_not_in_mvp\n  message: The diagnostic MVP permits only bounded read-only commands.\n  retryable: false",
+      "reading": {
+        "en": "The allow-list is exact matching with no gray zone: even a docker ps format string one character off is refused. That is a feature, not a bug.",
+        "zh": "白名单是精确匹配，没有灰色地带：连 docker ps 的格式差一个字符都会被拒。这是特性，不是缺陷。"
+      },
+      "emphasis": "deny"
+    },
+    {
+      "id": "denied-unregistered",
+      "kind": "boundary",
+      "title": {
+        "en": "Boundary: unregistered resource is refused",
+        "zh": "边界：未注册资源被拒绝"
+      },
+      "thinking": {
+        "en": "Try to target a machine that is not registered. The Agent must not be able to point SAFA at arbitrary infrastructure.",
+        "zh": "尝试指定一台未注册的机器。Agent 不能把 SAFA 指向任意基础设施。"
+      },
+      "command": "./scripts/safa exec not-registered-alias --intent \"Check production disk capacity\" -- df -h /",
+      "output": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: failed\nerror:\n  code: resource_not_found\n  message: The requested resource is not registered.\n  retryable: false",
+      "emphasis": "deny"
+    }
+  ]
+}
