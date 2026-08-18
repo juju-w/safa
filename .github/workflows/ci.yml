@@ -43,7 +43,13 @@ jobs:
       - name: Validate Skill metadata
         run: .ci-venv/bin/python tests/validate_skill.py skills/safa
       - name: Validate runtime manifest schema JSON
-        run: python3 -m json.tool contracts/runtime-manifest-v1.schema.json >/dev/null
+        run: |
+          python3 -m json.tool contracts/runtime-manifest-v1.schema.json >/dev/null
+          python3 -m json.tool contracts/source-preview-manifest-v1.schema.json >/dev/null
+          python3 -m json.tool skills/safa/manifests/source-preview-macos-v1.json >/dev/null
+          python3 tests/validate_source_preview.py \
+            contracts/source-preview-manifest-v1.schema.json \
+            skills/safa/manifests/source-preview-macos-v1.json
       - name: Strict-decode the public TOON contract with pinned official sources
         run: >-
           node --no-warnings --experimental-strip-types
@@ -54,12 +60,20 @@ jobs:
       - name: Validate launcher syntax across available shells
         run: |
           sh -n skills/safa/scripts/safa
+          sh -n skills/safa/scripts/install-source-preview.sh
           bash -n skills/safa/scripts/safa
+          bash -n skills/safa/scripts/install-source-preview.sh
           if command -v zsh >/dev/null 2>&1; then
             zsh -n skills/safa/scripts/safa
+            zsh -n skills/safa/scripts/install-source-preview.sh
           fi
       - name: Validate fail-closed launcher behavior
-        run: tests/launcher_contract.sh
+        run: |
+          tests/launcher_contract.sh
+          tests/source_preview_contract.sh
+      - name: Verify exact Source Preview archive
+        if: runner.os == 'macOS'
+        run: skills/safa/scripts/install-source-preview.sh --verify-source
       - name: Check whitespace
         shell: bash
         run: |

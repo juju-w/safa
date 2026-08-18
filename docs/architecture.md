@@ -44,8 +44,11 @@ sequenceDiagram
     A->>S: request operation using resource alias
     S->>L: safa doctor/resource/exec
     L->>L: detect platform and architecture
-    L->>L: resolve exact compatible manifest entry
-    L->>L: verify digest and platform signature policy
+    L->>L: verify the installed local Runtime lock
+    alt Source Preview Runtime absent
+        L-->>S: human-only exact local build action
+        S-->>A: request local user action
+    end
     L->>R: invoke verified CLI with arguments
     R->>O: request credentials/user authorization
     O-->>R: authorized handle or denial
@@ -56,9 +59,12 @@ sequenceDiagram
 ```
 
 The Skill installer does not execute an npm-style lifecycle hook. The launcher is installed as an
-ordinary Skill file and is deliberately narrow. On first invocation it selects, verifies, installs
-one native Runtime package in the current user's scope, and invokes its CLI. It cannot read vault
-data, interpret remote commands, approve work, or weaken the Broker's authorization decision.
+ordinary Skill file and is deliberately narrow. In the Source Preview, first invocation returns one
+human-only local build action; it does not download or compile itself. The separate wrapper verifies
+an exact source archive, then invokes the Runtime repository's reviewed Xcode build/sign/atomic
+install path. The launcher subsequently verifies the installed component lock and invokes the CLI.
+It cannot read vault data, interpret remote commands, approve work, or weaken the Broker's
+authorization decision.
 
 The launcher is a script, not a portable native binary. The current POSIX shell entry serves the
 macOS Runtime. Another platform entry is added only with that platform's reviewed Runtime. Platform
@@ -121,10 +127,10 @@ flowchart LR
       Prompt["Prompt and Agent"]
       Output["Remote stdout, stderr, logs, files"]
     end
-    subgraph Verified["Verified distribution"]
+    subgraph Verified["Verified local Source Preview"]
       Launcher["Small resolver"]
-      Manifest["Pinned manifest + digest"]
-      CLI["Signed native CLI"]
+      Manifest["Pinned source commit + digest"]
+      CLI["Locally built and signed native CLI"]
     end
     subgraph Native["Native user security boundary"]
       Broker["Runtime broker/daemon"]
@@ -207,23 +213,25 @@ the [topology algorithm and Agent decision diagrams](topology.md) for a worked v
 
 ## 8. Distribution and releases
 
-Runtime and Skill releases are separate:
+Source Preview and verified binary releases are separate:
 
-1. `safa-runtime` builds platform assets in isolated CI.
-2. Platform signing/notarization is verified and checksums are generated.
-3. A pull request adds an exact-version manifest to `safa`.
-4. Contract compatibility and provenance are reviewed.
-5. Only then may a Skill release reference that manifest.
+1. The Source Preview manifest pins one exact public `safa-runtime` commit and archive digest.
+2. A local human explicitly builds it with Xcode and an Apple Development identity.
+3. The Runtime installer verifies component identity/signature/CDHash/version and activates
+   atomically; no precompiled executable is downloaded.
+4. A future verified binary track builds universal assets in isolated CI, applies Developer ID and
+   notarization, generates checksums, and adds an exact binary manifest only after review.
 
-The resulting user journey is one Skill installation command followed by normal use. Runtime
-bootstrap happens on the first launcher invocation, not as hidden code execution inside
+The resulting preview journey is one Skill installation command, one explicit local build action,
+then normal Agent use. Build/bootstrap never occurs as hidden code execution inside
 `npx skills add`. See [distribution.md](distribution.md).
 
 There is no automatic `latest` promotion. Rollback selects a previously reviewed manifest; it does
 not mutate an already published manifest.
 
-The current publication hold prohibits tags, Releases, marketplace uploads, public installers, and
-embedded runtime archives.
+The current binary publication hold prohibits tags, Releases, marketplace uploads, prebuilt public
+installers, and embedded Runtime archives. It does not require Developer ID for the local source
+preview.
 
 ## 9. Data portability
 
@@ -242,9 +250,11 @@ leave a plaintext intermediate. This workflow is not part of the current preview
 5. Keep the universal Skill entry as a small script resolver; do not introduce a shared native
    launcher binary.
 6. Introduce shared conformance fixtures consumed by each implemented platform Runtime CI.
-7. Produce signed macOS Runtime assets and a verified manifest.
-8. Release the Skill only after the end-to-end resolver and rollback path pass review.
-9. Choose and implement another platform Runtime only when that work is actually scheduled.
+7. Prove the exact source-build bootstrap and local rollback path.
+8. Produce Developer ID-signed/notarized macOS Runtime assets only when prebuilt distribution is
+   justified.
+9. Release the verified binary Skill manifest only after its resolver and rollback path pass review.
+10. Choose and implement another platform Runtime only when that work is actually scheduled.
 
 ## 11. Future browser-session capability
 

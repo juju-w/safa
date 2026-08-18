@@ -17,10 +17,10 @@ asking the user to paste a reusable credential into the conversation.
 ![Windows planned](https://img.shields.io/badge/Windows-planned-lightgrey)
 
 > [!IMPORTANT]
-> SAFA is an unpublished macOS diagnostic preview. No signed Runtime release, public installer,
-> tag, or marketplace package is available yet. The installation command below describes the
-> intended release experience, not current production guidance. The coordinated Skill and Runtime
-> migration implements the Agent-only TOON v2 contract, but it is not a signed public release.
+> SAFA is a macOS developer Source Preview. It builds the exact digest-pinned Runtime source on the
+> user's own Mac and signs it with that user's local Apple Development identity. No Developer ID
+> binary, notarized Runtime release, tag, or marketplace package is published yet. Do not interpret
+> local source signing as public Apple publisher provenance.
 
 ## See it in action
 
@@ -135,19 +135,27 @@ See [Product architecture](docs/architecture.md) for the complete trust boundari
 
 ## Installation model
 
-The intended public installation command is:
+Install the Source Preview Skill with:
 
 ```bash
 npx skills add juju-w/safa --skill safa -g -a codex
 ```
 
-The Skill package contains instructions, a small platform resolver, references, icons, and an exact
-Runtime manifest. On first use, the resolver selects the matching native Runtime, verifies its
-digest and platform signature, installs it in the current-user scope, and invokes the CLI. The Skill
-installer itself does not receive a secret or run an npm-style `postinstall` hook.
+The Skill package contains instructions, a small launcher, references, icons, an exact Runtime source
+manifest, and a human-only build wrapper. The Skill installer does not receive a secret, compile
+native code, or run an npm-style `postinstall` hook.
 
-Runtime bootstrap is deliberately disabled during the publication hold. See
-[Runtime distribution and bootstrap](docs/distribution.md) for the verification and rollback model.
+First `doctor` returns one explicit local action marked `safe_for_agent: false`:
+
+```bash
+./scripts/install-source-preview.sh --confirm-local-build
+```
+
+Run it yourself in a normal terminal. It verifies the exact source archive digest and layout, invokes
+Xcode locally, verifies the signed Runtime components, and installs atomically in the current-user
+scope. It requires macOS 14.4+, Xcode 16.3+, and one Apple Development identity, but no paid Apple
+Developer Program, Homebrew, `sudo`, `xattr` bypass, or downloaded precompiled executable. See
+[Runtime distribution and bootstrap](docs/distribution.md).
 
 ## What the Skill invokes
 
@@ -187,7 +195,7 @@ capabilities. The canonical command and envelope definitions live in the
 
 | Area | Status |
 |---|---|
-| macOS native Runtime | Swift preview implemented; signed public package not released |
+| macOS native Runtime | Swift Source Preview implemented; locally built/signed, no public binary |
 | Resource directory | Existing OpenSSH import plus hidden password host registration, encrypted inventory, safe summaries, authorized details |
 | Topology | Placement, reachability, impact, and user-authorized logical relationship changes |
 | Remote operation | Bounded non-sudo SSH diagnostics only |

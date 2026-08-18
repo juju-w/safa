@@ -1,0 +1,24 @@
+{
+  "schema": "dev.safa.source-preview-manifest/v1",
+  "runtime_version": "0.1.0",
+  "cli_schema": "dev.safa.cli/v2",
+  "platform": "macos",
+  "architectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "minimum_os_version": "14.4",
+  "minimum_xcode_version": "16.3",
+  "source": {
+    "repository": "https://github.com/juju-w/safa-runtime",
+    "revision": "02e3ee2d8c23334ad7c8bd02e558038b1c553fe6",
+    "archive_url": "https://github.com/juju-w/safa-runtime/archive/02e3ee2d8c23334ad7c8bd02e558038b1c553fe6.tar.gz",
+    "sha256": "40e9f5611decfc80ad3107dee7d818a3c1afaf5ee5ffbf430da140a974dbed18",
+    "archive_format": "tar.gz",
+    "root_directory": "safa-runtime-02e3ee2d8c23334ad7c8bd02e558038b1c553fe6"
+  },
+  "installer": {
+    "path": "Scripts/install-local-runtime.sh",
+    "signing_kind": "local-apple-development"
+  }
+}
