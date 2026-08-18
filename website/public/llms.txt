@@ -1,0 +1,46 @@
+# SAFA
+
+> Secure Access for Agents: an open-source Agent Skill and native macOS Runtime that lets AI agents diagnose registered servers, services, databases, and infrastructure without ever receiving a reusable credential (password, private key, token, or sudo secret).
+
+## About
+
+SAFA answers the question "why is production down?" without turning it into a credential-sharing exercise. A user registers a resource once on their Mac; afterwards an AI agent can discover the resource by safe logical alias, ask the native Runtime for a bounded topology answer, request one authorized read-only diagnostic, and receive sanitized TOON-formatted evidence.
+
+The project is organized as two repositories:
+- juju-w/safa — the Agent Skill, public Agent-CLI/TOON/resource contracts, conformance fixtures, product documentation, and the website.
+- juju-w/safa-runtime — the Swift/macOS native Runtime: CLI, Broker, credential helper, OS security adapters, and tests.
+
+Current status: macOS source preview. Linux and Windows runtimes are planned but not yet implemented or claimed as supported.
+
+## Pages
+
+- [Home](https://juju-w.github.io/safa/): product overview, interactive concept demo, install command (`npx skills add juju-w/safa --skill safa`).
+- [How it works](https://juju-w.github.io/safa/how-it-works/): the five-layer request flow, credential isolation boundary, topology model, security invariants, roadmap.
+- [Live demo](https://juju-w.github.io/safa/live-demo/): a real replayed diagnosis (2026-08-19) with actual TOON evidence: swap at 95%, allow-listed read-only diagnostics, and boundary refusals.
+
+## Key concepts
+
+- Agent Skill: teaches compatible agents how to discover resources, plan safe diagnostics, call SAFA, handle denials, and explain results.
+- Native Runtime: the local security boundary that resolves protected connection data, controls credentials, enforces policy, authorizes, connects to targets, and sanitizes evidence.
+- Broker: the vault-authoritative native process that owns policy, credentials, and transport; the Agent-facing CLI has no credential authority.
+- TOON: the canonical structured text format (schema `dev.safa.cli/v2`) used for every Agent-facing CLI result, error, and empty state.
+- AXI (Agent eXperience Interface): the design principles the CLI follows; the CLI is Agent-only and has no human presentation mode.
+- Safe alias: the only selector an agent may use for a registered resource (e.g. `nas.primary`); never an IP, username, or key path.
+- Allow-list policy: only exact, reviewed read-only commands (df, uptime, free, ps, systemctl is-active, docker ps/stats) may run automatically; sudo and off-allow-list commands are refused with stable TOON errors.
+
+## FAQ
+
+Q: Does the AI agent ever see my credentials?
+A: No. Reusable credentials and vault keys never enter Agent-facing output. The native macOS Runtime resolves them locally behind policy, authorization, and redaction.
+
+Q: What platforms does SAFA support?
+A: SAFA is currently a macOS source preview (Swift 6). Linux and Windows native runtimes are planned but not yet implemented.
+
+Q: How is this different from giving the agent an SSH key?
+A: With SAFA the agent holds no credential and no unrestricted session: every operation is a bounded, allow-listed, policy-checked action returning redacted evidence.
+
+Q: Can SAFA run sudo commands?
+A: Not in the current MVP. sudo-classified requests are refused (`approval_not_in_mvp`); scoped sudo with expiring grants is specified but not shipped.
+
+Q: How do I install it?
+A: `npx skills add juju-w/safa --skill safa` on macOS, then register a resource once. Requires the native Runtime (installed and verified by the launcher).

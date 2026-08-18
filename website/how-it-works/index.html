@@ -44,6 +44,27 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>How SAFA Works — Secure Access for Agents</h1>
+      <p>The Agent sees the task. SAFA handles the secret. SAFA is a local security boundary for infrastructure work: an Agent can discover a registered resource, reason over its topology, and request one bounded operation without receiving the password, private key, token, or protected route behind it.</p>
+      <h2>The five-layer request flow</h2>
+      <ol>
+        <li>You describe the problem — no IP or password needed.</li>
+        <li>The Skill discovers the registered alias and asks the topology surface for placement, path, or impact.</li>
+        <li>Policy narrows the action to one resource, command, scope, and expiry.</li>
+        <li>Your Mac authorizes: macOS shows the exact action before Touch ID approval when user presence is required.</li>
+        <li>Evidence comes back: the Runtime executes, bounds, redacts, and labels remote output as untrusted evidence.</li>
+      </ol>
+      <h2>Credential isolation</h2>
+      <p>Credentials never cross into the Agent-visible channel. Open source does not mean open secrets: the code is public; Keychain records, vault keys, host routes, and authorization decisions are local runtime state.</p>
+      <h2>Security invariants</h2>
+      <ul>
+        <li>No credential return path: the Agent-facing contract has no command for showing or exporting a stored secret.</li>
+        <li>Remote output is untrusted evidence, not instructions or authorization.</li>
+        <li>Verification fails closed: signature, runtime, host identity, or policy failure does not fall back to raw SSH.</li>
+        <li>Scope stays explicit: bounded, non-sudo argument execution only — not an unrestricted shell.</li>
+      </ul>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
