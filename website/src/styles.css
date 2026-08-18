@@ -436,3 +436,26 @@ html[lang="zh-CN"] .ld-hero h1 { font-size: clamp(2.8rem, 5vw, 4.8rem); letter-s
   .ld-step-head { flex-wrap: wrap; }
   .ld-conclusion-points li { grid-template-columns: 1fr; }
 }
+/* hero acronym under the SAFA wordmark */
+.hero-acronym { margin: 10px 0 0; color: #7fd8ff; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; text-shadow: 0 4px 18px rgba(62, 129, 255, 0.24); }
+html[lang="zh-CN"] .hero-acronym { letter-spacing: 0.12em; }
+
+/* nav right cluster: star badge + language switch */
+.nav-right { justify-self: end; display: flex; align-items: center; gap: 12px; }
+.star-badge { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 13px; border: 1px solid rgba(245, 197, 66, 0.35); border-radius: 999px; color: #ffe3a3; background: rgba(70, 52, 12, 0.28); font-size: 0.8rem; font-weight: 700; transition: border-color 180ms ease, background 180ms ease; }
+.star-badge:hover { border-color: rgba(255, 213, 90, 0.75); background: rgba(96, 72, 16, 0.45); }
+.star-badge svg { width: 15px; height: 15px; color: #ffd75e; }
+.star-badge span { min-width: 1.2em; text-align: center; font-variant-numeric: tabular-nums; }
+
+/* footer meta: license link + star trend */
+.footer-meta { display: flex; align-items: center; gap: 16px; }
+.footer-meta a { display: inline-flex; align-items: center; gap: 7px; }
+.star-stats { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid rgba(245, 197, 66, 0.3); border-radius: 999px; color: #ffdf9e; background: rgba(70, 52, 12, 0.24); font-size: 0.76rem; font-weight: 700; }
+.star-stats svg { width: 13px; height: 13px; color: #ffd75e; }
+.star-stats em { color: #a7c3a4; font-size: 0.68rem; font-style: normal; font-weight: 600; }
+
+@media (max-width: 680px) {
+  .nav-right { gap: 8px; }
+  .star-badge { padding: 0 10px; }
+  .footer-meta { flex-direction: column; align-items: flex-start; gap: 10px; }
+}

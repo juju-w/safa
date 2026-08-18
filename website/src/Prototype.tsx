@@ -128,6 +128,7 @@ export function Prototype() {
         <div className="hero-content">
           <p className="eyebrow">{t.heroEyebrow}</p>
           <h1 id="hero-title">SAFA</h1>
+          <p className="hero-acronym">{t.heroAcronym}</p>
           <p className="hero-slogan">{t.heroSlogan}</p>
           <p className="hero-body">{t.heroBody}</p>
           <div className="hero-actions">
