@@ -12,7 +12,9 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 - Center the page narrative on an interactive Agent conversation, exact user authorization, Touch ID, and continued read-only diagnosis.
 - Provide English and Simplified Chinese UI, with English as the default.
 - Write Simplified Chinese as native product copy, not sentence-by-sentence translation; prefer concise developer language and avoid literal phrases such as “凭证保持密封” or “信任路径”.
+- Treat `content/zh-CN-translation-handoff.md` as the translation-review checklist. Do not silently machine-translate missing copy; keep technical identifiers and commands unchanged and have reviewed Chinese returned against the stable keys.
 - Use an in-page `How it works` destination until a real documentation site exists; do not publish a dead Docs link.
+- Keep `How it works` as a linear technical explainer with chapter navigation, request lifecycle, credential boundary, topology, security limits, and current status. It must not repeat the homepage's product pitch, before/after comparison, interactive demo, or large marketing CTA.
 - Avoid lightning, wavy electric cables, excessive glow, and card-heavy dashboard composition.
 
 When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.

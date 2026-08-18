@@ -5,3 +5,4 @@ dist/
 # Local Product Design review evidence; keep workstation paths out of the public repo.
 design-qa.md
 qa-*.png
+audit-*/
