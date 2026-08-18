@@ -15,6 +15,8 @@ if [ ! -x "$launcher" ]; then
   exit 1
 fi
 
+grep -F 'exec /usr/bin/env -i' "$launcher" >/dev/null
+
 set +e
 output=$(HOME="$test_home" "$launcher" doctor 2>&1)
 result=$?
@@ -32,6 +34,21 @@ case "$(uname -s)" in
     data_root="${test_home}/Library/Application Support/SAFA"
     mkdir -p "$data_root"
     architecture=$(uname -m)
+    printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"0.1.0\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"ABCDEFGHIJ\",\"app_cdhash\":\"0000000000000000000000000000000000000000\",\"broker_cdhash\":\"0000000000000000000000000000000000000000\",\"askpass_cdhash\":\"0000000000000000000000000000000000000000\",\"trusted_setup_cdhash\":\"0000000000000000000000000000000000000000\"}" \
+      > "${data_root}/runtime.local.json"
+    chmod 600 "${data_root}/runtime.local.json"
+
+    set +e
+    output=$(HOME="$test_home" "$launcher" doctor 2>&1)
+    result=$?
+    set -e
+
+    printf '%s\n' "$output" | grep -Fx 'status: user_action_required' >/dev/null
+    printf '%s\n' "$output" | grep -Fx '  code: runtime.lock_upgrade_required' >/dev/null
+    printf '%s\n' "$output" \
+      | grep -Fx '  reinstall the verified SAFA Runtime,A local user must refresh the verified local lock,false' >/dev/null
+    [ "$result" -eq 1 ]
+
     printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"0.1.0\",\"cli_schema\":\"dev.safa.cli/v1\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"ABCDEFGHIJ\",\"app_cdhash\":\"0000000000000000000000000000000000000000\",\"broker_cdhash\":\"0000000000000000000000000000000000000000\",\"askpass_cdhash\":\"0000000000000000000000000000000000000000\",\"trusted_setup_cdhash\":\"0000000000000000000000000000000000000000\"}" \
       > "${data_root}/runtime.local.json"
     chmod 600 "${data_root}/runtime.local.json"

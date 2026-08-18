@@ -34,6 +34,9 @@ The Skill's `scripts/safa` launcher MUST:
   activation;
 - install/activate under the current user's application-support scope without sudo;
 - pass arguments to the signed CLI without interpreting remote commands;
+- launch the signed CLI with an explicit minimal environment, preserving only the current user,
+  fixed system path, safe temporary directory, locale, and an absolute SSH agent socket when one is
+  present;
 - never read Keychain, vault, server configuration, or credentials;
 - never follow an unpinned `latest` URL or execute a downloaded shell program;
 - return a stable error if verification or activation fails.
@@ -91,8 +94,9 @@ During the publication hold, a developer may pre-provision a signed macOS Runtim
 current-user version store. The local installer writes `runtime.local.json` with the exact version,
 Agent CLI schema, architecture, Developer Team, and Code Directory hashes for the app, Broker,
 AskPass, and trusted-setup helper. The launcher verifies every locked field before forwarding
-arguments. This local lock is not a public release manifest and cannot authorize download or
-notarization claims.
+arguments. A legacy lock that lacks the CLI schema binding fails closed with a local upgrade action;
+the launcher never guesses compatibility or edits integrity metadata in place. This local lock is
+not a public release manifest and cannot authorize download or notarization claims.
 
 ## Agent-visible safety invariant
 
