@@ -75,7 +75,16 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .prompt-grid article > span svg { width: 24px; height: 24px; }
 .prompt-grid blockquote { margin: 22px 0 14px; color: #f0f6ff; font-size: 1.16rem; font-weight: 680; letter-spacing: -0.025em; line-height: 1.35; }
 .prompt-grid article > p { margin: 0; color: var(--muted); font-size: 0.86rem; line-height: 1.65; }
-.replay-button { position: absolute; right: 0; bottom: 0; display: inline-flex; align-items: center; gap: 8px; padding: 10px 13px; border: 1px solid rgba(139, 187, 238, 0.24); border-radius: 10px; color: #c7d7eb; background: rgba(12, 25, 54, 0.48); cursor: pointer; }
+.heading-actions { position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; }
+.demo-section .section-heading { padding-right: min(560px, 46%); }
+.live-session-link { display: inline-flex; align-items: center; gap: 12px; max-width: 440px; padding: 10px 14px; border: 1px solid rgba(98, 224, 178, 0.4); border-radius: 12px; background: rgba(21, 66, 57, 0.55); color: #d9ffef; transition: border-color 180ms ease, background 180ms ease, transform 180ms ease; }
+.live-session-link:hover { border-color: rgba(98, 224, 178, 0.75); background: rgba(26, 84, 72, 0.7); transform: translateY(-1px); }
+.live-session-link > svg:first-child { flex: 0 0 auto; color: var(--mint); font-size: 1.35rem; }
+.live-session-link > svg:last-child { flex: 0 0 auto; color: var(--mint); font-size: 1rem; }
+.live-session-link span { display: grid; gap: 3px; min-width: 0; }
+.live-session-link strong { font-size: 0.8rem; color: #eafff6; }
+.live-session-link small { overflow: hidden; color: #9fc8b9; font-size: 0.68rem; line-height: 1.45; text-overflow: ellipsis; }
+.replay-button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 13px; border: 1px solid rgba(139, 187, 238, 0.24); border-radius: 10px; color: #c7d7eb; background: rgba(12, 25, 54, 0.48); cursor: pointer; }
 .agent-window { display: grid; grid-template-columns: 230px minmax(0, 1fr); min-height: 770px; overflow: hidden; border: 1px solid rgba(149, 202, 255, 0.4); border-radius: var(--radius-lg); background: rgba(7, 16, 37, 0.94); box-shadow: 0 34px 100px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.055); backdrop-filter: blur(28px); }
 .agent-sidebar { position: relative; display: flex; flex-direction: column; padding: 24px 18px; border-right: 1px solid rgba(144, 190, 240, 0.15); background: rgba(6, 14, 32, 0.54); }
 .agent-product { display: flex; align-items: center; gap: 9px; font-size: 0.92rem; font-weight: 720; }
@@ -277,6 +286,9 @@ html[lang="zh-CN"] .chapter-heading h2 { font-size: clamp(2.25rem, 3.8vw, 3.65re
 }
 
 @media (max-width: 680px) {
+  .demo-section .section-heading { padding-right: 0; }
+  .heading-actions { position: static; flex-direction: column; align-items: stretch; margin-top: 16px; }
+  .live-session-link { max-width: none; }
   .site-nav { width: calc(100% - 32px); height: 68px; }
   .site-nav .brand span { font-size: 1rem; }
   .language-switch { padding: 0 10px; font-size: 0.76rem; }
