@@ -32,6 +32,45 @@
     <link rel="canonical" href="https://juju-w.github.io/safa/" />
     <link rel="icon" type="image/png" href="%BASE_URL%assets/safa-icon-64.png" />
     <title>SAFA — Secure Access for Agents</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://juju-w.github.io/safa/#software",
+          "name": "SAFA — Secure Access for Agents",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "macOS",
+          "description": "Let AI agents diagnose servers, services, and infrastructure without revealing passwords, private keys, or reusable credentials.",
+          "url": "https://juju-w.github.io/safa/",
+          "image": "https://juju-w.github.io/safa/assets/hero-aurora.webp",
+          "logo": "https://juju-w.github.io/safa/assets/safa-icon-64.png",
+          "license": "https://github.com/juju-w/safa/blob/main/LICENSE",
+          "codeRepository": "https://github.com/juju-w/safa",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://juju-w.github.io/safa/#website",
+          "name": "SAFA",
+          "url": "https://juju-w.github.io/safa/",
+          "inLanguage": ["en", "zh-CN"]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://juju-w.github.io/safa/#faq",
+          "mainEntity": [
+            { "@type": "Question", "name": "Why is the production API returning 502?", "acceptedAnswer": { "@type": "Answer", "text": "SAFA finds the registered service, verifies its host, and inspects bounded health evidence — without the Agent ever receiving an IP, password, or private key." } },
+            { "@type": "Question", "name": "Can the crawler reach MySQL from this node?", "acceptedAnswer": { "@type": "Answer", "text": "SAFA asks the native Broker for a verified topology path instead of guessing from IP addresses or connection details." } },
+            { "@type": "Question", "name": "What breaks if the NAS goes down?", "acceptedAnswer": { "@type": "Answer", "text": "SAFA computes the affected services from the dependency graph and returns a bounded answer." } },
+            { "@type": "Question", "name": "Does SAFA ever see my credentials?", "acceptedAnswer": { "@type": "Answer", "text": "No. Reusable credentials and vault keys never enter Agent-facing output. The native macOS Runtime resolves them locally behind policy, authorization, and redaction." } },
+            { "@type": "Question", "name": "What platforms does SAFA support?", "acceptedAnswer": { "@type": "Answer", "text": "SAFA is currently a macOS source preview. Linux and Windows runtimes are planned but not yet implemented or claimed as supported." } }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

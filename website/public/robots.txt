@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# GitHub Pages serves the site under /safa/. Allow everything; the site is
+# three public pages and has no private content.
+Sitemap: https://juju-w.github.io/safa/sitemap.xml
