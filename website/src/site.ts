@@ -23,7 +23,7 @@ export const homeCopy = {
     articlesTitle: "From the blog",
     articles: [
       { title: "Why Your AI Agent Should Never Hold Your SSH Keys", summary: "Agents are doing ops now — and handing them a key is exactly the wrong move. Process separation, allow-list policy, and user-presence authorization, with real evidence.", url: "why-safa/", date: "2026-08-19" },
-      { title: "Zero-Trust Database Access: SSH Tunnels, Topology, and the Agent", summary: "Reach MySQL through SSH without exposing a port or a password: jump hosts, pinned host identity, per-request grants — and why topology answers beat IP guessing.", url: "why-safa/topology-and-db/", date: "2026-08-19" },
+      { title: "The SAFA Access Pattern: Every Resource, Topology, No Plaintext Password", summary: "How hosts, databases, object storage, caches, and services are registered with credentials that never become plaintext; trusted-setup password entry; jump routes and pinned identity; topology from evidence. · 中文版", url: "why-safa/access-patterns/", date: "2026-08-19" },
     ],
     learnHow: "How SAFA works",
     whySafa: "Why SAFA",
@@ -111,7 +111,7 @@ export const homeCopy = {
     articlesTitle: "文章",
     articles: [
       { title: "为什么 AI Agent 永远不该拿到你的 SSH 密钥", summary: "Agent 开始做运维了——把钥匙交给它恰恰是错的方向。进程隔离、白名单策略、用户在场授权，附真实证据。", url: "why-safa/", date: "2026-08-19" },
-      { title: "零信任数据库访问：SSH 隧道、拓扑与 Agent", summary: "不暴露端口、不交出密码地通过 SSH 访问 MySQL：跳板机、钉住主机身份、按请求授权——以及为什么拓扑答案胜过猜 IP。", url: "why-safa/topology-and-db/", date: "2026-08-19" },
+      { title: "SAFA 访问模式：所有资源类型、拓扑，以及不落明文的密码", summary: "主机、数据库、对象存储、缓存与服务如何统一登记且密码永不落明文；trusted-setup 安全录入；跳板与钉住身份；基于证据的拓扑答案。", url: "why-safa/access-patterns/zh/", date: "2026-08-19" },
     ],
     learnHow: "了解工作原理",
     whySafa: "为什么要做 SAFA",
