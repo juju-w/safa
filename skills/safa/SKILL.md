@@ -25,7 +25,10 @@ For every later command, keep that working directory and invoke `./scripts/safa`
 inside a Runtime `next` row use the logical binary name `safa`, so replace only that leading token
 with `./scripts/safa` and preserve the remaining argument vector exactly.
 If the runtime reports `user_action_required`, explain that a trusted local action is needed. Follow
-only an explicit returned action. Do not collect the missing value in chat.
+only an explicit returned action. When the returned action is marked `safe_for_agent: false`, show it
+to the user and wait for them to run it in their own terminal. The Source Preview build action is
+human-only because it performs network download, Xcode signing, and local Runtime installation.
+Never run it silently or collect Apple account/signing values in chat.
 
 ## Select a resource
 

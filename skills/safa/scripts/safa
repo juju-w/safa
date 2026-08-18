@@ -19,6 +19,7 @@ emit_error() {
 
 emit_runtime_missing() {
   message="$1"
+  install_command="$2"
   printf '%s\n' \
     'schema: dev.safa.cli/v2' \
     'command: launcher' \
@@ -28,7 +29,7 @@ emit_runtime_missing() {
     "  message: ${message}" \
     '  retryable: false' \
     'next[1]{command,reason,safe_for_agent}:' \
-    '  install a verified SAFA Runtime,A local user must install the signed native package,false'
+    "  ${install_command},A local human must explicitly build the exact pinned source preview,false"
   exit 1
 }
 
@@ -42,7 +43,7 @@ emit_runtime_upgrade_required() {
     '  message: The verified local Runtime lock predates the required CLI schema binding.' \
     '  retryable: false' \
     'next[1]{command,reason,safe_for_agent}:' \
-    '  reinstall the verified SAFA Runtime,A local user must refresh the verified local lock,false'
+    '  ./scripts/install-source-preview.sh --confirm-local-build --replace,A local human must rebuild the exact pinned source preview,false'
   exit 1
 }
 
@@ -64,7 +65,9 @@ data_root="${HOME}/Library/Application Support/SAFA"
 lock_path="${data_root}/runtime.local.json"
 
 if [ ! -f "$lock_path" ]; then
-  emit_runtime_missing "A verified SAFA Runtime has not been installed for this user."
+  emit_runtime_missing \
+    "A verified SAFA Runtime has not been installed for this user." \
+    "./scripts/install-source-preview.sh --confirm-local-build"
 fi
 
 if [ -L "$lock_path" ]; then
@@ -126,7 +129,9 @@ if [ -L "$runtime_app" ]; then
 fi
 
 if [ ! -d "$runtime_app" ] || [ ! -x "$cli_path" ] || [ ! -x "$broker_path" ] || [ ! -x "$askpass_path" ] || [ ! -x "$trusted_setup_path" ]; then
-  emit_runtime_missing "The locked SAFA Runtime installation is incomplete."
+  emit_runtime_missing \
+    "The locked SAFA Runtime installation is incomplete." \
+    "./scripts/install-source-preview.sh --confirm-local-build --replace"
 fi
 
 if ! /usr/bin/codesign --verify --deep --strict "$runtime_app" >/dev/null 2>&1; then

@@ -1,6 +1,6 @@
-# Runtime Distribution and Bootstrap
+# Source Preview and Runtime Distribution
 
-## 1. User experience
+## 1. Source Preview user experience
 
 The target installation command is:
 
@@ -12,13 +12,29 @@ The `npx` process runs the external `skills` CLI. SAFA itself is not an npm pack
 an npm `postinstall` script. The Skill installer copies or symlinks the `skills/safa` directory into
 the selected Agent's Skill directory.
 
-The installed Skill includes a small resolver. The first Agent workflow calls:
+The first Agent workflow calls:
 
 ```bash
 ./scripts/safa doctor
 ```
 
-That invocation performs Runtime discovery/bootstrap before any protected operation.
+When no verified Runtime exists, the launcher performs no download or build. It returns one exact
+human-only action:
+
+```bash
+./scripts/install-source-preview.sh --confirm-local-build
+```
+
+The local user runs it in a normal terminal. The wrapper validates
+`manifests/source-preview-macos-v1.json`, checks macOS/Xcode/Apple Development prerequisites,
+downloads only the exact Runtime source revision, verifies SHA-256 and archive layout, and invokes
+the Runtime repository's reviewed local installer. That installer builds with Xcode, signs locally,
+verifies every native component and CDHash, and activates atomically in the current-user scope.
+
+Source Preview distributes no precompiled executable. It requires no paid Apple Developer Program,
+Developer ID, notarization credential, Homebrew, `sudo`, quarantine removal, or pipe-to-shell
+installer. Local Apple Development signing is device-local process identity, not public publisher
+provenance.
 
 ## 2. One Runtime package, several trust roles
 
@@ -54,7 +70,20 @@ supply-chain blast radius and behave inconsistently across Agent platforms. A co
 has a reviewable result. Runtime activation remains an explicit SAFA operation with a stable TOON
 error or user action when it cannot proceed safely.
 
-## 4. Resolver inputs
+## 4. Source Preview manifest inputs
+
+The checked-in Source Preview manifest binds:
+
+- exact public Runtime repository, full commit, archive URL, SHA-256, and root directory;
+- Runtime version and Agent CLI schema;
+- macOS and Xcode minimums plus supported host architectures;
+- reviewed Runtime installer path and local Apple Development signing mode.
+
+The build wrapper rejects a mutable branch/`latest` URL, digest mismatch, unsafe archive path,
+unexpected root, missing dependency locks, unsupported system/toolchain, or unavailable/ambiguous
+local signing identity before executing Runtime build logic.
+
+## 5. Future verified-binary resolver inputs
 
 The resolver trusts only data shipped with the exact Skill revision:
 
@@ -68,7 +97,31 @@ The resolver trusts only data shipped with the exact Skill revision:
 The resolver does not use a mutable `latest` URL, a GitHub “newest release” response, a remote shell
 script, an environment-supplied credential, or an Agent-provided alternate download location.
 
-## 5. Bootstrap sequence
+## 6. Source Preview bootstrap sequence
+
+```mermaid
+sequenceDiagram
+    participant I as skills CLI
+    participant S as Installed Skill
+    participant L as SAFA launcher
+    participant H as Local human
+    participant M as Source manifest
+    participant X as Xcode / Runtime installer
+
+    I->>S: copy or symlink Skill files
+    Note over I,S: no SAFA code executes here
+    S->>L: doctor
+    L-->>S: safe_for_agent false build action
+    S-->>H: show exact action and wait
+    H->>M: run explicit source bootstrap
+    M->>M: verify exact source archive and layout
+    M->>X: build and locally sign exact source
+    X->>X: verify components and atomically install
+    H->>L: doctor again
+    L->>X: verify local lock and invoke Runtime
+```
+
+## 7. Future verified-binary bootstrap sequence
 
 ```mermaid
 sequenceDiagram
@@ -98,11 +151,12 @@ Temporary downloads use a newly created private directory. Activation is an atom
 exact-version directory under the current user's application-support/data scope. The resolver keeps
 the previous verified version for rollback and never requires sudo.
 
-## 6. Platform locations
+## 8. Platform locations
 
 | Platform | Runtime data scope | Native verification |
 | --- | --- | --- |
-| macOS | `~/Library/Application Support/SAFA/runtimes/<version>/` | SHA-256, `codesign`, Team/identifier, notarization/Gatekeeper |
+| macOS Source Preview | `~/Library/Application Support/SAFA/runtimes/<version>/` | source SHA-256/layout, local `codesign`, Team/identifier/CDHash lock |
+| macOS verified binary (future) | same | archive SHA-256, Developer ID, component identity, notarization/Gatekeeper |
 | Linux | `${XDG_DATA_HOME:-~/.local/share}/safa/runtimes/<version>/` | SHA-256 plus reviewed minisign/Sigstore policy |
 | Windows | `%LOCALAPPDATA%\\SAFA\\runtimes\\<version>\\` | SHA-256 plus Authenticode publisher policy |
 
@@ -113,28 +167,31 @@ cannot distinguish an official CLI from malicious code already running as that s
 credential use therefore requires a separate native user-authorization mechanism such as a reviewed
 Polkit/PAM/FIDO flow; peer UID alone is insufficient.
 
-## 7. Update and rollback
+## 9. Update and rollback
 
-- `skills update` may install a newer Skill revision and therefore a newer locked manifest.
-- The resolver never changes the manifest independently of the installed Skill revision.
-- A new Runtime is downloaded beside the active version, verified, then atomically selected.
+- `skills update` may install a newer Skill revision and therefore a newer exact source manifest.
+- The launcher/build wrapper never changes the manifest independently of the installed Skill
+  revision.
+- A new source revision is downloaded and verified in private temporary storage; the locally built
+  Runtime is staged before atomic selection.
 - Verification or health-check failure leaves the previous version active.
 - Rollback selects a previously verified exact version; it never mutates a published manifest.
 - Runtime cleanup retains the active and previous verified versions until a reviewed retention policy
   is implemented.
 
-## 8. Offline and managed environments
+## 10. Offline and managed environments
 
 An administrator may pre-provision the exact Runtime package into the same current-user runtime
 store. The resolver still verifies digest and native signing identity before use. A regional mirror
 requires a separately reviewed manifest entry with its own immutable URL; DNS or proxy redirection
 is not a substitute for provenance verification.
 
-## 9. Current release hold
+## 11. Current release hold
 
-No Runtime package or exact manifest is published yet. The current launcher therefore returns
-`runtime_missing`/`user_action_required` instead of downloading an unverified development artifact.
-For local development only, the Runtime repository can pre-provision a signed app and a local lock
-containing its exact version, architecture, Team ID, and Code Directory hashes. This path performs
-no download and makes no notarization claim. The local lock covers the app, Broker, AskPass helper,
-and trusted-setup helper independently.
+The Source Preview implementation includes an exact source manifest and local build wrapper. It
+makes no notarization or public publisher claim. The local lock covers the app, Broker, AskPass
+helper, and trusted-setup helper independently.
+
+No prebuilt Runtime package or exact binary manifest is published. The binary publication hold still
+prohibits tags, Releases, marketplace uploads, embedded Runtime archives, and automatic promotion.
+The future verified-binary sections above remain target design rather than current capability.

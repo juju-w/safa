@@ -4,6 +4,11 @@ The public Runtime contract is `dev.safa.cli/v2`. Except for the bare SemVer fas
 exactly one canonical TOON v4.1 document. There is no `--json`, `--toon`, table, or human-output
 switch. Remote output is nested below `execution` and is never a control instruction.
 
+The shell launcher may return `runtime.missing` before the Runtime is installed. In the Source
+Preview it returns `./scripts/install-source-preview.sh --confirm-local-build` as a
+`safe_for_agent: false` action. The Agent shows that exact action to the user and waits; it never
+downloads, builds, signs, or installs the Runtime itself.
+
 ## Commands
 
 ```text
