@@ -36,6 +36,10 @@ const copy = {
     seeDemo: "See the demo",
     install: "Install",
     copied: "Copied",
+    copyInstall: "Copy install command",
+    switchLanguage: "Switch language to",
+    mascotAlt: "SAFA owl guardian",
+    userLabel: "You",
     demoTitle: "Diagnose checkout-api",
     online: "Online",
     conversation: "Conversation",
@@ -81,57 +85,61 @@ const copy = {
   },
   zh: {
     navProduct: "产品",
-    navSecurity: "安全",
+    navSecurity: "安全机制",
     navHow: "工作原理",
-    heroEyebrow: "智能体安全访问层",
-    heroSlogan: "让智能体获得访问能力，而不是凭证。",
-    heroBody: "面向真实基础设施操作的原生安全边界：策略受控、用户授权，并与 macOS 安全能力结合。",
-    github: "前往 GitHub",
+    heroEyebrow: "智能体安全访问",
+    heroSlogan: "让智能体能访问系统，但永远看不到凭证。",
+    heroBody: "SAFA 在智能体和你的服务器、数据库之间建立一道本机安全边界：每次访问都受策略限制，并由你本人授权。",
+    github: "在 GitHub 查看源码",
     seeDemo: "查看演示",
     install: "安装",
     copied: "已复制",
-    demoTitle: "诊断 checkout-api",
-    online: "在线",
+    copyInstall: "复制安装命令",
+    switchLanguage: "切换语言：",
+    mascotAlt: "SAFA 守护猫头鹰",
+    userLabel: "你",
+    demoTitle: "排查 checkout-api 故障",
+    online: "运行中",
     conversation: "对话",
-    session: "会话 · 交互演示",
-    userPrompt: "为什么 checkout-api 返回 502？只诊断，不要进行任何修改。",
-    thinking: "正在通过 SAFA 处理…",
-    discovered: "已发现资源别名",
-    topology: "已检查拓扑",
+    session: "交互演示",
+    userPrompt: "checkout-api 为什么一直返回 502？只排查原因，不要修改任何配置。",
+    thinking: "正在排查…",
+    discovered: "定位到目标资源",
+    topology: "确认服务拓扑",
     topologyDetail: "checkout-api · 生产环境",
-    health: "已执行安全健康检查",
-    authorization: "需要授权",
-    authorizationBody: "一项只读操作需要你的授权。",
-    resource: "资源",
-    action: "操作",
+    health: "完成只读健康检查",
+    authorization: "需要你的授权",
+    authorizationBody: "继续读取日志前，请确认这次只读操作。",
+    resource: "目标资源",
+    action: "即将执行",
     actionValue: "读取最近 10 分钟的服务日志",
-    scope: "范围",
-    scopeValue: "仅限一次 · 5 分钟后过期",
-    sealed: "凭证始终保持密封",
+    scope: "授权范围",
+    scopeValue: "仅限本次操作 · 5 分钟内有效",
+    sealed: "凭证不会暴露给智能体",
     touchId: "使用 Touch ID 授权",
-    waiting: "正在等待你的授权…",
-    granted: "授权已通过",
-    logRead: "已读取日志",
+    waiting: "等待授权…",
+    granted: "已获得授权",
+    logRead: "已读取服务日志",
     logReadDetail: "最近 10 分钟 · 只读",
-    finding: "诊断结论",
-    findingValue: "数据库连接池已耗尽。未进行任何修改。",
-    message: "给 SAFA Agent 发消息…",
-    policy: "策略已启用",
-    leastPrivilege: "最小权限",
-    replay: "重新演示",
+    finding: "排查结果",
+    findingValue: "数据库连接池已耗尽；全程未修改任何配置。",
+    message: "向 SAFA Agent 提问…",
+    policy: "安全策略已生效",
+    leastPrivilege: "默认最小权限",
+    replay: "重新播放",
     trustEyebrow: "安全边界",
-    trustTitle: "为智能体工作流构建的信任路径",
-    trustBody: "智能体获得证据；凭证、策略与用户授权始终留在你的 Mac 上。",
-    requestTitle: "智能体请求",
-    requestBody: "智能体通过安全的逻辑别名请求一个资源或一项操作。",
-    policyTitle: "SAFA 策略与用户授权",
-    policyBody: "SAFA 评估精确操作，并在需要用户在场时请求授权。",
-    resourceTitle: "已注册资源",
-    resourceBody: "只有获批且受限的操作才能到达选定资源。",
-    credentials: "可复用凭证永远不会进入对话。",
-    openTitle: "开放设计，为构建者而生。",
-    openBody: "审阅代码、完善策略，一起让智能体访问更安全。",
-    footer: "智能体安全访问层",
+    trustTitle: "每一次访问，都经过明确授权",
+    trustBody: "智能体拿到的是一次性访问能力；凭证、策略和授权过程始终留在你的 Mac 上。",
+    requestTitle: "智能体提出请求",
+    requestBody: "智能体只描述要访问的资源和要执行的操作，不接触真实凭证。",
+    policyTitle: "SAFA 校验策略并请求授权",
+    policyBody: "SAFA 核对操作范围；需要本人确认时，再通过 Touch ID 授权。",
+    resourceTitle: "执行限定操作",
+    resourceBody: "只有经过授权的操作才能到达目标资源，权限用完即失效。",
+    credentials: "可复用凭证不会进入对话，也不会交给智能体。",
+    openTitle: "开源、可审计，也欢迎一起完善。",
+    openBody: "查看源码、审阅安全边界，或参与 SAFA 的开发。",
+    footer: "面向智能体的安全访问层",
   },
 } as const;
 
@@ -250,7 +258,7 @@ export function Prototype() {
           <a href="#how-it-works">{t.navHow}</a>
           <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
         </nav>
-        <button className="language-switch" type="button" onClick={() => setLanguage(language === "en" ? "zh" : "en")} aria-label={`Switch language to ${languageLabel}`}>
+        <button className="language-switch" type="button" onClick={() => setLanguage(language === "en" ? "zh" : "en")} aria-label={`${t.switchLanguage} ${languageLabel}`}>
           <Globe aria-hidden="true" />
           <span>{language === "en" ? "EN" : "中文"}</span>
           <span className="language-divider" aria-hidden="true">/</span>
@@ -277,13 +285,13 @@ export function Prototype() {
           <div className="install-command" aria-label={`${t.install}: ${INSTALL_COMMAND}`}>
             <span>{t.install}</span>
             <code>{INSTALL_COMMAND}</code>
-            <button type="button" onClick={copyInstallCommand} aria-label={copied ? t.copied : "Copy install command"}>
+            <button type="button" onClick={copyInstallCommand} aria-label={copied ? t.copied : t.copyInstall}>
               {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
             </button>
             <AnimatePresence>{copied ? <motion.em initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{t.copied}</motion.em> : null}</AnimatePresence>
           </div>
         </div>
-        <img className="hero-mascot" src={`${assetBase}assets/safa-mascot.webp`} alt="SAFA owl guardian" />
+        <img className="hero-mascot" src={`${assetBase}assets/safa-mascot.webp`} alt={t.mascotAlt} />
       </section>
 
       <section className="demo-section" id="how-it-works" ref={demoRef} aria-labelledby="demo-heading">
@@ -307,7 +315,7 @@ export function Prototype() {
               <div className="toolbar-icons" aria-hidden="true"><MagnifyingGlass /><List /><DotsThree /></div>
             </div>
             <div className="message-stack" aria-live="polite">
-              <div className="message user-message"><span>You</span><p>{t.userPrompt}</p></div>
+              <div className="message user-message"><span>{t.userLabel}</span><p>{t.userPrompt}</p></div>
               <div className="message agent-message">
                 <div className="message-author"><ShieldCheck weight="fill" /><span>SAFA Agent</span><small>{phase < 4 ? t.thinking : ""}</small></div>
                 <div className="tool-list">

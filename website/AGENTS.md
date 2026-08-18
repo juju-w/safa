@@ -11,6 +11,7 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 - Do not include the Source Preview section in the marketing page.
 - Center the page narrative on an interactive Agent conversation, exact user authorization, Touch ID, and continued read-only diagnosis.
 - Provide English and Simplified Chinese UI, with English as the default.
+- Write Simplified Chinese as native product copy, not sentence-by-sentence translation; prefer concise developer language and avoid literal phrases such as “凭证保持密封” or “信任路径”.
 - Use an in-page `How it works` destination until a real documentation site exists; do not publish a dead Docs link.
 - Avoid lightning, wavy electric cables, excessive glow, and card-heavy dashboard composition.
 
