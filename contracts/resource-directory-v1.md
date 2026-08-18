@@ -204,6 +204,11 @@ The Agent XPC surface uses separate explicit DTOs instead of the legacy dynamic 
   bounded read-only hardware/system probe, and commits `active` only when the draft revision remains
   unchanged. A remediable failure may retain the draft; edit resumes it. Trusted resources cannot
   be silently retargeted. `edit --state disabled|active` changes access state.
+- When no explicit OpenSSH alias exists, the same add command may invoke a separately signed local
+  setup helper. It reads endpoint/account/fingerprint/password with echo disabled, verifies manual
+  fingerprint equality, and submits one caller-bound typed transaction. The Broker verifies the
+  live account, identity, platform, and inventory before atomically storing the credential and
+  activating the resource. The Agent receives none of those protected values.
 - `remove`: requires device-owner authentication and a revisioned broker transaction; removal
   refuses to break a live relationship.
 

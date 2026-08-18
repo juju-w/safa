@@ -125,6 +125,8 @@ Core guarantees of the current design:
 - reusable credentials and vault keys never enter Agent-facing output;
 - resources are selected by safe logical alias rather than copied endpoint details;
 - SSH targets use pinned host identity and isolated client configuration;
+- a separately signed no-custom-GUI setup helper can enroll a new password SSH host while every
+  protected field remains hidden from Agent argv, environment, stdin, stdout, and stderr;
 - temporary password delivery is child-bound, short-lived, and single-use;
 - output is bounded and matching credential bytes are redacted before return;
 - verifier or authorization failures stop the operation instead of falling back to raw access.
@@ -186,7 +188,7 @@ capabilities. The canonical command and envelope definitions live in the
 | Area | Status |
 |---|---|
 | macOS native Runtime | Swift preview implemented; signed public package not released |
-| Resource directory | Host registration, encrypted inventory, safe summaries, authorized details |
+| Resource directory | Existing OpenSSH import plus hidden password host registration, encrypted inventory, safe summaries, authorized details |
 | Topology | Placement, reachability, impact, and user-authorized logical relationship changes |
 | Remote operation | Bounded non-sudo SSH diagnostics only |
 | Linux and Windows native Runtimes | Planned; not yet selected or scaffolded |

@@ -37,11 +37,17 @@ List safe logical aliases:
 
 Use only an alias returned by SAFA for remote work. Do not ask the user for an IP address, port,
 username, jump route, password, private key, sudo password, or token. If the desired alias is absent,
-offer the system-authenticated SSH-config draft import, but invoke it only when the user explicitly
-asks to add the resource:
+offer the system-authenticated add workflow, but invoke it only when the user explicitly asks to add
+the resource. Use an OpenSSH alias when one already exists:
 
 ```bash
 ./scripts/safa resource add ALIAS --from-ssh-config SSH_ALIAS
+```
+
+For a new host that is not in OpenSSH configuration, use only the safe alias and host platform:
+
+```bash
+./scripts/safa resource add ALIAS --type host.linux
 ```
 
 Both names are logical aliases, not endpoints. The command creates `draft/needs_setup`; report that
@@ -53,10 +59,17 @@ to continue, resume it through edit:
 ./scripts/safa resource edit ALIAS --from-ssh-config SSH_ALIAS
 ```
 
-Add/edit use macOS user presence, a pre-existing trusted `known_hosts` entry, and an existing local
-OpenSSH identity or agent. They verify the registered host platform and record a bounded read-only
-hardware/system inventory snapshot. They support direct routes, including an already running local
-Core Tunnel listener. If SAFA returns a host-identity, authentication, tunnel, or route remediation, report it;
+For OpenSSH import, add/edit use macOS user presence, a pre-existing trusted `known_hosts` entry,
+and an existing local OpenSSH identity or agent. For a new password host, the same add command may
+open a separately signed trusted helper: every protected field is typed with terminal echo disabled,
+the fingerprint must come from an independent trusted source, and no value is returned to the Agent.
+If no trusted controlling terminal is available, SAFA returns a `safe_for_agent: false` command;
+show that exact command to the user and wait for them to run it locally. Never type, relay, infer, or
+repeat any protected value on the user's behalf.
+
+Both paths verify the registered host platform and record a bounded read-only hardware/system
+inventory snapshot. They support direct routes, including an already running local Core Tunnel
+listener. If SAFA returns a host-identity, authentication, tunnel, or route remediation, report it;
 never collect the missing secret or bypass the failure with raw SSH.
 
 Select only `host.linux`, `host.macos`, or `host.windows`; NAS is a resource role, not a host type.

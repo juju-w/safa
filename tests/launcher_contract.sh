@@ -32,7 +32,7 @@ case "$(uname -s)" in
     data_root="${test_home}/Library/Application Support/SAFA"
     mkdir -p "$data_root"
     architecture=$(uname -m)
-    printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"0.1.0\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"ABCDEFGHIJ\",\"app_cdhash\":\"0000000000000000000000000000000000000000\",\"broker_cdhash\":\"0000000000000000000000000000000000000000\",\"askpass_cdhash\":\"0000000000000000000000000000000000000000\"}" \
+    printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"0.1.0\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"ABCDEFGHIJ\",\"app_cdhash\":\"0000000000000000000000000000000000000000\",\"broker_cdhash\":\"0000000000000000000000000000000000000000\",\"askpass_cdhash\":\"0000000000000000000000000000000000000000\",\"trusted_setup_cdhash\":\"0000000000000000000000000000000000000000\"}" \
       > "${data_root}/runtime.local.json"
     chmod 600 "${data_root}/runtime.local.json"
 

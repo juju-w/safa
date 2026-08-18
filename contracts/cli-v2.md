@@ -63,6 +63,12 @@ Endpoint, username, password, sudo password, private key, credential locator, ho
 recovery material, and raw approval have no Agent-facing option. Resource aliases remain the only
 selectors.
 
+When `resource add` cannot resolve an explicit OpenSSH alias, the macOS Runtime may launch its
+separately signed trusted-setup helper using only the safe alias/type. Protected input is hidden and
+does not travel through CLI argv, environment, Agent-controlled stdin, stdout, or stderr. If no
+trusted controlling terminal is available, the CLI returns the exact retry as a
+`safe_for_agent: false` next command.
+
 ## 3. Canonical output
 
 All non-version invocations emit exactly one UTF-8 TOON v4.1 document with LF line endings and no

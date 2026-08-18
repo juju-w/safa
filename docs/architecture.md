@@ -110,7 +110,8 @@ resource domain, sanitization, and conformance behavior remain platform-neutral.
 
 “One Runtime” refers to one installed package, not one all-powerful process. The package keeps a thin
 Agent-facing CLI separate from the Broker/daemon that owns vault authority. On macOS the package is
-`SAFA.app`, containing `safa`, `safa-broker`, and the one-shot `safa-askpass` helper.
+`SAFA.app`, containing `safa`, `safa-broker`, the one-shot `safa-askpass` helper, and the separately
+signed no-custom-GUI `safa-trusted-setup` helper.
 
 ## 6. Trust boundaries
 
@@ -127,12 +128,14 @@ flowchart LR
     end
     subgraph Native["Native user security boundary"]
       Broker["Runtime broker/daemon"]
+      Setup["Trusted setup helper\nhidden protected input"]
       Vault["OS credential store"]
       Consent["OS user authorization"]
     end
     Target["Registered target resource"]
 
     Prompt --> Launcher --> CLI --> Broker
+    CLI -->|"safe alias/type only"| Setup -->|"signed trusted-local IPC"| Broker
     Manifest --> Launcher
     Broker --> Vault
     Broker --> Consent
@@ -149,6 +152,9 @@ Key invariants:
 4. Remote output is bounded and remains explicitly untrusted.
 5. A verifier failure is terminal. The launcher does not fall back to an unsigned binary or raw SSH.
 6. A compromised remote server must not obtain credentials for unrelated registered resources.
+7. New SSH connection fields and passwords are collected with echo disabled by the signed setup
+   helper, never by the Agent-facing CLI; the Broker persists them only after host/account/platform
+   verification succeeds.
 
 ## 7. Resource extensibility
 

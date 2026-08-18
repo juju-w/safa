@@ -89,9 +89,9 @@ their runtimes pass conformance and security review.
 
 During the publication hold, a developer may pre-provision a signed macOS Runtime in the documented
 current-user version store. The local installer writes `runtime.local.json` with the exact version,
-architecture, Developer Team, and Code Directory hashes. The launcher verifies every locked field
-before forwarding arguments. This local lock is not a public release manifest and cannot authorize
-download or notarization claims.
+architecture, Developer Team, and Code Directory hashes for the app, Broker, AskPass, and
+trusted-setup helper. The launcher verifies every locked field before forwarding arguments. This
+local lock is not a public release manifest and cannot authorize download or notarization claims.
 
 ## Agent-visible safety invariant
 

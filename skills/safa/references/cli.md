@@ -34,9 +34,12 @@ given. `--help` returns one structured local response. `--version` alone prints 
 
 Resource lifecycle occurs in a local, system-authenticated workflow. There are no endpoint,
 username, password, key, token, sudo-password, host-key, recovery-secret, secret-show, or approval
-flags. Add/edit resolve a logical alias through the Broker's local OpenSSH configuration. A retained
-draft can be resumed with edit. Windows targets must expose OpenSSH; this is target support from the
-macOS Runtime, not a Windows-native Runtime claim.
+flags. Add/edit first resolve a logical alias through the Broker's local OpenSSH configuration. If a
+new SSH alias is absent, `resource add ALIAS --type host.*` launches a separately signed trusted
+helper that reads all protected fields with terminal echo disabled and verifies the host/account
+before atomic activation. A non-interactive attempt returns the same local command in a
+`safe_for_agent: false` next row. A retained draft can be resumed with edit. Windows targets must
+expose OpenSSH; this is target support from the macOS Runtime, not a Windows-native Runtime claim.
 
 The built-in service template names are `mysql`, `postgresql`, `sqlserver`, `mongodb`, `s3`, `minio`,
 `oss`, `redis`, `kafka`, `rabbitmq`, `elasticsearch`, `neo4j`, and `http`. Registration is typed, but
