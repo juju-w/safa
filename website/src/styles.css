@@ -459,3 +459,20 @@ html[lang="zh-CN"] .hero-acronym { letter-spacing: 0.12em; }
   .star-badge { padding: 0 10px; }
   .footer-meta { flex-direction: column; align-items: flex-start; gap: 10px; }
 }
+/* authorized path section (design target, next capability) */
+.ld-auth { padding-bottom: 90px; }
+.ld-auth-status { display: flex; align-items: flex-start; gap: 10px; margin-top: 22px; padding: 13px 16px; border: 1px solid rgba(255, 205, 120, 0.32); border-radius: 12px; color: #e8d5ae; background: rgba(92, 66, 20, 0.2); font-size: 0.82rem; line-height: 1.6; }
+.ld-auth-status svg { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 2px; color: #ffcf7d; }
+.ld-auth-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 26px; }
+.ld-auth-steps article { position: relative; padding: 22px 18px 18px; border: 1px solid rgba(104, 235, 193, 0.24); border-radius: 18px; background: rgba(14, 38, 54, 0.6); }
+.ld-auth-steps article > svg { width: 26px; height: 26px; margin-top: 18px; color: var(--mint); }
+.ld-auth-num { position: absolute; top: 14px; right: 16px; color: #4d6d86; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; }
+.ld-auth-steps h3 { margin: 14px 0 0; color: #e7f5ef; font-size: 0.96rem; font-weight: 700; }
+.ld-auth-steps p { margin: 8px 0 0; color: #9fb9c8; font-size: 0.8rem; line-height: 1.65; }
+
+@media (max-width: 980px) {
+  .ld-auth-steps { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 680px) {
+  .ld-auth-steps { grid-template-columns: 1fr; }
+}

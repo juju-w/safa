@@ -34,7 +34,35 @@
       "nextTitle": "Next steps",
       "nextBody": "Confirm whether a large media-transcode or download batch ran recently. Container-level memory and logs need an additional reviewed read-only capability before the Agent can look at them.",
       "replayHint": "Replay this exact session on your own machine with the checked-in script.",
-      "finalLine": "Credentials stayed on the Mac. The Agent only ever saw bounded, sanitized evidence."
+      "finalLine": "Credentials stayed on the Mac. The Agent only ever saw bounded, sanitized evidence.",
+      "authorizedFlow": {
+        "eyebrow": "The authorized path",
+        "title": "Privileged actions: approve once, then execute",
+        "body": "SAFA is not only about refusal. When the user grants an elevated action through the macOS authorization prompt (Touch ID), the same Broker executes it under the same bounded rules — without the Agent ever seeing the password.",
+        "status": "Design target — specified in 002-sudo-execution, not yet in the 0.1.0 preview. The preview refuses sudo (as shown above); the authorized flow below is what ships next.",
+        "steps": [
+          {
+            "title": "Agent requests",
+            "body": "A sudo command on nas.primary with its intent and expected effect.",
+            "icon": "terminal"
+          },
+          {
+            "title": "macOS shows the exact action",
+            "body": "Target resource, exact command, stated intent, and risk — a prompt the Agent cannot script, repeat, or answer from chat.",
+            "icon": "shield"
+          },
+          {
+            "title": "User approves with Touch ID",
+            "body": "A one-time grant bound to this exact command and resource revision.",
+            "icon": "fingerprint"
+          },
+          {
+            "title": "Bounded execution, sanitized evidence",
+            "body": "The credential is injected inside the Broker boundary; the Agent receives only the bounded, redacted TOON result.",
+            "icon": "check"
+          }
+        ]
+      }
     },
     "zh": {
       "eyebrow": "真实演示",
@@ -70,7 +98,35 @@
       "nextTitle": "下一步建议",
       "nextBody": "确认近期是否跑过大批量媒体转码或下载任务。容器级内存与日志需要先评审并开放对应的只读能力，Agent 才能继续深入。",
       "replayHint": "想在这台机器上重放同一会话，请使用仓库中附带的回放脚本。",
-      "finalLine": "凭证始终留在 Mac 上。Agent 只拿到了有限、经过脱敏的证据。"
+      "finalLine": "凭证始终留在 Mac 上。Agent 只拿到了有限、经过脱敏的证据。",
+      "authorizedFlow": {
+        "eyebrow": "授权路径",
+        "title": "高级操作：授权一次，然后执行",
+        "body": "SAFA 不只是拦截。当用户通过 macOS 授权提示（Touch ID）批准一个提权操作时，同一个 Broker 会在同样的边界约束下执行它——Agent 依然看不到密码。",
+        "status": "设计目标——见 002-sudo-execution 规格，当前 0.1.0 预览未开放。预览版会拒绝 sudo（如上所示）；下面的授权流是下一个交付能力。",
+        "steps": [
+          {
+            "title": "Agent 发起请求",
+            "body": "在 nas.primary 上请求 sudo 命令，附上意图与预期影响。",
+            "icon": "terminal"
+          },
+          {
+            "title": "macOS 展示完整操作",
+            "body": "目标资源、精确命令、意图与风险——这是 Agent 无法脚本化、重复触发或从对话里代答的提示。",
+            "icon": "shield"
+          },
+          {
+            "title": "用户用 Touch ID 授权",
+            "body": "一次性授权，绑定到这条精确命令和资源版本。",
+            "icon": "fingerprint"
+          },
+          {
+            "title": "有界执行，脱敏证据",
+            "body": "凭证只在 Broker 边界内注入；Agent 拿到的仍然只有有限、脱敏的 TOON 结果。",
+            "icon": "check"
+          }
+        ]
+      }
     }
   },
   "steps": [

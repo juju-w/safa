@@ -5,6 +5,7 @@ import {
   Clipboard,
   Copy,
   EyeSlash,
+  Fingerprint,
   GithubLogo,
   LockKey,
   MagnifyingGlass,
@@ -154,6 +155,28 @@ export function LiveDemo() {
         </div>
         <div className="ld-steps">
           {boundarySteps.map((step, index) => (<StepCard key={step.id} step={step} index={mainSteps.length + index} lang={language} />))}
+        </div>
+      </section>
+
+      <section className="ld-section ld-auth" aria-labelledby="ld-auth-title">
+        <div className="section-heading">
+          <p className="eyebrow">{t.authorizedFlow.eyebrow}</p>
+          <h2 id="ld-auth-title">{t.authorizedFlow.title}</h2>
+          <p>{t.authorizedFlow.body}</p>
+        </div>
+        <div className="ld-auth-status"><WarningCircle weight="fill" aria-hidden="true" />{t.authorizedFlow.status}</div>
+        <div className="ld-auth-steps">
+          {t.authorizedFlow.steps.map((step, index) => {
+            const Icon = [TerminalWindow, ShieldCheck, Fingerprint, CheckCircle][index] ?? CheckCircle;
+            return (
+              <article key={step.title}>
+                <span className="ld-auth-num">{String(index + 1).padStart(2, "0")}</span>
+                <Icon weight="duotone" aria-hidden="true" />
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+              </article>
+            );
+          })}
         </div>
       </section>
 
