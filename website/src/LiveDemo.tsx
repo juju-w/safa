@@ -9,6 +9,7 @@ import {
   GithubLogo,
   LockKey,
   MagnifyingGlass,
+  Play,
   ShieldCheck,
   TerminalWindow,
   WarningCircle,
@@ -51,6 +52,86 @@ function CopyButton({ text, label, copiedLabel }: { text: string; label: string;
       {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
       <span>{copied ? copiedLabel : label}</span>
     </button>
+  );
+}
+
+function AuthorizedFlowDemo({ lang }: { lang: "en" | "zh" }) {
+  const t = liveDemoCopy[lang].authorizedFlow.interactive;
+  const reducedMotion = useReducedMotion();
+  const [phase, setPhase] = useState(0);
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    if (phase !== 1) return;
+    const timer = window.setTimeout(() => setPhase(2), reducedMotion ? 0 : 650);
+    return () => window.clearTimeout(timer);
+  }, [phase, reducedMotion]);
+
+  const start = () => setPhase(1);
+  const approve = () => {
+    setAuthed(true);
+    setPhase(3);
+    window.setTimeout(() => setPhase(4), reducedMotion ? 0 : 750);
+    window.setTimeout(() => setPhase(5), reducedMotion ? 0 : 1750);
+  };
+  const replay = () => { setAuthed(false); setPhase(0); };
+
+  if (phase === 0) {
+    return (
+      <div className="ld-interactive">
+        <button className="ld-run" type="button" onClick={start}><Play weight="fill" aria-hidden="true" /> {t.runLabel}</button>
+        <p className="ld-design-note"><WarningCircle weight="fill" aria-hidden="true" />{t.designNote}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ld-interactive" aria-live="polite">
+      <div className="ld-req-card">
+        <span className="ld-step-eyebrow">{t.requestEyebrow}</span>
+        <h4>{t.requestTitle}</h4>
+        <pre><code>{t.requestCmd}</code></pre>
+        <div className="ld-req-meta">
+          <span><LockKey weight="fill" aria-hidden="true" />{t.sealed}</span>
+        </div>
+      </div>
+
+      {phase >= 2 ? (
+        <div className="ld-approval-card">
+          <span className="ld-step-eyebrow">{t.approvalEyebrow}</span>
+          <h4>{t.approvalTitle}</h4>
+          <dl>
+            <div><dt>{t.resourceLabel}</dt><dd>{t.resourceValue}</dd></div>
+            <div><dt>{t.actionLabel}</dt><dd><code>{t.actionValue}</code></dd></div>
+            <div><dt>{t.riskLabel}</dt><dd>{t.riskValue}</dd></div>
+            <div><dt>{t.scopeLabel}</dt><dd>{t.scopeValue}</dd></div>
+          </dl>
+          {!authed ? (
+            <button className="ld-touchid" type="button" onClick={approve}><Fingerprint weight="fill" aria-hidden="true" /> {t.touchId}</button>
+          ) : (
+            <p className="ld-granted"><CheckCircle weight="fill" aria-hidden="true" /> {t.granted}</p>
+          )}
+        </div>
+      ) : null}
+
+      {phase >= 4 ? (
+        <div className="ld-exec-card">
+          <span className="ld-step-eyebrow">{t.executingEyebrow}</span>
+          <p>{t.executing}</p>
+        </div>
+      ) : null}
+
+      {phase >= 5 ? (
+        <div className="ld-result-card">
+          <span className="ld-step-eyebrow">{t.resultEyebrow}</span>
+          <p className="ld-result-note">{t.resultNote}</p>
+          <pre><code>{t.result}</code></pre>
+        </div>
+      ) : null}
+
+      <button className="ld-replay" type="button" onClick={replay}><Play weight="fill" aria-hidden="true" /> {t.replay}</button>
+      <p className="ld-design-note"><WarningCircle weight="fill" aria-hidden="true" />{t.designNote}</p>
+    </div>
   );
 }
 
@@ -165,6 +246,7 @@ export function LiveDemo() {
           <p>{t.authorizedFlow.body}</p>
         </div>
         <div className="ld-auth-status"><WarningCircle weight="fill" aria-hidden="true" />{t.authorizedFlow.status}</div>
+        <AuthorizedFlowDemo lang={language} />
         <div className="ld-auth-steps">
           {t.authorizedFlow.steps.map((step, index) => {
             const Icon = [TerminalWindow, ShieldCheck, Fingerprint, CheckCircle][index] ?? CheckCircle;
