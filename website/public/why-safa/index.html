@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050a18" />
+    <meta name="description" content="Why AI agents should never hold your SSH keys, and the secure-access pattern that gives agents bounded, authorized, sanitized infrastructure access instead: safe aliases, allow-list policy, macOS user-presence approval, credential isolation, and redacted TOON evidence." />
+    <meta name="author" content="SAFA" />
+    <link rel="canonical" href="https://juju-w.github.io/safa/why-safa/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Why Your AI Agent Should Never Hold Your SSH Keys" />
+    <meta property="og:description" content="AI agents are doing ops now. The instinct to hand them a key is exactly the wrong move. Here is the secure-access pattern behind SAFA: keep the credential in a native local boundary, give the agent aliases, allow-listed actions, and user-approved, sanitized evidence." />
+    <meta property="og:url" content="https://juju-w.github.io/safa/why-safa/" />
+    <meta property="og:image" content="https://juju-w.github.io/safa/assets/hero-aurora.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Why Your AI Agent Should Never Hold Your SSH Keys" />
+    <meta name="twitter:description" content="Agents are doing ops now. Handing them a key is exactly the wrong move. The SAFA pattern: credentials stay in a native local boundary; the agent gets aliases, allow-listed actions, and user-approved evidence." />
+    <title>Why Your AI Agent Should Never Hold Your SSH Keys — SAFA</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Why Your AI Agent Should Never Hold Your SSH Keys",
+      "description": "AI agents are doing operations work now, and the most common instinct is to hand them an SSH key or password. This article explains why reusable credentials in an agent context fail, and presents the SAFA pattern: process-separated credential boundary, safe aliases, allow-list policy, macOS user-presence approval, and redacted TOON evidence.",
+      "url": "https://juju-w.github.io/safa/why-safa/",
+      "image": "https://juju-w.github.io/safa/assets/hero-aurora.webp",
+      "datePublished": "2026-08-19",
+      "dateModified": "2026-08-19",
+      "inLanguage": "en",
+      "author": { "@type": "Organization", "name": "SAFA" },
+      "publisher": { "@type": "Organization", "name": "SAFA", "logo": { "@type": "ImageObject", "url": "https://juju-w.github.io/safa/assets/safa-icon-64.png" } },
+      "mainEntityOfPage": "https://juju-w.github.io/safa/why-safa/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Should I give my AI agent the SSH key?", "acceptedAnswer": { "@type": "Answer", "text": "No. A reusable credential given to an agent enters chat history, model context, and tool logs; it grants a broad, reusable, unaudited session, and it can be exfiltrated through prompt injection. The secure pattern is to keep the credential inside a native local boundary and give the agent safe aliases, allow-listed actions, and user-approved, sanitized evidence." } },
+        { "@type": "Question", "name": "How does SAFA keep credentials away from the agent?", "acceptedAnswer": { "@type": "Answer", "text": "SAFA splits authority across processes: an agent-facing CLI that parses and presents but holds no credential authority, a Broker that owns policy, credentials, and transport, and narrow helpers for credential delivery and trusted setup. The agent only ever receives safe logical aliases and bounded TOON-formatted evidence." } },
+        { "@type": "Question", "name": "What actions can a SAFA agent perform?", "acceptedAnswer": { "@type": "Answer", "text": "Only allow-listed, read-only commands (df, uptime, free, ps, systemctl is-active, docker ps/stats) run automatically. Sudo is refused in the current preview; privileged and protected actions are gated by macOS user-presence approval such as Touch ID. The Agent's own risk assessment is advisory only and can never substitute for user approval." } },
+        { "@type": "Question", "name": "Is SAFA open source?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The Skill, contracts, and documentation are MIT-licensed at github.com/juju-w/safa, and the native Swift/macOS Runtime is at github.com/juju-w/safa-runtime. It is currently a macOS source preview; Linux and Windows runtimes are planned." } }
+      ]
+    }
+    </script>
+    <style>
+      :root { color: #eef6ff; background: #050a18; font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --text: #f5f9ff; --muted: #9db0cb; --cyan: #7fe5ff; --mint: #62edc3; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; min-height: 100vh; color: var(--text); background: #050a18; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+      .wrap { max-width: 780px; margin: 0 auto; padding: 48px 24px 96px; }
+      .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 40px; color: inherit; text-decoration: none; font-weight: 750; }
+      .brand img { width: 30px; height: 30px; border-radius: 8px; }
+      h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.12; letter-spacing: -0.03em; }
+      .dek { color: #b7c9df; font-size: 1.08rem; line-height: 1.7; margin: 0 0 28px; }
+      .meta { color: #71839c; font-size: 0.8rem; margin-bottom: 44px; display: flex; flex-wrap: wrap; gap: 8px 16px; }
+      .meta a { color: var(--cyan); text-decoration: none; }
+      h2 { margin: 48px 0 14px; font-size: 1.5rem; letter-spacing: -0.02em; }
+      h3 { margin: 30px 0 10px; font-size: 1.12rem; }
+      p { margin: 14px 0; color: #c9d7e8; }
+      ul, ol { color: #c9d7e8; }
+      li { margin: 8px 0; }
+      a { color: var(--cyan); }
+      strong { color: #eaf3fd; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.86em; background: rgba(131, 184, 241, 0.12); padding: 2px 6px; border-radius: 6px; color: #91f2c8; }
+      pre { overflow-x: auto; padding: 14px 16px; border-radius: 12px; background: rgba(2, 8, 22, 0.85); border: 1px solid rgba(122, 168, 220, 0.14); }
+      pre code { background: none; padding: 0; color: #b9cfe8; line-height: 1.6; }
+      blockquote { margin: 20px 0; padding: 14px 18px; border-left: 3px solid var(--mint); border-radius: 0 12px 12px 0; background: rgba(45, 138, 105, 0.12); color: #cfe3d8; }
+      blockquote p { margin: 6px 0; color: #cfe3d8; }
+      .callout { margin: 24px 0; padding: 16px 18px; border: 1px solid rgba(255, 205, 120, 0.32); border-radius: 12px; background: rgba(92, 66, 20, 0.16); color: #e8d5ae; }
+      .callout strong { color: #ffe3a3; }
+      table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.88rem; }
+      th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(122, 168, 220, 0.16); }
+      th { color: #9db8d4; font-weight: 650; }
+      td { color: #c9d7e8; }
+      .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 44px; }
+      .cta a { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; }
+      .cta .primary { color: #031321; background: #8be8ff; border: 1px solid rgba(233, 252, 255, 0.82); }
+      .cta .secondary { color: #eaf4ff; border: 1px solid rgba(143, 184, 233, 0.32); }
+      footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid rgba(122, 178, 236, 0.14); color: #71839c; font-size: 0.82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="brand" href="https://juju-w.github.io/safa/"><img src="https://juju-w.github.io/safa/assets/safa-icon-64.png" alt="SAFA icon" /><span>SAFA</span></a>
+      <h1>Why Your AI Agent Should Never Hold Your SSH Keys</h1>
+      <p class="dek">AI agents are doing operations work now — running diagnostics, restarting services, checking databases. The most common instinct is to hand the agent a key or a password. That instinct is exactly the wrong move. Here is the access pattern that keeps the agent useful and the credentials unreachable.</p>
+      <div class="meta"><span>SAFA — Secure Access for Agents</span><span>2026-08-19</span><span><a href="https://github.com/juju-w/safa">github.com/juju-w/safa</a></span><span><a href="https://juju-w.github.io/safa/live-demo/">See a real diagnosis</a></span></div>
+
+      <h2>The problem: agents are finally doing ops — with the wrong access model</h2>
+      <p>In 2025 and 2026, coding agents and ops agents stopped being a novelty. Claude Code, Codex, and their peers regularly SSH into servers, run <code>kubectl</code>, tail logs, and inspect databases. The standard onboarding pattern for "let the agent touch my infrastructure" is: <em>paste the host, paste the username, point it at your private key, let it use your ssh config.</em></p>
+      <p>This is the equivalent of giving a contractor the master key to your building because they asked to check the thermostat. The request is reasonable; the credential is wildly oversized for it — and, unlike a physical key, the digital one is <strong>copyable, reusable, and quotable</strong>.</p>
+      <blockquote><p>Non-human identity (NHI) security is among the fastest-growing segments of cybersecurity: every credential an agent holds is a credential an attacker can steal, reuse, or exfiltrate through a single prompt injection.</p></blockquote>
+      <p>Industry research has converged on the same conclusion. Anthropic has published detailed containment work on how its own agents are sandboxed and how credentials are kept out of model reach. NCC Group's security audit of AI coding agents mapped the credential-handling gaps across mainstream tools. Browser-agent research showed agents routinely mishandling cookies and session tokens. The through-line is consistent: <strong>the moment a reusable secret becomes model-visible, it is a liability, not a capability.</strong></p>
+
+      <h2>Why "just give the agent a key" fails</h2>
+      <p>The failure modes are not hypothetical, and they compound:</p>
+      <ul>
+        <li><strong>Prompt injection turns access into exfiltration.</strong> Agents read remote output: logs, banners, error messages. If a compromised service can make the model act, a credential-bearing agent becomes a full-access weapon. Treating remote output as untrusted data is not paranoia; it is the only safe default.</li>
+        <li><strong>Reusable credentials are single-point failures.</strong> One SSH key pasted into a chat or logged by a tool is a permanent, unrevocable-by-usage secret. There is no per-action limit on what the agent may do with it.</li>
+        <li><strong>No per-action authorization.</strong> A key says "anything the account can do", not "read the disk usage of this one host". There is no policy layer between the agent's request and the action.</li>
+        <li><strong>No redaction.</strong> Command output may echo connection details, environment values, or secrets back into the conversation, model context, and chat history.</li>
+        <li><strong>No auditability.</strong> "The agent touched the server" is not an audit trail. Who authorized which action, when, against which resource, with which grant — all of that vanishes.</li>
+      </ul>
+
+      <h2>The pattern: separate the agent from the secret</h2>
+      <p>SAFA (Secure Access for Agents) is an open-source implementation of one idea: <strong>the agent never holds a reusable credential; it holds a safe alias and an intent, and a native local boundary does the rest.</strong></p>
+      <p>The architecture splits authority across processes so that no single agent-facing component can both interpret a request and resolve a secret:</p>
+      <table>
+        <thead><tr><th>Component</th><th>Responsibility</th><th>Credential authority</th></tr></thead>
+        <tbody>
+          <tr><td><code>safa</code> CLI</td><td>Parse agent commands, encode one canonical TOON result</td><td>None</td></tr>
+          <tr><td><code>safa-broker</code></td><td>Resolve protected records, enforce policy, authorize, connect, sanitize</td><td>Keychain / vault owner</td></tr>
+          <tr><td><code>safa-askpass</code></td><td>Deliver one child-bound, short-lived SSH secret</td><td>One-shot only</td></tr>
+          <tr><td><code>safa-trusted-setup</code></td><td>Collect hidden protected fields after local authentication</td><td>No persistent storage</td></tr>
+        </tbody>
+      </table>
+      <p>Concretely, the agent works with <strong>safe aliases</strong> (<code>nas.primary</code>), never IPs or usernames. Every remote action is checked against an <strong>allow-list</strong>: exact, reviewed argument vectors for read-only diagnostics (<code>df</code>, <code>uptime</code>, <code>free</code>, <code>ps</code>, <code>systemctl is-active</code>, <code>docker ps</code>/<code>stats</code>). Anything else is refused with a stable, structured error — there is no gray zone, and a format string one character off is refused too.</p>
+      <p>The agent-facing CLI speaks <strong>TOON</strong> (schema <code>dev.safa.cli/v2</code>), a canonical structured text format designed for agents (AXI principles): every success, empty state, refusal, and error is one machine-readable document on stdout, with stderr reserved for redacted diagnostics. Remote stdout and stderr are <strong>untrusted data</strong>, never instructions.</p>
+
+      <h2>Authorization is the rule, not the exception</h2>
+      <p>SAFA does not just intercept — it gates. <strong>High-privilege actions require the user to be present on the Mac.</strong> This is already how the preview behaves, not a roadmap promise:</p>
+      <ul>
+        <li><strong>Viewing protected details needs approval.</strong> Requesting a resource's details (<code>safa resource show ALIAS --details</code>) — the endpoint, port, username, inventory — triggers a macOS user-presence prompt (Touch ID / password). The details are returned only after the user approves, and the value never reaches the agent as raw material for further credential reuse.</li>
+        <li><strong>Privileged execution is gated by the same model.</strong> In the current preview, sudo-classified requests are refused with <code>approval_not_in_mvp</code>. The specified next capability (002-sudo-execution) replaces the refusal with a scoped approval: the user reviews the exact target, command, intent, and risk on the Mac, approves once (or grants a short-lived, revocable command family), and the Broker executes with the sudo credential injected only inside its own boundary — immediately isolating the privileged child's stdin, never composing the password into argv, environment, output, or audit records.</li>
+        <li><strong>The agent's self-assessment is advisory only.</strong> A model deciding "this sudo command is low risk" can never substitute for the macOS user-presence approval. No amount of agent reasoning proves a human authorized anything.</li>
+      </ul>
+      <div class="callout"><strong>The invariant:</strong> the sudo password, the SSH key, the vault key — none of them ever appears in agent argv, environment, stdin, stdout, stderr, chat history, or audit records. Ever. The credential exists only inside the Broker boundary, for the duration of one bounded operation.</div>
+
+      <h2>Real evidence, not a marketing mock</h2>
+      <p>The <a href="https://juju-w.github.io/safa/live-demo/">live demo</a> is a real recorded session against a real registered resource, replayed step by step with the actual TOON output. In that session the agent:</p>
+      <ul>
+        <li>discovered 11 registered resources by safe alias only;</li>
+        <li>ran allow-listed diagnostics (<code>df</code>, <code>uptime</code>, <code>free</code>, <code>ps</code>) and found the genuine signal: <strong>swap at 95% (9.5 GiB of 10 GiB) while RAM had headroom</strong> — an unreclaimed historical memory spike, the real cause of a "slow NAS" report;</li>
+        <li>reported a real contradiction (systemd says <code>inactive</code> for services that are running under the vendor stack) instead of inventing a conclusion;</li>
+        <li>was refused for <code>sudo</code>, for an off-allow-list command, and for an unregistered resource — all with stable, parseable errors.</li>
+      </ul>
+      <p>Every number in that replay is verbatim. The agent never saw an IP, a username, or a key.</p>
+
+      <h2>Where this fits</h2>
+      <p>SAFA occupies a specific, still-sparse niche: <strong>local-first, open-source, agent-native infrastructure access</strong>. Enterprise zero-trust platforms (Teleport's agentic identity, P0's authz control plane, BastionZero, Apono) solve similar problems with servers, tenants, and rollout teams. Cloud vendors are shipping agent identity primitives (Entra Agent ID, AWS AgentCore). SAFA is the personal-scale, inspectable implementation: the Skill teaches any capable agent the workflow, the native Runtime is a real security boundary on your own Mac, and the contracts, conformance fixtures, and threat model are public for review.</p>
+      <p>It is also a deliberately honest preview: macOS-only for now, non-sudo read-only execution today, sudo with scoped approval specified next, database/object-store/cache adapters registered but not yet operable. The guarantees that matter — no credential return path, fail-closed verification, untrusted remote output, explicit scope — are designed in from the first commit, not bolted on.</p>
+
+      <h2>Get started</h2>
+      <p>On macOS: <code>npx skills add juju-w/safa --skill safa</code>, register a resource once, then just ask. See the <a href="https://juju-w.github.io/safa/">product</a>, the <a href="https://juju-w.github.io/safa/how-it-works/">architecture explainer</a>, and the <a href="https://juju-w.github.io/safa/live-demo/">real diagnosis</a>.</p>
+      <div class="cta">
+        <a class="primary" href="https://juju-w.github.io/safa/live-demo/">See the real diagnosis</a>
+        <a class="secondary" href="https://github.com/juju-w/safa">View on GitHub</a>
+      </div>
+
+      <h2>FAQ</h2>
+      <h3>Should I give my AI agent the SSH key?</h3>
+      <p>No. A reusable credential enters chat history and model context, grants an unaudited broad session, and can be exfiltrated through prompt injection. Keep the secret in a native boundary; give the agent aliases and bounded, approved actions.</p>
+      <h3>How does SAFA keep credentials away from the agent?</h3>
+      <p>Process separation: the CLI has no credential authority, the Broker owns policy/credentials/transport, and narrow helpers handle credential delivery and trusted setup. The agent receives only safe aliases and bounded TOON evidence.</p>
+      <h3>What can a SAFA agent do?</h3>
+      <p>Allow-listed read-only diagnostics run automatically. Privileged and protected actions are gated by macOS user-presence approval (Touch ID). Sudo is refused in the preview; scoped, approved sudo is the specified next capability.</p>
+      <h3>Is SAFA open source?</h3>
+      <p>Yes — MIT-licensed. Skill/contracts at github.com/juju-w/safa, native Swift/macOS Runtime at github.com/juju-w/safa-runtime. Currently a macOS source preview.</p>
+
+      <footer>
+        <span>SAFA — Secure Access for Agents · MIT License</span>
+        <span><a href="https://github.com/juju-w/safa">GitHub</a> · <a href="https://juju-w.github.io/safa/sitemap.xml">Sitemap</a></span>
+      </footer>
+    </div>
+  </body>
+</html>
