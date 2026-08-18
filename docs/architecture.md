@@ -17,7 +17,7 @@ flowchart TB
     Runtime["juju-w/safa-runtime\nnative runtime repository"]
 
     Product --> Skill["Agent Skill and launcher"]
-    Product --> PublicContracts["CLI/JSON contracts and fixtures"]
+    Product --> PublicContracts["Agent CLI/TOON contracts and fixtures"]
     Product --> Manifest["Exact runtime manifests"]
     Product --> ProductDocs["Product and threat-model documentation"]
 
@@ -42,7 +42,7 @@ sequenceDiagram
 
     A->>S: install Skill files (copy/symlink only)
     A->>S: request operation using resource alias
-    S->>L: safa doctor/resource/exec --json
+    S->>L: safa doctor/resource/exec
     L->>L: detect platform and architecture
     L->>L: resolve exact compatible manifest entry
     L->>L: verify digest and platform signature policy
@@ -51,7 +51,7 @@ sequenceDiagram
     O-->>R: authorized handle or denial
     R->>T: bounded connection/action
     T-->>R: untrusted output
-    R-->>S: stable JSON envelope + bounded output
+    R-->>S: stable TOON document + bounded output
     S-->>A: finding, status, or safe next action
 ```
 
@@ -73,11 +73,28 @@ All platforms expose the same conceptual surface:
 - resource-directory lifecycle using aliases and typed safe metadata;
 - bounded execution/request state with stable status and error codes;
 - version negotiation before protected actions;
-- a JSON envelope that separates trusted control fields from untrusted remote output.
+- one canonical TOON document that separates trusted control fields from untrusted remote output.
 
 The internal implementation may differ. macOS can use XPC, Linux can use a Unix domain socket with
 peer-credential checks, and Windows can use a Named Pipe with access control. Those transports are
 not part of the Agent-facing contract.
+
+The first public contract targets `dev.safa.cli/v2`. It is an Agent-only
+[AXI](https://axi.md/) surface: no human renderer, no `--json`/`--toon` format negotiation, and no
+interactive terminal input. TOON is produced only at the final presentation boundary from explicit
+typed DTOs. Broker IPC, vault persistence, and adapter protocols remain private and format-neutral.
+
+Lists default to three or four safe fields; additional fields require a command-specific allowlisted
+`--fields`. Long content is previewed with total size and explicit truncation, and `--full` remains
+subject to a Broker hard cap. Results carry cheap aggregates and deterministic answers when they
+prevent a predictable second call. Empty success, no-op, and error states are explicit. Unknown
+input fails before Broker work, while stdout remains one TOON document and stderr carries only
+redacted diagnostics.
+
+No-argument roots expose a bounded safe home view and contextual command templates. An optional
+session integration may inject that same safe view only after explicit setup; it never captures
+transcripts, protected topology, or remote output for ambient reuse. The complete target is
+specified in [`cli-v2.md`](../contracts/cli-v2.md). JSON v1 is not retained as a second public mode.
 
 ## 5. Platform runtime design
 
@@ -121,7 +138,7 @@ flowchart LR
     Broker --> Consent
     Broker --> Target
     Target --> Output --> Broker
-    Broker -->|"sanitized stable envelope"| Prompt
+    Broker -->|"sanitized stable TOON"| Prompt
 ```
 
 Key invariants:
@@ -211,14 +228,17 @@ leave a plaintext intermediate. This workflow is not part of the current preview
 
 ## 10. Migration sequence
 
-1. Freeze and version the current CLI/JSON/resource contracts in `safa`.
-2. Keep the working Swift implementation intact while moving product-owned Skill material here.
-3. Keep the universal Skill entry as a small script resolver; do not introduce a shared native
+1. Keep the Agent-only TOON v2 contract and pinned official conformance sources synchronized.
+2. Keep the Skill and exact Runtime schema range atomic; do not publish a dual-format mode.
+3. Preserve the native security boundary while evolving only explicit presentation DTOs.
+4. Re-run the SAFA task corpus when the CLI contract or selected Agent models change; record
+   completion, turns, tokens, and latency rather than inferring results from third-party benchmarks.
+5. Keep the universal Skill entry as a small script resolver; do not introduce a shared native
    launcher binary.
-4. Introduce shared conformance fixtures consumed by each implemented platform Runtime CI.
-5. Produce signed macOS Runtime assets and a verified manifest.
-6. Release the Skill only after the end-to-end resolver and rollback path pass review.
-7. Choose and implement another platform Runtime only when that work is actually scheduled.
+6. Introduce shared conformance fixtures consumed by each implemented platform Runtime CI.
+7. Produce signed macOS Runtime assets and a verified manifest.
+8. Release the Skill only after the end-to-end resolver and rollback path pass review.
+9. Choose and implement another platform Runtime only when that work is actually scheduled.
 
 ## 11. Future browser-session capability
 

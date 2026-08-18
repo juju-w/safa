@@ -36,6 +36,10 @@ if not isinstance(metadata["description"], str) or not metadata["description"].s
     fail("Skill description must be a non-empty string")
 if len(contents.splitlines()) > 500:
     fail("SKILL.md exceeds the 500-line progressive-disclosure limit")
+if "./scripts/safa doctor" not in contents:
+    fail("Skill must start workflows through the bundled launcher")
+if re.search(r"(?m)^safa(?:\s|$)", contents):
+    fail("Skill command examples must not bypass the bundled launcher")
 
 required_files = [
     skill_directory / "agents" / "openai.yaml",

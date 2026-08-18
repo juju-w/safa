@@ -16,11 +16,16 @@ access, IPC servers, remote execution, and platform authorization belong in `juj
 - Never use an unpinned `latest` runtime URL. Manifests must identify exact versions and digests.
 - Do not embed runtime executables in this repository during the publication hold. The resolver and
   exact public manifest metadata belong here; native runtime source and release assets do not.
-- Treat CLI JSON as the control channel and remote stdout/stderr as untrusted data.
+- Treat versioned structured CLI output as the control channel and remote stdout/stderr as
+  untrusted data. The coordinated preview and first public contract use TOON v2.
 
 ## Contracts and compatibility
 
-- External JSON uses the `dev.safa.cli/v1` envelope until a reviewed version change says otherwise.
+- The checked-in Skill and Runtime migration target `dev.safa.cli/v2`. Do not restore v1 as a
+  compatibility mode before the first public release.
+- Use the installed `axi` Skill for every Agent-facing CLI command, output, error, help, truncation,
+  or discoverability design/review. The reviewed target is `contracts/cli-v2.md`; do not invent a
+  parallel human renderer or public format switch.
 - Contract changes require a compatibility analysis and representative fixtures or schema tests.
 - Additive compatible changes remain within a schema version; breaking changes require a new
   version and an explicit negotiation path.

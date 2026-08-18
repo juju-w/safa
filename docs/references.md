@@ -1,14 +1,32 @@
 # Research References
 
-SAFA cites research where an external result materially informed a design decision. The current
-research basis concerns how an Agent should receive a bounded projection of infrastructure
-topology. These citations acknowledge the evidence; they do not claim that SAFA reproduces the
-papers' models, datasets, benchmarks, or reported results.
+SAFA cites research and external design specifications where they materially informed a decision.
+The current basis covers both the Agent-facing CLI and bounded infrastructure-topology projections.
+These citations acknowledge the influence; they do not claim that SAFA reproduces another project's
+models, datasets, benchmarks, or reported results.
 
 The normative SAFA behavior remains in the public contracts and deterministic Broker tests. If a
 future implementation copies or adapts source code, an algorithm implementation, dataset, or other
 licensed artifact, its license and required attribution must be reviewed separately from this
 scholarly bibliography.
+
+## Agent CLI design
+
+1. Kun Chen. “AXI: Agent eXperience Interface.” 2026.
+   [Website](https://axi.md/) · [Source and Skill](https://github.com/kunchenguid/axi)
+
+   **Influence on SAFA:** the Agent-only CLI adopts token-efficient output, minimal default schemas,
+   bounded previews, precomputed aggregates, definitive empty states, structured failures,
+   content-first roots, contextual next commands, and concise local help. SAFA narrows ambient
+   context and `--full` behavior to preserve its security boundary.
+
+2. Johann Schopplich and contributors. “Token-Oriented Object Notation (TOON), Specification v4.1.”
+   2026. [Specification](https://toonformat.dev/reference/spec.html) ·
+   [Implementations](https://toonformat.dev/ecosystem/implementations.html)
+
+   **Influence on SAFA:** public Agent output uses canonical TOON at the presentation boundary while
+   typed Runtime DTOs, private IPC, and persistence remain implementation details. Shipping requires
+   strict conformance fixtures against the selected encoder version.
 
 ## Topology projection
 

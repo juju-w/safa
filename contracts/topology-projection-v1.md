@@ -1,5 +1,9 @@
 # Topology Projection v1
 
+> [!NOTE]
+> This contract defines the topology data model independently of its outer encoding. Private Broker
+> IPC remains typed JSON data; the implemented Agent CLI v2 encodes its reviewed projection as TOON.
+
 **Status**: Runtime v1 implemented; publication remains on hold.
 
 SAFA models infrastructure topology as a directed, typed, attributed multigraph. A rendered
@@ -156,11 +160,11 @@ means no such path exists in the bounded graph; `indeterminate` means bounds pre
 ## 5. Simple CLI surface
 
 ```text
-safa topology show [ALIAS] --json
-safa topology path FROM TO --json
-safa topology impact ALIAS --json
-safa topology link FROM RELATION TO --json
-safa topology unlink FROM RELATION TO --json
+safa topology show [ALIAS] [--limit N] [--fields FIELD,...]
+safa topology path FROM TO [--limit N]
+safa topology impact ALIAS [--limit N]
+safa topology link FROM RELATION TO
+safa topology unlink FROM RELATION TO
 ```
 
 `show`, `path`, and `impact` are non-interactive safe projections. `link` and `unlink` require
@@ -232,8 +236,7 @@ Full bibliographic attribution and the mapping from each result to a SAFA design
 
 ## 10. Compatibility analysis
 
-This is an additive v1 contract. It changes no existing command, field, status, exit code, or
-Runtime manifest. Topology commands emit the existing `dev.safa.cli/v1` envelope and place the
-projection under `data.topology`. Existing resource relationships remain protected by default;
-Agent visibility requires an explicit trusted-local classification. Representative fixtures live
-under `conformance/cli-v1/`.
+This remains the Broker's internal topology projection v1. The CLI maps it into the public
+`dev.safa.cli/v2` TOON DTO; internal projection versioning does not leak into the public envelope.
+Existing resource relationships remain protected by default, and Agent visibility requires an
+explicit trusted-local classification.

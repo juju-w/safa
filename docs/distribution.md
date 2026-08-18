@@ -15,7 +15,7 @@ the selected Agent's Skill directory.
 The installed Skill includes a small resolver. The first Agent workflow calls:
 
 ```bash
-./scripts/safa doctor --json
+./scripts/safa doctor
 ```
 
 That invocation performs Runtime discovery/bootstrap before any protected operation.
@@ -51,7 +51,7 @@ platform Runtime exists; the repository does not carry speculative launcher impl
 
 Executing arbitrary repository scripts while merely installing Agent instructions would enlarge the
 supply-chain blast radius and behave inconsistently across Agent platforms. A copy-only Skill install
-has a reviewable result. Runtime activation remains an explicit SAFA operation with a stable JSON
+has a reviewable result. Runtime activation remains an explicit SAFA operation with a stable TOON
 error or user action when it cannot proceed safely.
 
 ## 4. Resolver inputs
@@ -81,7 +81,7 @@ sequenceDiagram
 
     I->>S: copy or symlink Skill files
     Note over I,S: no SAFA code executes here
-    S->>L: doctor --json
+    S->>L: doctor
     L->>M: select exact platform + architecture
     L->>L: reuse verified installed version when present
     alt Runtime absent
@@ -91,7 +91,7 @@ sequenceDiagram
       O-->>L: valid or denied
       L->>L: atomic current-user installation
     end
-    L->>R: invoke native CLI doctor --json
+    L->>R: invoke native CLI doctor
 ```
 
 Temporary downloads use a newly created private directory. Activation is an atomic rename into an

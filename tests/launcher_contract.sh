@@ -16,24 +16,18 @@ if [ ! -x "$launcher" ]; then
 fi
 
 set +e
-output=$(HOME="$test_home" "$launcher" doctor --json 2>&1)
+output=$(HOME="$test_home" "$launcher" doctor 2>&1)
 result=$?
 set -e
 
-printf '%s' "$output" | python3 -c '
-import json
-import sys
-
-payload = json.load(sys.stdin)
-assert payload["schema"] == "dev.safa.cli/v1"
-assert payload["command"] == "launcher"
-assert payload["status"] in {"failed", "user_action_required"}
-assert payload["data"]["error"]["code"] in {"runtime_missing", "unsupported_platform"}
-'
+printf '%s\n' "$output" | grep -Fx 'schema: dev.safa.cli/v2' >/dev/null
+printf '%s\n' "$output" | grep -Fx 'command: launcher' >/dev/null
+printf '%s\n' "$output" | grep -Eq '^status: (failed|user_action_required)$'
+printf '%s\n' "$output" | grep -Eq '^  code: (runtime\.missing|unsupported_platform)$'
 
 case "$(uname -s)" in
   Darwin)
-    [ "$result" -eq 22 ]
+    [ "$result" -eq 1 ]
 
     data_root="${test_home}/Library/Application Support/SAFA"
     mkdir -p "$data_root"
@@ -43,21 +37,15 @@ case "$(uname -s)" in
     chmod 600 "${data_root}/runtime.local.json"
 
     set +e
-    output=$(HOME="$test_home" "$launcher" doctor --json 2>&1)
+    output=$(HOME="$test_home" "$launcher" doctor 2>&1)
     result=$?
     set -e
 
-    printf '%s' "$output" | python3 -c '
-import json
-import sys
-
-payload = json.load(sys.stdin)
-assert payload["status"] == "user_action_required"
-assert payload["data"]["error"]["code"] == "runtime_missing"
-'
-    [ "$result" -eq 22 ]
+    printf '%s\n' "$output" | grep -Fx 'status: user_action_required' >/dev/null
+    printf '%s\n' "$output" | grep -Fx '  code: runtime.missing' >/dev/null
+    [ "$result" -eq 1 ]
     ;;
   *)
-    [ "$result" -eq 45 ]
+    [ "$result" -eq 1 ]
     ;;
 esac

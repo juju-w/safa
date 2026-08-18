@@ -19,12 +19,13 @@ asking the user to paste a reusable credential into the conversation.
 > [!IMPORTANT]
 > SAFA is an unpublished macOS diagnostic preview. No signed Runtime release, public installer,
 > tag, or marketplace package is available yet. The installation command below describes the
-> intended release experience, not current production guidance.
+> intended release experience, not current production guidance. The coordinated Skill and Runtime
+> migration implements the Agent-only TOON v2 contract, but it is not a signed public release.
 
 ## See it in action
 
 After one-time local resource setup, the normal interface is the Agent conversation—not the CLI.
-This illustrative transcript uses fictional aliases and synthetic output.
+This illustrative target-v2 transcript uses fictional aliases and synthetic output.
 
 > **You**
 >
@@ -40,9 +41,9 @@ This illustrative transcript uses fictional aliases and synthetic output.
 
 | Step | Skill / Runtime call | Synthetic result |
 |---:|---|---|
-| 1 | `safa doctor --json` | Broker and vault are ready. |
-| 2 | `safa resource list --json` | Safe alias `web.production` matches the request. |
-| 3 | `safa topology show web.production --json` | The Broker returns the bounded service context. |
+| 1 | `safa doctor` | Broker and vault are ready. |
+| 2 | `safa resource list` | Safe alias `web.production` matches the request. |
+| 3 | `safa topology show web.production` | The Broker returns the bounded service context. |
 | 4 | `safa exec web.production … systemctl is-active nginx` | `active` |
 | 5 | `safa exec web.production … df -h /` | Root filesystem is 98% full. |
 
@@ -72,6 +73,27 @@ SAFA deliberately separates those responsibilities:
 The CLI is the narrow machine interface between these layers; it is not the primary product
 experience and has no operation that returns a stored password or private key.
 
+## Agent-native CLI design
+
+SAFA's thin CLI is designed as an
+[Agent eXperience Interface](https://axi.md/): it serves Agents only and does not maintain a second
+human-oriented presentation mode. Except for a bare SemVer fast path, every result, empty state,
+no-op, and error is one canonical [TOON](https://toonformat.dev/) document on stdout.
+
+The surface follows four practical rules:
+
+- default lists expose only three or four safe fields, with allowlisted `--fields` expansion;
+- counts, health summaries, topology answers, truncation state, and useful next commands are
+  precomputed when they avoid another Agent turn;
+- no-argument roots return bounded live state instead of a manual, while `--help` remains concise
+  and local to one command;
+- errors use the same TOON contract, unknown input fails before any Broker or remote action, and
+  terminal stdin is never used for a secret or approval.
+
+The Runtime's XPC DTOs, encrypted storage, and native adapters remain private implementation
+details. TOON is applied only at the Agent output boundary after policy, authorization, redaction,
+and output limits. See the [CLI v2 contract](contracts/cli-v2.md).
+
 ## How it works
 
 ```mermaid
@@ -89,7 +111,7 @@ sequenceDiagram
     R->>R: authorize, resolve, and enforce policy
     R->>T: connect without exposing the credential
     T-->>R: untrusted operational evidence
-    R-->>S: bounded, redacted JSON result
+    R-->>S: bounded, redacted TOON result
     S-->>A: lifecycle-aware findings
     A-->>U: evidence-backed answer
 ```
@@ -100,7 +122,7 @@ storage, user authorization, strict target identity, policy, and bounded output�
 
 Core guarantees of the current design:
 
-- reusable credentials and vault keys never enter Agent-facing JSON;
+- reusable credentials and vault keys never enter Agent-facing output;
 - resources are selected by safe logical alias rather than copied endpoint details;
 - SSH targets use pinned host identity and isolated client configuration;
 - temporary password delivery is child-bound, short-lived, and single-use;
@@ -135,19 +157,19 @@ tasks in natural language, while the Skill selects from this small surface using
 
 ```bash
 # Confirm that SAFA is ready and discover safe aliases.
-safa doctor --json
-safa resource list --json
+safa doctor
+safa resource list
 
 # Inspect the safe summary for a storage host, then check its root filesystem.
-safa resource show storage.primary --json
-safa exec storage.primary --json --intent "Check a disk capacity alert" -- df -h /
+safa resource show storage.primary
+safa exec storage.primary --intent "Check a disk capacity alert" -- df -h /
 
 # Find the processes consuming the most CPU on a batch worker.
-safa exec worker.batch --json --intent "Investigate a high CPU alert" -- \
+safa exec worker.batch --intent "Investigate a high CPU alert" -- \
   ps -eo pid,ppid,user,stat,comm,%cpu,%mem --sort=-%cpu
 
 # Ask the Broker whether an application has a verified path to its database.
-safa topology path app.production database.primary --json
+safa topology path app.production database.primary
 ```
 
 </details>
@@ -157,7 +179,7 @@ setup or desired topology-link actions can reuse separate Broker-memory authoriz
 minutes; destructive/state changes still require a fresh prompt. Arbitrary
 shell execution, sudo, mutation approval, and non-SSH protocol operations are not current Agent
 capabilities. The canonical command and envelope definitions live in the
-[CLI contract](contracts/cli-v1.md).
+[CLI contract](contracts/cli-v2.md).
 
 ## Current scope
 
@@ -177,7 +199,7 @@ The [Platform support matrix](docs/platform-support.md) is authoritative for pla
 
 | Repository | Owns |
 |---|---|
-| [`juju-w/safa`](https://github.com/juju-w/safa) | Agent Skill, public CLI/resource contracts, product documentation, conformance fixtures, and exact Runtime manifests |
+| [`juju-w/safa`](https://github.com/juju-w/safa) | Agent Skill, public Agent-CLI/TOON/resource contracts, product documentation, conformance fixtures, and exact Runtime manifests |
 | [`juju-w/safa-runtime`](https://github.com/juju-w/safa-runtime) | Native CLI/Broker/helper implementations, operating-system security adapters, tests, signing, and Runtime packaging |
 
 The product repository defines public behavior. Native Runtimes implement that behavior and consume
@@ -191,8 +213,10 @@ the same conformance fixtures; they do not create a second Agent contract.
 - [Runtime distribution and bootstrap](docs/distribution.md)
 - [Platform support matrix](docs/platform-support.md)
 - [Research references and influence map](docs/references.md)
+- [Agent CLI v2 benchmark results](docs/agent-cli-v2-benchmark.md)
 - [Brokered browser access roadmap](docs/browser-access-roadmap.md)
 - [Resource directory contract](contracts/resource-directory-v1.md)
+- [Agent CLI v2 contract](contracts/cli-v2.md)
 - [Native Runtime repository](https://github.com/juju-w/safa-runtime)
 
 SAFA is licensed under the [MIT License](LICENSE).

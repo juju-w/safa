@@ -6,9 +6,30 @@ export PATH
 emit_error() {
   error_code="$1"
   message="$2"
-  exit_code="$3"
-  printf '%s\n' "{\"schema\":\"dev.safa.cli/v1\",\"command\":\"launcher\",\"status\":\"failed\",\"request_id\":null,\"data\":{\"error\":{\"code\":\"${error_code}\",\"message\":\"${message}\",\"retryable\":false}},\"warnings\":[],\"next_action\":null}"
-  exit "$exit_code"
+  printf '%s\n' \
+    'schema: dev.safa.cli/v2' \
+    'command: launcher' \
+    'status: failed' \
+    'error:' \
+    "  code: ${error_code}" \
+    "  message: ${message}" \
+    '  retryable: false'
+  exit 1
+}
+
+emit_runtime_missing() {
+  message="$1"
+  printf '%s\n' \
+    'schema: dev.safa.cli/v2' \
+    'command: launcher' \
+    'status: user_action_required' \
+    'error:' \
+    '  code: runtime.missing' \
+    "  message: ${message}" \
+    '  retryable: false' \
+    'next[1]{command,reason,safe_for_agent}:' \
+    '  install a verified SAFA Runtime,A local user must install the signed native package,false'
+  exit 1
 }
 
 if [ "$(uname -s)" != "Darwin" ]; then
@@ -29,8 +50,7 @@ data_root="${HOME}/Library/Application Support/SAFA"
 lock_path="${data_root}/runtime.local.json"
 
 if [ ! -f "$lock_path" ]; then
-  printf '%s\n' '{"schema":"dev.safa.cli/v1","command":"launcher","status":"user_action_required","request_id":null,"data":{"error":{"code":"runtime_missing","message":"A verified SAFA Runtime has not been installed for this user.","retryable":false}},"warnings":[],"next_action":{"kind":"install_verified_runtime","safe_for_agent":false}}'
-  exit 22
+  emit_runtime_missing "A verified SAFA Runtime has not been installed for this user."
 fi
 
 if [ -L "$lock_path" ]; then
@@ -88,8 +108,7 @@ if [ -L "$runtime_app" ]; then
 fi
 
 if [ ! -d "$runtime_app" ] || [ ! -x "$cli_path" ] || [ ! -x "$broker_path" ] || [ ! -x "$askpass_path" ]; then
-  printf '%s\n' '{"schema":"dev.safa.cli/v1","command":"launcher","status":"user_action_required","request_id":null,"data":{"error":{"code":"runtime_missing","message":"The locked SAFA Runtime installation is incomplete.","retryable":false}},"warnings":[],"next_action":{"kind":"install_verified_runtime","safe_for_agent":false}}'
-  exit 22
+  emit_runtime_missing "The locked SAFA Runtime installation is incomplete."
 fi
 
 if ! /usr/bin/codesign --verify --deep --strict "$runtime_app" >/dev/null 2>&1; then
@@ -145,12 +164,9 @@ case " ${binary_architectures} " in
   *) emit_error "runtime_architecture_invalid" "The SAFA Runtime does not contain the required architecture." 45 ;;
 esac
 
-version_output=$("$cli_path" version --json 2>/dev/null) \
+version_output=$("$cli_path" --version 2>/dev/null) \
   || emit_error "runtime_version_invalid" "The SAFA Runtime version could not be verified." 45
-installed_version=$(printf '%s' "$version_output" \
-  | /usr/bin/plutil -extract data.runtime_version raw -o - - 2>/dev/null) \
-  || emit_error "runtime_version_invalid" "The SAFA Runtime version response is invalid." 45
-if [ "$installed_version" != "$runtime_version" ]; then
+if [ "$version_output" != "$runtime_version" ]; then
   emit_error "runtime_version_invalid" "The SAFA Runtime version does not match its local lock." 45
 fi
 

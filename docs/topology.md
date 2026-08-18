@@ -54,7 +54,7 @@ flowchart TD
     Q -->|What breaks if X fails?| I[topology impact X]
     Q -->|Explicitly record a relationship| L[topology link A relation B]
     Q -->|Explicitly remove a relationship| U[topology unlink A relation B]
-    S --> A1[Read data.topology.answer.outcome first]
+    S --> A1[Read answer.outcome first]
     P --> A1
     I --> A1
     L --> H[Wait for macOS user authorization]
@@ -68,11 +68,11 @@ connectivity.
 
 | User intent | One command | Read first |
 |---|---|---|
-| “这个服务部署/关联在哪里？” | `safa topology show service.api --json` | `data.topology.answer.outcome` |
-| “计算节点能访问 MySQL 吗？” | `safa topology path host.compute service.mysql --json` | `confirmed`, `not-found`, or `indeterminate` |
-| “NAS 挂了影响什么？” | `safa topology impact storage.reports --json` | `affected_aliases` |
-| “记一下 worker 依赖 API” | `safa topology link service.worker depends-on service.api --json` | mutation status |
-| “计算节点属于办公网” | `safa topology link host.compute member-of network.office-lan --json` | mutation status |
+| “这个服务部署/关联在哪里？” | `safa topology show service.api` | `answer.outcome` |
+| “计算节点能访问 MySQL 吗？” | `safa topology path host.compute service.mysql` | `confirmed`, `not-found`, or `indeterminate` |
+| “NAS 挂了影响什么？” | `safa topology impact storage.reports` | `affected_aliases` |
+| “记一下 worker 依赖 API” | `safa topology link service.worker depends-on service.api` | mutation status |
+| “计算节点属于办公网” | `safa topology link host.compute member-of network.office-lan` | mutation status |
 
 The table uses fictitious aliases. Real inventory never belongs in this repository.
 
@@ -81,4 +81,5 @@ The table uses fictitious aliases. Real inventory never belongs in this reposito
 A host may sit in one site, use a route in another security domain, run several services, and depend
 on multiple stores. That is not a tree. Visual layout is also ambiguous to models: proximity and
 arrow routing can be misread. SAFA therefore keeps the exact graph and proof in JSON, then derives a
-small diagram only for human review.
+small diagram only for human review. The Agent projection is canonical TOON, not a diagram or JSON
+compatibility envelope.
