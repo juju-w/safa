@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -9,139 +9,19 @@ import {
   DotsThree,
   Fingerprint,
   GithubLogo,
-  Globe,
   List,
   LockKey,
   MagnifyingGlass,
+  Network,
   Play,
+  ShareNetwork,
   ShieldCheck,
   TerminalWindow,
+  WarningCircle,
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
-
-type Language = "en" | "zh";
-
-const INSTALL_COMMAND = "npx skills add juju-w/safa --skill safa";
-const GITHUB_URL = "https://github.com/juju-w/safa";
-
-const copy = {
-  en: {
-    navProduct: "Product",
-    navSecurity: "Security",
-    navHow: "How it works",
-    heroEyebrow: "Secure Access for Agents",
-    heroSlogan: "Give agents access, not credentials.",
-    heroBody: "A native security boundary for AI agents—policy-controlled, user-authorized, and built for real infrastructure work.",
-    github: "View on GitHub",
-    seeDemo: "See the demo",
-    install: "Install",
-    copied: "Copied",
-    copyInstall: "Copy install command",
-    switchLanguage: "Switch language to",
-    mascotAlt: "SAFA owl guardian",
-    userLabel: "You",
-    demoTitle: "Diagnose checkout-api",
-    online: "Online",
-    conversation: "Conversation",
-    session: "Session · interactive demo",
-    userPrompt: "Why is checkout-api returning 502? Diagnose only—don’t change anything.",
-    thinking: "Working through SAFA…",
-    discovered: "Discovered resource alias",
-    topology: "Checked topology",
-    topologyDetail: "checkout-api · production",
-    health: "Ran safe health check",
-    authorization: "Authorization required",
-    authorizationBody: "A read-only action needs your approval.",
-    resource: "Resource",
-    action: "Action",
-    actionValue: "Read service logs from the last 10 minutes",
-    scope: "Scope",
-    scopeValue: "One action · expires in 5 minutes",
-    sealed: "Credentials remain sealed",
-    touchId: "Authorize with Touch ID",
-    waiting: "Waiting for your authorization…",
-    granted: "Authorization granted",
-    logRead: "Executed log read",
-    logReadDetail: "Last 10 minutes · read-only",
-    finding: "Finding",
-    findingValue: "Database connection pool exhausted. No changes made.",
-    message: "Message SAFA Agent…",
-    policy: "Policy active",
-    leastPrivilege: "Least privilege",
-    replay: "Replay demo",
-    trustEyebrow: "Security boundary",
-    trustTitle: "Trust built for agent workflows",
-    trustBody: "The agent gets evidence. SAFA keeps credentials, policy, and user authorization on your Mac.",
-    requestTitle: "Agent request",
-    requestBody: "The agent asks for one resource or action through a safe logical alias.",
-    policyTitle: "SAFA policy & user authorization",
-    policyBody: "SAFA evaluates the exact action and asks you when user presence is required.",
-    resourceTitle: "Registered resource",
-    resourceBody: "Only the approved, scoped action reaches the selected resource.",
-    credentials: "Reusable credentials never enter the conversation.",
-    openTitle: "Open by design. Built for builders.",
-    openBody: "Review the code, shape the policy, and help make agent access safer.",
-    footer: "Secure Access for Agents",
-  },
-  zh: {
-    navProduct: "产品",
-    navSecurity: "安全机制",
-    navHow: "工作原理",
-    heroEyebrow: "智能体安全访问",
-    heroSlogan: "让智能体能访问系统，但永远看不到凭证。",
-    heroBody: "SAFA 在智能体和你的服务器、数据库之间建立一道本机安全边界：每次访问都受策略限制，并由你本人授权。",
-    github: "在 GitHub 查看源码",
-    seeDemo: "查看演示",
-    install: "安装",
-    copied: "已复制",
-    copyInstall: "复制安装命令",
-    switchLanguage: "切换语言：",
-    mascotAlt: "SAFA 守护猫头鹰",
-    userLabel: "你",
-    demoTitle: "排查 checkout-api 故障",
-    online: "运行中",
-    conversation: "对话",
-    session: "交互演示",
-    userPrompt: "checkout-api 为什么一直返回 502？只排查原因，不要修改任何配置。",
-    thinking: "正在排查…",
-    discovered: "定位到目标资源",
-    topology: "确认服务拓扑",
-    topologyDetail: "checkout-api · 生产环境",
-    health: "完成只读健康检查",
-    authorization: "需要你的授权",
-    authorizationBody: "继续读取日志前，请确认这次只读操作。",
-    resource: "目标资源",
-    action: "即将执行",
-    actionValue: "读取最近 10 分钟的服务日志",
-    scope: "授权范围",
-    scopeValue: "仅限本次操作 · 5 分钟内有效",
-    sealed: "凭证不会暴露给智能体",
-    touchId: "使用 Touch ID 授权",
-    waiting: "等待授权…",
-    granted: "已获得授权",
-    logRead: "已读取服务日志",
-    logReadDetail: "最近 10 分钟 · 只读",
-    finding: "排查结果",
-    findingValue: "数据库连接池已耗尽；全程未修改任何配置。",
-    message: "向 SAFA Agent 提问…",
-    policy: "安全策略已生效",
-    leastPrivilege: "默认最小权限",
-    replay: "重新播放",
-    trustEyebrow: "安全边界",
-    trustTitle: "每一次访问，都经过明确授权",
-    trustBody: "智能体拿到的是一次性访问能力；凭证、策略和授权过程始终留在你的 Mac 上。",
-    requestTitle: "智能体提出请求",
-    requestBody: "智能体只描述要访问的资源和要执行的操作，不接触真实凭证。",
-    policyTitle: "SAFA 校验策略并请求授权",
-    policyBody: "SAFA 核对操作范围；需要本人确认时，再通过 Touch ID 授权。",
-    resourceTitle: "执行限定操作",
-    resourceBody: "只有经过授权的操作才能到达目标资源，权限用完即失效。",
-    credentials: "可复用凭证不会进入对话，也不会交给智能体。",
-    openTitle: "开源、可审计，也欢迎一起完善。",
-    openBody: "查看源码、审阅安全边界，或参与 SAFA 的开发。",
-    footer: "面向智能体的安全访问层",
-  },
-} as const;
+import { SiteFooter, SiteNav, useLanguage } from "./SiteChrome";
+import { GITHUB_URL, homeCopy, INSTALL_COMMAND, siteHref } from "./site";
 
 function useDemoSequence(active: boolean, reducedMotion: boolean | null) {
   const [phase, setPhase] = useState(0);
@@ -203,9 +83,9 @@ function ToolRow({ icon, label, detail, visible }: { icon: ReactNode; label: str
 }
 
 export function Prototype() {
-  const [language, setLanguage] = useState<Language>("en");
+  const { language, setLanguage } = useLanguage();
   const [copied, setCopied] = useState(false);
-  const t = copy[language];
+  const t = homeCopy[language];
   const reducedMotion = useReducedMotion();
   const demoRef = useRef<HTMLDivElement>(null);
   const demoInView = useInView(demoRef, { once: true, amount: 0.2 });
@@ -213,13 +93,6 @@ export function Prototype() {
   const { scrollYProgress } = useScroll();
   const heroY = useTransform(scrollYProgress, [0, 0.25], [0, reducedMotion ? 0 : 90]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.22], [1, 0.45]);
-  const assetBase = import.meta.env.BASE_URL;
-
-  useEffect(() => {
-    document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
-  }, [language]);
-
-  const languageLabel = useMemo(() => (language === "en" ? "中文" : "EN"), [language]);
 
   async function copyInstallCommand() {
     try {
@@ -247,27 +120,10 @@ export function Prototype() {
     <main className="site-shell" id="product">
       <motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }} aria-hidden="true" />
 
-      <header className="site-nav" aria-label="Primary navigation">
-        <a className="brand" href="#product" aria-label="SAFA home">
-          <img src={`${assetBase}assets/safa-icon-64.png`} alt="" />
-          <span>SAFA</span>
-        </a>
-        <nav className="nav-links">
-          <a href="#product">{t.navProduct}</a>
-          <a href="#security">{t.navSecurity}</a>
-          <a href="#how-it-works">{t.navHow}</a>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
-        </nav>
-        <button className="language-switch" type="button" onClick={() => setLanguage(language === "en" ? "zh" : "en")} aria-label={`${t.switchLanguage} ${languageLabel}`}>
-          <Globe aria-hidden="true" />
-          <span>{language === "en" ? "EN" : "中文"}</span>
-          <span className="language-divider" aria-hidden="true">/</span>
-          <span className="language-muted">{languageLabel}</span>
-        </button>
-      </header>
+      <SiteNav language={language} onLanguageChange={setLanguage} />
 
       <section className="hero" aria-labelledby="hero-title">
-        <motion.img className="hero-backdrop" src={`${assetBase}assets/hero-aurora.webp`} alt="" style={{ y: heroY, opacity: heroOpacity }} />
+        <motion.img className="hero-backdrop" src={siteHref("assets/hero-aurora.webp")} alt="" style={{ y: heroY, opacity: heroOpacity }} />
         <div className="hero-shade" aria-hidden="true" />
         <div className="hero-content">
           <p className="eyebrow">{t.heroEyebrow}</p>
@@ -275,11 +131,11 @@ export function Prototype() {
           <p className="hero-slogan">{t.heroSlogan}</p>
           <p className="hero-body">{t.heroBody}</p>
           <div className="hero-actions">
-            <a className="button button-primary" href={GITHUB_URL} target="_blank" rel="noreferrer">
-              <GithubLogo weight="fill" aria-hidden="true" /> {t.github}
-            </a>
-            <a className="button button-secondary" href="#how-it-works">
+            <a className="button button-primary" href="#diagnosis-demo">
               <Play weight="fill" aria-hidden="true" /> {t.seeDemo}
+            </a>
+            <a className="button button-secondary" href={siteHref("how-it-works/")}>
+              <ShieldCheck weight="fill" aria-hidden="true" /> {t.learnHow}
             </a>
           </div>
           <div className="install-command" aria-label={`${t.install}: ${INSTALL_COMMAND}`}>
@@ -291,10 +147,30 @@ export function Prototype() {
             <AnimatePresence>{copied ? <motion.em initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{t.copied}</motion.em> : null}</AnimatePresence>
           </div>
         </div>
-        <img className="hero-mascot" src={`${assetBase}assets/safa-mascot.webp`} alt={t.mascotAlt} />
+        <img className="hero-mascot" src={siteHref("assets/safa-mascot.webp")} alt={t.mascotAlt} />
       </section>
 
-      <section className="demo-section" id="how-it-works" ref={demoRef} aria-labelledby="demo-heading">
+      <section className="prompt-section" aria-labelledby="prompt-heading">
+        <div className="section-heading centered">
+          <p className="eyebrow">{t.promptEyebrow}</p>
+          <h2 id="prompt-heading">{t.promptTitle}</h2>
+          <p>{t.promptBody}</p>
+        </div>
+        <div className="prompt-grid">
+          {t.promptItems.map((item, index) => {
+            const Icon = [WarningCircle, Network, ShareNetwork][index];
+            return (
+              <article key={item.prompt}>
+                <span><Icon weight="duotone" aria-hidden="true" /></span>
+                <blockquote>“{item.prompt}”</blockquote>
+                <p>{item.result}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="demo-section" id="diagnosis-demo" ref={demoRef} aria-labelledby="demo-heading">
         <div className="section-heading">
           <p className="eyebrow">{t.navHow}</p>
           <h2 id="demo-heading">{t.demoTitle}</h2>
@@ -359,7 +235,7 @@ export function Prototype() {
         <div className="trust-flow">
           <article><span><TerminalWindow /></span><h3>{t.requestTitle}</h3><p>{t.requestBody}</p></article>
           <ArrowRight className="flow-arrow" aria-hidden="true" />
-          <article className="trust-center"><span><ShieldCheck weight="duotone" /></span><h3>{t.policyTitle}</h3><p>{t.policyBody}</p><img src={`${assetBase}assets/safa-mascot.webp`} alt="" /></article>
+          <article className="trust-center"><span><ShieldCheck weight="duotone" /></span><h3>{t.policyTitle}</h3><p>{t.policyBody}</p><img src={siteHref("assets/safa-mascot.webp")} alt="" /></article>
           <ArrowRight className="flow-arrow" aria-hidden="true" />
           <article><span><Database /></span><h3>{t.resourceTitle}</h3><p>{t.resourceBody}</p></article>
         </div>
@@ -371,7 +247,7 @@ export function Prototype() {
         <a className="button button-primary" href={GITHUB_URL} target="_blank" rel="noreferrer">{t.github} <ArrowRight aria-hidden="true" /></a>
       </section>
 
-      <footer><div className="brand"><img src={`${assetBase}assets/safa-icon-64.png`} alt="" /><span>SAFA</span></div><p>{t.footer}</p><a href={GITHUB_URL}>MIT License · GitHub</a></footer>
+      <SiteFooter language={language} />
     </main>
   );
 }
