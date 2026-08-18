@@ -61,7 +61,34 @@
             "body": "The credential is injected inside the Broker boundary; the Agent receives only the bounded, redacted TOON result.",
             "icon": "check"
           }
-        ]
+        ],
+        "interactive": {
+          "runLabel": "Try the authorized path",
+          "requestEyebrow": "1 · Agent requests",
+          "requestTitle": "A privileged request is submitted",
+          "requestCmd": "safa exec nas.primary --intent \"Restart the jellyfin media service\" -- sudo systemctl restart jellyfin",
+          "approvalEyebrow": "2 · macOS authorization required",
+          "approvalTitle": "Review the exact action",
+          "resourceLabel": "Target",
+          "resourceValue": "nas.primary",
+          "actionLabel": "Command",
+          "actionValue": "sudo systemctl restart jellyfin",
+          "riskLabel": "Effect",
+          "riskValue": "Restarts the jellyfin media service",
+          "scopeLabel": "Scope",
+          "scopeValue": "One-time grant · expires in 5 minutes",
+          "sealed": "The sudo password stays inside the Broker boundary.",
+          "touchId": "Authorize with Touch ID",
+          "waiting": "Waiting for your authorization…",
+          "granted": "Authorization granted",
+          "executingEyebrow": "3 · Bounded execution",
+          "executing": "Executing under the same allow-list policy — the credential is injected only inside the Broker.",
+          "resultEyebrow": "4 · Evidence returned",
+          "resultNote": "The Agent receives bounded, redacted TOON evidence. The sudo password never appears in argv, output, or audit records.",
+          "result": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: a1f0-4b2e-...\nresource: nas.primary\nintent: Restart the jellyfin media service\nexecution:\n  termination: exit\n  remote_exit_code: 0\n  stdout: jellyfin restarted (bounded, redacted)\n  stderr: (empty)",
+          "replay": "Replay",
+          "designNote": "Interactive preview of the design target (specs/002-sudo-execution). The 0.1.0 preview refuses sudo; this flow ships next."
+        }
       }
     },
     "zh": {
@@ -125,7 +152,34 @@
             "body": "凭证只在 Broker 边界内注入；Agent 拿到的仍然只有有限、脱敏的 TOON 结果。",
             "icon": "check"
           }
-        ]
+        ],
+        "interactive": {
+          "runLabel": "体验授权路径",
+          "requestEyebrow": "1 · Agent 发起请求",
+          "requestTitle": "提交一个提权请求",
+          "requestCmd": "safa exec nas.primary --intent \"重启 jellyfin 媒体服务\" -- sudo systemctl restart jellyfin",
+          "approvalEyebrow": "2 · 需要 macOS 授权",
+          "approvalTitle": "请核对本次操作",
+          "resourceLabel": "目标",
+          "resourceValue": "nas.primary",
+          "actionLabel": "命令",
+          "actionValue": "sudo systemctl restart jellyfin",
+          "riskLabel": "影响",
+          "riskValue": "重启 jellyfin 媒体服务",
+          "scopeLabel": "范围",
+          "scopeValue": "一次性授权 · 5 分钟内有效",
+          "sealed": "sudo 密码始终留在 Broker 边界内。",
+          "touchId": "使用 Touch ID 授权",
+          "waiting": "等待你的授权…",
+          "granted": "已获得授权",
+          "executingEyebrow": "3 · 有界执行",
+          "executing": "在同样的白名单策略下执行——凭证只在 Broker 内部注入。",
+          "resultEyebrow": "4 · 返回证据",
+          "resultNote": "Agent 拿到的仍然只有有限、脱敏的 TOON 证据。sudo 密码不会出现在 argv、输出或审计记录里。",
+          "result": "schema: dev.safa.cli/v2\ncommand: exec\nstatus: completed\nrequest_id: a1f0-4b2e-...\nresource: nas.primary\nintent: 重启 jellyfin 媒体服务\nexecution:\n  termination: exit\n  remote_exit_code: 0\n  stdout: jellyfin restarted (有界、脱敏)\n  stderr: (空)",
+          "replay": "重新播放",
+          "designNote": "设计目标（specs/002-sudo-execution）的交互预览。0.1.0 预览版会拒绝 sudo；此流程将在下一版本交付。"
+        }
       }
     }
   },
