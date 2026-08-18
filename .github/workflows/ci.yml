@@ -23,6 +23,19 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+      - uses: actions/checkout@v7
+        with:
+          repository: toon-format/toon
+          ref: f06ddca16c8a4ccd091f33d7216c543e10a9c681
+          path: .conformance-upstream/toon
+      - uses: actions/checkout@v7
+        with:
+          repository: toon-format/spec
+          ref: 62f16b369408180f1faf1cba7da1b46d1f336f12
+          path: .conformance-upstream/toon-spec
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 23.7.0
       - name: Create validation environment
         run: |
           python3 -m venv .ci-venv
@@ -31,14 +44,20 @@ jobs:
         run: .ci-venv/bin/python tests/validate_skill.py skills/safa
       - name: Validate runtime manifest schema JSON
         run: python3 -m json.tool contracts/runtime-manifest-v1.schema.json >/dev/null
-      - name: Validate CLI conformance fixtures
-        shell: bash
+      - name: Strict-decode the public TOON contract with pinned official sources
+        run: >-
+          node --no-warnings --experimental-strip-types
+          tests/verify_toon_conformance.mjs
+          .conformance-upstream/toon
+          .conformance-upstream/toon-spec
+          conformance/agent-cli-v2
+      - name: Validate launcher syntax across available shells
         run: |
-          for fixture in conformance/cli-v1/*.json; do
-            python3 -m json.tool "$fixture" >/dev/null
-          done
-      - name: Validate launcher syntax
-        run: sh -n skills/safa/scripts/safa
+          sh -n skills/safa/scripts/safa
+          bash -n skills/safa/scripts/safa
+          if command -v zsh >/dev/null 2>&1; then
+            zsh -n skills/safa/scripts/safa
+          fi
       - name: Validate fail-closed launcher behavior
         run: tests/launcher_contract.sh
       - name: Check whitespace

@@ -1,31 +1,125 @@
 #!/bin/sh
 set -eu
+PATH=/usr/bin:/bin:/usr/sbin:/sbin
+export PATH
 
 emit_error() {
   error_code="$1"
   message="$2"
-  exit_code="$3"
-  printf '%s\n' "{\"schema\":\"dev.safa.cli/v1\",\"command\":\"launcher\",\"status\":\"failed\",\"request_id\":null,\"data\":{\"error\":{\"code\":\"${error_code}\",\"message\":\"${message}\",\"retryable\":false}},\"warnings\":[],\"next_action\":null}"
-  exit "$exit_code"
+  printf '%s\n' \
+    'schema: dev.safa.cli/v2' \
+    'command: launcher' \
+    'status: failed' \
+    'error:' \
+    "  code: ${error_code}" \
+    "  message: ${message}" \
+    '  retryable: false'
+  exit 1
+}
+
+emit_runtime_missing() {
+  message="$1"
+  printf '%s\n' \
+    'schema: dev.safa.cli/v2' \
+    'command: launcher' \
+    'status: user_action_required' \
+    'error:' \
+    '  code: runtime.missing' \
+    "  message: ${message}" \
+    '  retryable: false' \
+    'next[1]{command,reason,safe_for_agent}:' \
+    '  install a verified SAFA Runtime,A local user must install the signed native package,false'
+  exit 1
 }
 
 if [ "$(uname -s)" != "Darwin" ]; then
   emit_error "unsupported_platform" "SAFA requires macOS." 45
 fi
 
-script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-runtime_app="${script_dir}/../assets/SAFA.app"
+if [ -z "${HOME:-}" ]; then
+  emit_error "runtime_home_unavailable" "The current user home directory is unavailable." 45
+fi
+
+architecture=$(uname -m)
+case "$architecture" in
+  arm64 | x86_64) ;;
+  *) emit_error "unsupported_architecture" "No SAFA Runtime is available for this architecture." 45 ;;
+esac
+
+data_root="${HOME}/Library/Application Support/SAFA"
+lock_path="${data_root}/runtime.local.json"
+
+if [ ! -f "$lock_path" ]; then
+  emit_runtime_missing "A verified SAFA Runtime has not been installed for this user."
+fi
+
+if [ -L "$lock_path" ]; then
+  emit_error "runtime_lock_invalid" "The local Runtime lock must not be a symbolic link." 45
+fi
+lock_security=$(/usr/bin/stat -f '%u:%Lp' "$lock_path" 2>/dev/null) \
+  || emit_error "runtime_lock_invalid" "The local Runtime lock metadata could not be verified." 45
+if [ "$lock_security" != "$(/usr/bin/id -u):600" ]; then
+  emit_error "runtime_lock_invalid" "The local Runtime lock has unsafe ownership or permissions." 45
+fi
+
+lock_field() {
+  field="$1"
+  /usr/bin/plutil -extract "$field" raw -o - "$lock_path" 2>/dev/null
+}
+
+lock_schema=$(lock_field schema) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+runtime_version=$(lock_field runtime_version) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_cli_schema=$(lock_field cli_schema) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_platform=$(lock_field platform) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_architecture=$(lock_field architecture) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_team=$(lock_field team_identifier) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_app_cdhash=$(lock_field app_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_broker_cdhash=$(lock_field broker_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_askpass_cdhash=$(lock_field askpass_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_trusted_setup_cdhash=$(lock_field trusted_setup_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+
+if [ "$lock_schema" != "dev.safa.local-runtime-lock/v1" ] \
+  || [ "$locked_cli_schema" != "dev.safa.cli/v2" ] \
+  || [ "$locked_platform" != "macos" ] \
+  || [ "$locked_architecture" != "$architecture" ]; then
+  emit_error "runtime_lock_incompatible" "The local Runtime is not compatible with this launcher." 45
+fi
+
+if ! printf '%s\n' "$runtime_version" \
+  | /usr/bin/grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'; then
+  emit_error "runtime_lock_invalid" "The local Runtime lock contains an invalid version." 45
+fi
+
+if ! printf '%s\n' "$locked_team" | /usr/bin/grep -Eq '^[A-Z0-9]{10}$'; then
+  emit_error "runtime_lock_invalid" "The local Runtime lock contains an invalid publisher identity." 45
+fi
+
+for locked_cdhash in "$locked_app_cdhash" "$locked_broker_cdhash" "$locked_askpass_cdhash" "$locked_trusted_setup_cdhash"; do
+  if ! printf '%s\n' "$locked_cdhash" | /usr/bin/grep -Eq '^[0-9a-f]{40}$'; then
+    emit_error "runtime_lock_invalid" "The local Runtime lock contains an invalid code-directory hash." 45
+  fi
+done
+
+runtime_app="${data_root}/runtimes/${runtime_version}/SAFA.app"
 cli_path="${runtime_app}/Contents/MacOS/safa"
 broker_app="${runtime_app}/Contents/Library/Helpers/SAFABrokerAgent.app"
 broker_path="${broker_app}/Contents/MacOS/safa-broker"
 askpass_path="${runtime_app}/Contents/Library/Helpers/safa-askpass"
+trusted_setup_path="${runtime_app}/Contents/Library/Helpers/safa-trusted-setup"
 
-if [ ! -d "$runtime_app" ] || [ ! -x "$cli_path" ] || [ ! -x "$broker_path" ] || [ ! -x "$askpass_path" ]; then
-  printf '%s\n' '{"schema":"dev.safa.cli/v1","command":"launcher","status":"user_action_required","request_id":null,"data":{"error":{"code":"runtime_missing","message":"The signed SAFA companion runtime has not been assembled in this development Skill.","retryable":false}},"warnings":[],"next_action":{"kind":"install_verified_runtime","safe_for_agent":false}}'
-  exit 22
+if [ -L "$runtime_app" ]; then
+  emit_error "runtime_integrity_invalid" "The locked SAFA Runtime must not be a symbolic link." 45
 fi
 
-for component in "$runtime_app" "$broker_app" "$cli_path" "$broker_path" "$askpass_path"; do
+if [ ! -d "$runtime_app" ] || [ ! -x "$cli_path" ] || [ ! -x "$broker_path" ] || [ ! -x "$askpass_path" ] || [ ! -x "$trusted_setup_path" ]; then
+  emit_runtime_missing "The locked SAFA Runtime installation is incomplete."
+fi
+
+if ! /usr/bin/codesign --verify --deep --strict "$runtime_app" >/dev/null 2>&1; then
+  emit_error "runtime_signature_invalid" "The SAFA Runtime package failed code-signature verification." 45
+fi
+
+for component in "$runtime_app" "$broker_app" "$cli_path" "$broker_path" "$askpass_path" "$trusted_setup_path"; do
   if ! /usr/bin/codesign --verify --strict "$component" >/dev/null 2>&1; then
     emit_error "runtime_signature_invalid" "The SAFA Runtime package failed code-signature verification." 45
   fi
@@ -42,18 +136,48 @@ signature_field() {
 cli_identifier=$(signature_field "$cli_path" "Identifier")
 broker_identifier=$(signature_field "$broker_path" "Identifier")
 askpass_identifier=$(signature_field "$askpass_path" "Identifier")
+trusted_setup_identifier=$(signature_field "$trusted_setup_path" "Identifier")
 cli_team=$(signature_field "$cli_path" "TeamIdentifier")
 broker_team=$(signature_field "$broker_path" "TeamIdentifier")
 askpass_team=$(signature_field "$askpass_path" "TeamIdentifier")
+trusted_setup_team=$(signature_field "$trusted_setup_path" "TeamIdentifier")
 
 if [ "$cli_identifier" != "dev.safa.cli" ] \
   || [ "$broker_identifier" != "dev.safa.broker" ] \
-  || [ "$askpass_identifier" != "dev.safa.askpass" ]; then
+  || [ "$askpass_identifier" != "dev.safa.askpass" ] \
+  || [ "$trusted_setup_identifier" != "dev.safa.trusted-local" ]; then
   emit_error "runtime_identity_invalid" "The SAFA Runtime package has an unexpected component identity." 45
 fi
 
-if [ -z "$cli_team" ] || [ "$cli_team" != "$broker_team" ] || [ "$cli_team" != "$askpass_team" ]; then
-  emit_error "runtime_publisher_invalid" "The SAFA Runtime components do not share one Developer Team identity." 45
+if [ "$cli_team" != "$locked_team" ] \
+  || [ "$broker_team" != "$locked_team" ] \
+  || [ "$askpass_team" != "$locked_team" ] \
+  || [ "$trusted_setup_team" != "$locked_team" ]; then
+  emit_error "runtime_publisher_invalid" "The SAFA Runtime publisher does not match its local lock." 45
+fi
+
+app_cdhash=$(signature_field "$runtime_app" CDHash)
+broker_cdhash=$(signature_field "$broker_app" CDHash)
+askpass_cdhash=$(signature_field "$askpass_path" CDHash)
+trusted_setup_cdhash=$(signature_field "$trusted_setup_path" CDHash)
+if [ "$app_cdhash" != "$locked_app_cdhash" ] \
+  || [ "$broker_cdhash" != "$locked_broker_cdhash" ] \
+  || [ "$askpass_cdhash" != "$locked_askpass_cdhash" ] \
+  || [ "$trusted_setup_cdhash" != "$locked_trusted_setup_cdhash" ]; then
+  emit_error "runtime_integrity_invalid" "The SAFA Runtime does not match its local lock." 45
+fi
+
+binary_architectures=$(/usr/bin/lipo -archs "$cli_path" 2>/dev/null) \
+  || emit_error "runtime_architecture_invalid" "The SAFA Runtime architecture could not be verified." 45
+case " ${binary_architectures} " in
+  *" ${architecture} "*) ;;
+  *) emit_error "runtime_architecture_invalid" "The SAFA Runtime does not contain the required architecture." 45 ;;
+esac
+
+version_output=$("$cli_path" --version 2>/dev/null) \
+  || emit_error "runtime_version_invalid" "The SAFA Runtime version could not be verified." 45
+if [ "$version_output" != "$runtime_version" ]; then
+  emit_error "runtime_version_invalid" "The SAFA Runtime version does not match its local lock." 45
 fi
 
 exec "$cli_path" "$@"

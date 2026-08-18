@@ -10,27 +10,79 @@ method. Registering a type does not grant access and does not claim its adapter 
 |---|---|---|
 | canonical alias | public | Lowercase logical name; globally unique in one vault |
 | alternate aliases | authorized | Share the canonical alias collision namespace |
-| resource type | public | Validated open identifier, for example `database.mysql` |
+| resource kind | public | Validated category such as `host`, `database`, or `messaging` |
+| template ID/version | public | Immutable built-in schema/adapter binding |
+| host platform | public | Hosts only: `linux`, `macos`, or `windows` |
+| roles | public | Orthogonal safe purposes such as `nas` or `gpu` |
+| resource type | public | Namespaced v2 type discriminator such as `host.linux` or `database.mysql` |
 | display name | authorized | Encrypted; may contain internal context |
 | access methods | authorized | Open identifiers; do not imply adapter availability |
 | endpoint/user/route | authorized | Encrypted connection metadata |
 | typed metadata | allowlist/authorized | Unknown keys always default private |
-| relationships | authorized | Returned with target aliases, never raw resource IDs |
+| relationships | tiered | Agent-visible logical edges are allowlisted; protected graph detail requires authorization |
 | credential bindings | broker only | Opaque IDs only; never in Agent DTOs |
 | credential values/locators | Keychain/broker only | Never resource metadata |
 
 ## Initial identifiers
 
-Resource types:
+Resource kinds:
+
+```text
+host
+database
+object-storage
+cache
+messaging
+search
+graph
+service
+```
+
+Host platforms:
+
+```text
+linux
+macos
+windows
+```
+
+Built-in template IDs:
+
+```text
+ssh
+mysql
+postgresql
+sqlserver
+mongodb
+s3
+minio
+oss
+redis
+kafka
+rabbitmq
+elasticsearch
+neo4j
+http
+```
+
+Resource type identifiers:
 
 ```text
 host.linux
 host.macos
-host.nas
+host.windows
 database.mysql
 database.postgresql
+database.sqlserver
+database.mongodb
 object-storage.s3
+object-storage.minio
+object-storage.oss
 cache.redis
+messaging.kafka
+messaging.rabbitmq
+search.elasticsearch
+graph.neo4j
 service.http
 ```
 
@@ -40,8 +92,16 @@ Access methods:
 ssh
 database.mysql
 database.postgresql
+database.sqlserver
 object-storage.s3
+object-storage.minio
+object-storage.oss
 cache.redis
+database.mongodb
+messaging.kafka
+messaging.rabbitmq
+search.elasticsearch
+graph.neo4j
 http
 ```
 
@@ -56,7 +116,7 @@ Supported values are `text`, `integer`, `boolean`, `byte_count`, and `text_list`
 credentials, and recognized encoded key material are rejected before persistence. Public summary
 fields require an exact
 source-reviewed key, type, and value. Other non-secret typed extension fields remain private until
-an authorized inspect and must pass bounded value/content checks. The `ssh.*` namespace is reserved
+an authorized detailed show and must pass bounded value/content checks. The `ssh.*` namespace is reserved
 for dedicated connection and identity fields. Complete sensitive key components and recognized
 compounds for credentials, fingerprints, keys, Keychain locators, passwords, tokens, PEM,
 certificates, passcodes/PINs, passphrases, JWK/JWKS, and locators are rejected without treating benign components
@@ -90,6 +150,7 @@ Initial host profile keys:
 | Key | Value | Default visibility |
 |---|---|---|
 | `host.os.family` | text | public summary |
+| `host.architecture` | text | authorized |
 | `host.os.version` | text | authorized |
 | `host.kernel.release` | text | authorized |
 | `host.cpu.model` | text | authorized |
@@ -99,6 +160,8 @@ Initial host profile keys:
 | `host.storage.available-bytes` | byte count | authorized |
 | `host.docker.available` | boolean | public summary |
 | `host.docker.version` | text | authorized |
+| `host.hardware.vendor` | text | authorized |
+| `host.hardware.model` | text | authorized |
 
 Initial profile-summary keys also include `database.engine`, `object-storage.provider`,
 `cache.engine`, and `service.protocol`. The allowlist lives in trusted source code. An imported
@@ -112,6 +175,18 @@ relationship is rejected with the referencing alias so a trusted setup flow can 
 retarget that dependency. Removal never leaves a live resource pointing at a deleted target and
 never silently rewrites another resource's topology.
 
+Relationships participate in the typed topology graph defined by
+[`topology-projection-v1.md`](topology-projection-v1.md). The default relationship record is
+protected. A trusted local flow may mark an abstract logical edge Agent-visible when both endpoint
+aliases and the relation type are safe; physical routes, network coordinates, evidence, and
+credential bindings remain protected or Broker-only. An Agent-created relationship is an asserted
+desired claim until Broker verification promotes a separate observed or derived edge.
+For resource-to-resource `hosted-on`, `depends-on`, and `backed-by` relations, the encrypted
+resource profile is canonical and persists origin; legacy records without origin decode as
+`import`. Reconciliation materializes one stable desired/asserted graph edge. Matching topology
+link/unlink and resource lifecycle updates keep the profile and graph consistent in one serialized
+Broker transaction.
+
 ## Query and mutation contracts
 
 The Agent XPC surface uses separate explicit DTOs instead of the legacy dynamic broker map:
@@ -120,26 +195,42 @@ The Agent XPC surface uses separate explicit DTOs instead of the legacy dynamic 
 
 - `list`: safe summaries, optionally filtered by lifecycle state; never prompts.
 - `show`: one safe summary by canonical or alternate alias; never prompts.
-- `inspect`: resolves the canonical resource, rate-limits prompts, and asks macOS for device-owner
-  authentication. Only an approved request receives `ResourceDetailsV1`.
-- `add` / `edit`: require device-owner authentication and accept only logical aliases and an
-  optional supported host type. The broker resolves private connection fields locally;
-  imports stay `draft/needs_setup`, trusted resources cannot be silently retargeted, and only
-  `host.linux`, `host.macos`, or `host.nas` is accepted by this adapter.
-- `setup`: requires device-owner authentication, resolves the same explicit OpenSSH alias, imports
-  prior `known_hosts` trust plus an available existing identity-file/agent locator, and runs bounded
-  direct-route verification. It commits `active` only when the draft revision remains unchanged.
-  `ProxyJump` and `ProxyCommand` routes fail closed pending reviewed route snapshot support.
-- `disable` / `remove`: require device-owner authentication and use revisioned broker transactions;
-  removal refuses to break a live relationship.
+- `show --details`: resolves the canonical resource, rate-limits prompts, and asks macOS for
+  device-owner authentication. Only an approved request receives `ResourceDetailsV1`.
+- `add` / `edit`: require device-owner authentication and accept only logical aliases, safe
+  template/type choices, and an optional active/disabled state. The broker resolves private
+  connection fields locally. Add creates a private draft, then imports prior `known_hosts` trust
+  plus an available identity-file/agent locator, runs bounded direct-route verification and a
+  bounded read-only hardware/system probe, and commits `active` only when the draft revision remains
+  unchanged. A remediable failure may retain the draft; edit resumes it. Trusted resources cannot
+  be silently retargeted. `edit --state disabled|active` changes access state.
+- When no explicit OpenSSH alias exists, the same add command may invoke a separately signed local
+  setup helper. It reads endpoint/account/fingerprint/password with echo disabled, verifies manual
+  fingerprint equality, and submits one caller-bound typed transaction. The Broker verifies the
+  live account, identity, platform, and inventory before atomically storing the credential and
+  activating the resource. The Agent receives none of those protected values.
+- `remove`: requires device-owner authentication and a revisioned broker transaction; removal
+  refuses to break a live relationship.
+
+The macOS Runtime may reuse one successful add/edit/setup authorization within that operation class
+for at most five minutes. This is an in-memory Broker lease, not a stored password or Agent token.
+It does not cover remove, disable, enable, protected inspection, credential use, sudo, or arbitrary
+execution; a denial, sensitive state action, or Broker restart clears it.
+
+Setup, verification, activation, disabling, and enabling remain internal lifecycle stages rather
+than public resource commands. `ProxyJump` and `ProxyCommand` routes fail closed pending reviewed
+route snapshot support. Windows targets use the same pinned OpenSSH lifecycle rather than a
+separate password transport.
 
 Denied, rate-limited, malformed, and unknown-resource replies contain no protected detail object.
 No resource-directory reply includes a credential ID, Keychain locator, password, token, access
 key, host fingerprint, or private/public key material.
 
-## Future adapters
+## Service adapter boundary
 
-Database, object-storage, cache, and service adapters must add typed operations and policies at the
-broker boundary. They reuse resource aliases and credential bindings but must not interpret metadata
-as executable instructions. Least-privilege accounts remain separate resources or credential roles;
-one generic credential must not become a cross-service superuser.
+Database, object-storage, cache, messaging, search, graph, and service resources reuse the same
+encrypted CRUD transaction and typed template registry. Their signed protocol adapters still own connection and credential
+verification; metadata is never interpreted as executable instructions. The Broker records
+revision-bound verification evidence, exposes `needs_verification` before that proof, and clears the
+proof when connection or credential material changes. Least-privilege accounts remain separate
+credential roles; one generic credential must not become a cross-service superuser.

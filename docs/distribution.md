@@ -15,7 +15,7 @@ the selected Agent's Skill directory.
 The installed Skill includes a small resolver. The first Agent workflow calls:
 
 ```bash
-./scripts/safa doctor --json
+./scripts/safa doctor
 ```
 
 That invocation performs Runtime discovery/bootstrap before any protected operation.
@@ -27,7 +27,7 @@ separation:
 
 ```mermaid
 flowchart LR
-    Resolver["Skill resolver"] --> CLI["thin safa CLI\nno vault entitlement"]
+    Resolver["Shell resolver\nplatform selection only"] --> CLI["platform-native safa CLI\nno vault entitlement"]
     CLI -->|"authenticated local IPC\nno plaintext credential"| Broker["Broker / daemon\npolicy + vault authority"]
     Broker --> Vault["OS credential store"]
     Broker --> Helper["one-shot credential helper"]
@@ -42,11 +42,16 @@ identity claims, resolves protected data itself, and never exposes a raw-secret 
 Open source is compatible with this design. Runtime signing keys, vault keys, and user credentials
 are not source code. Security must survive complete knowledge of the implementation.
 
+The resolver is intentionally a script rather than a compiled cross-platform CLI. The current
+`scripts/safa` POSIX shell entry serves macOS. It consumes the locked manifest and passes the
+original argument vector to the native Runtime. Another platform entry is designed only when that
+platform Runtime exists; the repository does not carry speculative launcher implementations.
+
 ## 3. Why bootstrap is not an install hook
 
 Executing arbitrary repository scripts while merely installing Agent instructions would enlarge the
 supply-chain blast radius and behave inconsistently across Agent platforms. A copy-only Skill install
-has a reviewable result. Runtime activation remains an explicit SAFA operation with a stable JSON
+has a reviewable result. Runtime activation remains an explicit SAFA operation with a stable TOON
 error or user action when it cannot proceed safely.
 
 ## 4. Resolver inputs
@@ -76,7 +81,7 @@ sequenceDiagram
 
     I->>S: copy or symlink Skill files
     Note over I,S: no SAFA code executes here
-    S->>L: doctor --json
+    S->>L: doctor
     L->>M: select exact platform + architecture
     L->>L: reuse verified installed version when present
     alt Runtime absent
@@ -86,7 +91,7 @@ sequenceDiagram
       O-->>L: valid or denied
       L->>L: atomic current-user installation
     end
-    L->>R: invoke native CLI doctor --json
+    L->>R: invoke native CLI doctor
 ```
 
 Temporary downloads use a newly created private directory. Activation is an atomic rename into an
@@ -129,3 +134,7 @@ is not a substitute for provenance verification.
 
 No Runtime package or exact manifest is published yet. The current launcher therefore returns
 `runtime_missing`/`user_action_required` instead of downloading an unverified development artifact.
+For local development only, the Runtime repository can pre-provision a signed app and a local lock
+containing its exact version, architecture, Team ID, and Code Directory hashes. This path performs
+no download and makes no notarization claim. The local lock covers the app, Broker, AskPass helper,
+and trusted-setup helper independently.
