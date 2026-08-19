@@ -131,13 +131,23 @@ For a privileged action, request sudo explicitly. The command after `--` must no
 ```
 
 A sudo request always requires trusted macOS user-presence approval. If SAFA returns
-`sudo_credential_required`, the resource has no enrolled sudo credential: direct the user to the
-trusted local enrollment flow (`safa-trusted-setup resource sudo`); never collect a sudo password
-in conversation. If SAFA returns `approval_required` with a `request_id`, the user reviews and
-approves the exact command locally (`safa-trusted-setup request approve <id>`); follow only a
-returned `next` row marked `safe_for_agent: true`. Never submit a `sudo` prefix at user
-privilege — it is refused as a privilege-escalation attempt. Shell programs, mutation, and grants
-remain roadmap capabilities; do not invent those commands or bypass SAFA.
+`sudo_credential_required`, the resource has no enrolled sudo credential: enroll it through the
+CLI, which launches the trusted local helper (password entry and Touch ID happen in the system
+terminal, never in the agent channel):
+
+```bash
+./scripts/safa resource sudo ALIAS
+# passwordless hosts: ./scripts/safa resource sudo ALIAS --passwordless
+# remove:            ./scripts/safa resource sudo ALIAS --remove
+```
+
+If the CLI reports the trusted flow needs a controlling terminal, show the returned
+`safe_for_agent: false` command to the user and wait for them to run it locally. If SAFA returns
+`approval_required` with a `request_id`, the user reviews and approves the exact command locally
+(`safa-trusted-setup request approve <id>`); follow only a returned `next` row marked
+`safe_for_agent: true`. Never submit a `sudo` prefix at user privilege — it is refused as a
+privilege-escalation attempt. Shell programs, mutation, and grants remain roadmap capabilities; do
+not invent those commands or bypass SAFA.
 
 Resource-directory lifecycle is the one supported local mutation family. Use `resource edit` only
 when the user asks to refresh or resume configuration. Change access state only on an explicit
