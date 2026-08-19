@@ -25,7 +25,7 @@ safa topology path FROM TO [--limit 1...64]
 safa topology impact ALIAS [--limit 1...64]
 safa topology link FROM RELATION TO
 safa topology unlink FROM RELATION TO
-safa exec ALIAS --intent TEXT [--expected-effect TEXT] [--rollback TEXT]
+safa exec ALIAS --intent TEXT [--expected-effect TEXT] [--rollback TEXT] [--privilege user|sudo]
   [--timeout SECONDS] [--output-limit 1...1048576] [--full] -- ARG...
 ```
 
@@ -64,6 +64,12 @@ using macOS user presence and still never returns credentials or credential loca
 Lifecycle detail remains in `status`: `approval_required`, `user_action_required`, `denied`,
 `cancelled`, `expired`, `transport_failed`, `remote_execution_failed`, or `failed`. A remote command's
 exit code is `execution.remote_exit_code`, never the SAFA process exit.
+
+`--privilege sudo` submits a privileged request: it always requires trusted macOS user-presence
+approval, never resolves automatically, and fails closed with `sudo_credential_required` when the
+resource has no enrolled sudo credential. Do not include a `sudo` prefix in the arguments after
+`--` (a redundant prefix is stripped). A `sudo` prefix at default user privilege is refused as
+`command.embedded_sudo`.
 
 ## Required behavior
 

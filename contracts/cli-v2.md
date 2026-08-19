@@ -52,7 +52,7 @@ safa topology link FROM RELATION TO
 safa topology unlink FROM RELATION TO
 
 safa exec ALIAS --intent TEXT [--expected-effect TEXT] [--rollback TEXT]
-  [--timeout SECONDS] [--output-limit BYTES] [--full] -- ARG...
+  [--privilege user|sudo] [--timeout SECONDS] [--output-limit BYTES] [--full] -- ARG...
 ```
 
 Running `safa`, `safa resource`, or `safa topology` without a deeper verb returns bounded live data,
@@ -62,6 +62,16 @@ arguments, and flags fail before Broker or remote work begins.
 Endpoint, username, password, sudo password, private key, credential locator, host-key approval,
 recovery material, and raw approval have no Agent-facing option. Resource aliases remain the only
 selectors.
+
+`exec` defaults to `--privilege user`. `--privilege sudo` submits the request with
+`privilege: sudo`: it is always classified high-risk, can never resolve to an automatic or
+policy-only disposition, and requires trusted macOS user-presence approval (exact, scoped, or
+explicit full-access) before the Broker runs it through the sudo executor. The command arguments
+after `--` must not include a `sudo` prefix (a redundant prefix is stripped); sudo execution
+requires an enrolled, verified sudo credential for the resource, otherwise the request fails closed
+with `sudo_credential_required` before any approval prompt. A `sudo` prefix submitted at
+`--privilege user` is treated as a privilege-escalation attempt and refused with
+`command.embedded_sudo`.
 
 When `resource add` cannot resolve an explicit OpenSSH alias, the macOS Runtime may launch its
 separately signed trusted-setup helper using only the safe alias/type. Protected input is hidden and

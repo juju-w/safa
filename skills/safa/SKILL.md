@@ -123,8 +123,21 @@ Prefer argument execution for ordinary commands:
 ./scripts/safa exec ALIAS --intent "Explain the diagnostic purpose" -- COMMAND ARG...
 ```
 
-The current preview exposes bounded, non-sudo argument execution only. Shell programs, mutation,
-sudo, grants, and approval are roadmap capabilities; do not invent those commands or bypass SAFA.
+For a privileged action, request sudo explicitly. The command after `--` must not include a
+`sudo` prefix:
+
+```bash
+./scripts/safa exec ALIAS --intent "Restart the media service" --expected-effect "jellyfin restarts" --privilege sudo -- systemctl restart jellyfin
+```
+
+A sudo request always requires trusted macOS user-presence approval. If SAFA returns
+`sudo_credential_required`, the resource has no enrolled sudo credential: direct the user to the
+trusted local enrollment flow (`safa-trusted-setup resource sudo`); never collect a sudo password
+in conversation. If SAFA returns `approval_required` with a `request_id`, the user reviews and
+approves the exact command locally (`safa-trusted-setup request approve <id>`); follow only a
+returned `next` row marked `safe_for_agent: true`. Never submit a `sudo` prefix at user
+privilege — it is refused as a privilege-escalation attempt. Shell programs, mutation, and grants
+remain roadmap capabilities; do not invent those commands or bypass SAFA.
 
 Resource-directory lifecycle is the one supported local mutation family. Use `resource edit` only
 when the user asks to refresh or resume configuration. Change access state only on an explicit
