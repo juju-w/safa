@@ -286,7 +286,8 @@ prove this boundary but cannot enlarge it.
 - SSH operation and the evidence-backed exact HTTP slice on the supported macOS Runtime;
 - zero reusable credential material in Agent-visible input or output;
 - weak-Agent completion and safety gates;
-- final-stage signing verification; and
+- final-stage signing verification, including distribution-profile authorization for the Broker's
+  restricted Keychain entitlement; and
 - non-destructive replacement smoke preserving the previous compatible vault and Keychain state.
 
 ### Not required to hold the core RC

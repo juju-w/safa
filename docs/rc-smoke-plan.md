@@ -18,6 +18,9 @@ endpoints, usernames, fingerprints, passwords, or command output that contains p
   Cover Docker group authorization separately; it is not a substitute for sudo testing.
 - Build and install the same candidate through the Team-provisioned signed installer. Do not use the
   source-preview signing path for RC evidence because it does not prove the production entitlements.
+- Require the final Broker to embed an unexpired Developer ID distribution provisioning profile
+  whose Team, application identifier, Keychain allowlist, and signing certificate authorize its
+  exact restricted Keychain entitlement. Ordinary `codesign --verify` is not sufficient evidence.
 - Restart the Broker from the newly installed bundle and verify the resolver selects that exact
   version. Replacing the same version must not leave the previous Broker process running.
 
@@ -32,6 +35,8 @@ swift build -c release
 xcodebuild -quiet -project Apps/SAFA/SAFA.xcodeproj -scheme "SAFA Runtime" \
   -configuration Debug CODE_SIGNING_ALLOWED=NO build
 Scripts/tests/source-preview-installer-contract.sh
+Scripts/tests/mvp-candidate-contract.sh
+Scripts/scan-secrets.sh
 ```
 
 Run the product repository's CI-equivalent Skill, Markdown/JSON, TOON, launcher, and website checks,
@@ -44,6 +49,10 @@ python3 tests/validate_runtime_pair.py /absolute/path/to/safa-runtime
 
 This must prove that Runtime records the exact product commit and contract digest and carries the
 same canonical JSON/TOON fixture set byte-for-byte.
+
+Before installation, run Runtime `Scripts/verify-mvp-candidate.sh` with the archive, evidence file,
+independently reviewed evidence SHA-256, and fixed production Team. Install through
+`Scripts/install-mvp-candidate.sh`; do not copy a build-directory app or rewrite its local lock.
 
 Required automated evidence includes:
 

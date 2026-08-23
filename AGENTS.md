@@ -74,9 +74,10 @@ access, IPC servers, remote execution, and platform authorization belong in `juj
   persistent-data migration because it changes the Broker's Keychain access group; never present it
   as an ordinary in-place upgrade.
 - Accept a macOS Runtime manifest only when the runtime release evidence verifies the final staged
-  app after all signing/export steps: Broker-only Keychain entitlement, role identifiers, Team,
-  Hardened Runtime, notarization, exact version, architecture, and digest. Signature validity alone
-  is insufficient.
+  app after all signing/export steps: Broker-only Keychain entitlement, an unexpired matching
+  Developer ID distribution provisioning profile authorizing that restricted entitlement, role
+  identifiers, Team, Hardened Runtime, notarization, exact version, architecture, and digest.
+  Signature validity alone is insufficient.
 - Never authorize a silent unpinned update. A resolver installs only an exact version and digest;
   publisher keys belong in protected release automation with auditable human approval, not in the
   repository, ordinary developer machines, or conversational workflows.

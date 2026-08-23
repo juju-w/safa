@@ -40,7 +40,7 @@ or authorize an installer.
 | Human interaction | Trusted registration/change and at most one continuous exact Task handoff | Routine approval polling, capability confirmation, context maintenance, or conversational secret entry |
 | Resource understanding | Existing bounded safe Resource projection sufficient for tested alias selection | Notebook, Timeline, Agent observations, semantic summaries, ambient hooks, and `ssh-hosts` migration |
 | Evidence | Canonical TOON v2 control state plus bounded untrusted target output | Raw dependency output, unbounded content, or target text treated as control instructions |
-| Distribution | Exact version/digest, production Team, final-stage signature/entitlement/notarization evidence, and non-destructive replacement | `latest`, unsigned fallback, developer-only identity as durable vault authority, public tag, or public installer |
+| Distribution | Exact version/digest, production Team, final-stage signature/entitlement/profile/notarization evidence, and non-destructive replacement | `latest`, unsigned fallback, developer-only identity as durable vault authority, public tag, or public installer |
 
 Existing topology queries, diagnostics, explicit privilege compatibility controls, and Resource
 administration may remain available. They do not become mandatory steps or additional MVP concepts.
@@ -152,7 +152,8 @@ verify rollback behavior without deleting user state.
 **Acceptance scenarios**:
 
 1. Final staged evidence verifies exact version, digest, architecture, production Team, role
-   identifiers, Broker-only Keychain entitlement, Hardened Runtime, and notarization after export.
+   identifiers, Broker-only Keychain entitlement, its unexpired matching Developer ID distribution
+   provisioning profile, Hardened Runtime, and notarization after export.
 2. The previous compatible vault and Keychain state survive installation and Broker restart.
 3. Signature, entitlement, digest, Team, migration, or replacement failure blocks MVP acceptance;
    deleting state is never a workaround.
@@ -173,7 +174,8 @@ verify rollback behavior without deleting user state.
 - **MVP-008**: SSH and the exact registered HTTP GET/HEAD slice MUST pass the same public contract,
   fail-closed, leakage, and bounded-Evidence gates on the final candidate.
 - **MVP-009**: The final candidate MUST be selected by exact version and digest and MUST pass
-  final-stage macOS signing, entitlement, notarization, and replacement verification.
+  final-stage macOS signing, restricted-entitlement provisioning-profile, notarization, and
+  replacement verification.
 - **MVP-010**: The product/runtime commit pair, candidate identity, test evidence, and smoke result
   MUST be recorded without production resource data or secrets.
 - **MVP-011**: Notebook, Timeline, Agent observations, summaries, ambient hooks, legacy migration,

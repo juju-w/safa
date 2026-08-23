@@ -65,11 +65,13 @@ or manifest invalidates downstream evidence and restarts the affected gates.
 1. Build through the reviewed production packaging path using protected publisher automation.
 2. Verify the final staged app after every export/signing step: exact version, digest,
    architectures, production Team, role identifiers, designated requirements, Broker-only Keychain
-   entitlement, Hardened Runtime, and notarization.
+   entitlement, its unexpired matching Developer ID distribution provisioning profile, Hardened
+   Runtime, and notarization.
 3. Confirm the resolver selects only that exact version and digest and has no unsigned or `latest`
    fallback.
-4. Stop immediately on a Team, entitlement, helper-role, digest, notarization, or replacement
-   mismatch. Do not reset the vault or re-register Resources to continue.
+4. Stop immediately on a Team, entitlement, provisioning-profile, helper-role, digest,
+   notarization, or replacement mismatch. Do not reset the vault or re-register Resources to
+   continue.
 
 ### Phase 4 — Run the end-to-end MVP smoke
 
