@@ -20,11 +20,9 @@ real machine and not claims that arbitrary shell access is available.
 
 | Step | Skill / Runtime call | Synthetic result |
 |---:|---|---|
-| 1 | `doctor` | Broker and vault are ready. |
-| 2 | `resource list` | `web.production` matches the requested role. |
-| 3 | `topology show web.production` | Bounded service context returned. |
-| 4 | `exec web.production … systemctl is-active nginx` | `active` |
-| 5 | `exec web.production … df -h /` | Root filesystem is 98% full. |
+| 1 | `resource list` | `web.production` matches the ambiguous requested role. |
+| 2 | `exec web.production … --privilege auto -- systemctl is-active nginx` | `active` |
+| 3 | `exec web.production … --privilege auto -- df -h /` | Root filesystem is 98% full. |
 
 </details>
 
@@ -77,8 +75,7 @@ real machine and not claims that arbitrary shell access is available.
 
 | Step | Skill / Runtime call | Synthetic result |
 |---:|---|---|
-| 1 | `resource show worker.batch` | Active Linux host; safe summary only. |
-| 2 | `exec worker.batch … ps … --sort=-%cpu` | `python3` is using 82.4% CPU. |
+| 1 | `exec worker.batch … --privilege auto -- ps … --sort=-%cpu` | `python3` is using 82.4% CPU. |
 
 </details>
 
@@ -91,7 +88,7 @@ real machine and not claims that arbitrary shell access is available.
 ## What these examples demonstrate
 
 - the user asks in natural language instead of selecting a transport command;
-- the Skill discovers logical aliases and chooses the smallest allowed operation;
+- the Skill discovers a logical alias once when needed and submits the smallest exact Task;
 - topology truth and credential use remain Broker-owned;
 - the Agent reports uncertainty and lifecycle state instead of bypassing a denial;
 - consequential changes require a separately authorized workflow and are not implied by diagnosis.

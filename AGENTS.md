@@ -6,6 +6,20 @@ This repository owns SAFA's platform-neutral product surface: the Agent Skill, p
 runtime selection manifests, compatibility fixtures, and product architecture. Native credential
 access, IPC servers, remote execution, and platform authorization belong in `juju-w/safa-runtime`.
 
+## Product authority
+
+- `PRODUCT.md` is the normative source for SAFA's product identity, four core concepts, primary
+  journey, core-RC boundary, success criteria, and feature-admission gate.
+- Specifications, contracts, architecture, documentation, the Skill, and Runtime plans are
+  subordinate to `PRODUCT.md`. They may refine implementation or wire behavior but may not silently
+  add a normal-path concept, Agent step, or user-presence moment.
+- Every feature specification and plan must include Product Alignment: name the
+  Resource–Task–Decision–Evidence journey it improves and classify the work as core RC, post-RC, or
+  rejected from the main path.
+- Prefer hiding deterministic complexity inside Runtime. A new Agent-facing noun, command family,
+  workflow state, or mandatory preflight requires a `PRODUCT.md` change plus weak-Agent,
+  compatibility, and security evidence.
+
 ## Non-negotiable boundaries
 
 - Never add credentials, private keys, tokens, endpoints, recovery secrets, signing identities, or
@@ -50,6 +64,29 @@ access, IPC servers, remote execution, and platform authorization belong in `juj
   explicit release request. The current repository is under a publication hold.
 - Runtime release assets are produced in `safa-runtime`; this repository accepts only verified,
   exact-version manifests referencing those assets.
+
+## macOS publisher trust and credential safety
+
+- State the trust boundary truthfully: macOS signing proves which Developer Team published a
+  Runtime; it does not make a malicious official update harmless. Do not claim that SAFA protects a
+  user from compromise or deliberate abuse of the official publisher signing authority.
+- Fix the production Developer Team before the first durable public vault. Treat a Team change as a
+  persistent-data migration because it changes the Broker's Keychain access group; never present it
+  as an ordinary in-place upgrade.
+- Accept a macOS Runtime manifest only when the runtime release evidence verifies the final staged
+  app after all signing/export steps: Broker-only Keychain entitlement, role identifiers, Team,
+  Hardened Runtime, notarization, exact version, architecture, and digest. Signature validity alone
+  is insufficient.
+- Never authorize a silent unpinned update. A resolver installs only an exact version and digest;
+  publisher keys belong in protected release automation with auditable human approval, not in the
+  repository, ordinary developer machines, or conversational workflows.
+- Prefer credentials that limit publisher and Agent blast radius: non-exportable device keys,
+  scoped/revocable service tokens, and command-scoped remote authorization. Reusable SSH, sudo, or
+  administrator passwords are compatibility fallbacks and require system-authenticated user
+  presence for privileged use.
+- Before accepting an RC manifest, require a replacement smoke test that preserves a previous
+  compatible Runtime's Keychain and vault state. Deleting user state is never a valid migration or
+  signing-regression workaround.
 
 ## Validation
 

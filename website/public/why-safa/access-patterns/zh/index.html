@@ -159,7 +159,7 @@ count:
 
       <h2>什么可见，什么需要用户在场</h2>
       <p>默认的非交互摘要只暴露经过源码评审的白名单键：<code>host.os.family</code>、<code>host.docker.available</code>、<code>database.engine</code>、<code>object-storage.provider</code>、<code>cache.engine</code>、<code>service.protocol</code>。IP、内核版本、CPU/内存/磁盘细节、Docker 版本、路由以及一切未知键，都需要 <code>resource show --details</code>——而这条命令依赖 macOS 自有的用户在场提示。受保护详情与提权动作共用同一条规则：要么用户在 Mac 前，要么值保持隐藏。</p>
-      <p>授权在代码里不是模糊概念：待审批请求携带 <code>TrustedApprovalPresentation</code>（资源别名、特权级别、精确命令、意图、预期影响、风险级别、发现项），用户通过 <code>safa-trusted-setup request approve</code> 或拒绝来决策——sudo 还支持可选的作用域授权（见 spec 002）。Agent 的自我评估只是建议，永远不能替代这个决定。</p>
+      <p>授权在代码里不是模糊概念：待审批请求携带 <code>TrustedApprovalPresentation</code>（资源别名、特权级别、精确命令、意图、预期影响、风险级别、发现项），用户通过 <code>safa request review &lt;id&gt;</code> 打开签名的可信本地流程。首次 sudo 凭据建立可在这个已认证的精确请求里继续；Agent 的自我评估永远不能替代用户决定。</p>
 
       <h2>当前范围与后续</h2>
       <p>当前可执行的配置是 SSH 主机 + 白名单只读诊断。数据库、对象存储、缓存与服务已作为类型化记录登记，其操作在评审前保持门控。通用目录、不透明凭据引用模型、跳板路由字段、访问类别与用户在场授权路径，都已经在设计与契约中——接下来交付的是各适配器，且每个都附带一致性测试夹具，而不是空头承诺。</p>

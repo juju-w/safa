@@ -42,6 +42,10 @@ jobs:
           .ci-venv/bin/python -m pip install --quiet PyYAML
       - name: Validate Skill metadata
         run: .ci-venv/bin/python tests/validate_skill.py skills/safa
+      - name: Validate product-core and Skill drift
+        run: python3 tests/validate_skill_drift.py
+      - name: Validate pinned weak-Agent usability evidence
+        run: node tests/validate_agent_usability_eval.mjs
       - name: Validate runtime manifest schema JSON
         run: python3 -m json.tool contracts/runtime-manifest-v1.schema.json >/dev/null
       - name: Strict-decode the public TOON contract with pinned official sources

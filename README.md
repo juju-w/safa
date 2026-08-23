@@ -8,10 +8,11 @@
 registered servers, services, databases, NAS devices, and infrastructure without ever receiving a
 reusable credential. Register a resource once on your Mac; after that, ask natural questions such as
 “why is this API returning 502?”, “can the crawler reach MySQL?”, or “what breaks if the NAS is
-offline?” SAFA discovers the right alias, computes the relevant topology answer, authorizes one
-bounded diagnostic, and returns sanitized evidence.
+offline?” The Agent selects a safe Resource alias and submits the bounded Tasks needed for the
+outcome. SAFA Runtime resolves route, privilege, policy, credentials, and exact authorization, then
+returns bounded evidence.
 
-[Website](https://juju-w.github.io/safa/) · [How it works](https://juju-w.github.io/safa/how-it-works/) · [Agent scenarios](docs/scenarios.md) · [Architecture](docs/architecture.md)
+[Product definition](PRODUCT.md) · [Website](https://juju-w.github.io/safa/) · [How it works](https://juju-w.github.io/safa/how-it-works/) · [Agent scenarios](docs/scenarios.md) · [Architecture](docs/architecture.md)
 
 [![CI](https://github.com/juju-w/safa/actions/workflows/ci.yml/badge.svg)](https://github.com/juju-w/safa/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/juju-w/safa?style=flat)](https://github.com/juju-w/safa/stargazers)
@@ -37,19 +38,17 @@ This illustrative target-v2 transcript uses fictional aliases and synthetic outp
 
 > **Agent**
 >
-> I’ll use SAFA to find the registered service, check its known context, and run only bounded
-> read-only diagnostics. You do not need to send me an IP address, SSH key, or password.
+> I’ll use SAFA to find the registered service once, then run only the bounded read-only checks
+> needed for this diagnosis. You do not need to send me an IP address, SSH key, or password.
 
 <details open>
 <summary><strong>SAFA Skill activity</strong></summary>
 
 | Step | Skill / Runtime call | Synthetic result |
 |---:|---|---|
-| 1 | `safa doctor` | Broker and vault are ready. |
-| 2 | `safa resource list` | Safe alias `web.production` matches the request. |
-| 3 | `safa topology show web.production` | The Broker returns the bounded service context. |
-| 4 | `safa exec web.production … systemctl is-active nginx` | `active` |
-| 5 | `safa exec web.production … df -h /` | Root filesystem is 98% full. |
+| 1 | `safa resource list` | Safe alias `web.production` matches the ambiguous request. |
+| 2 | `safa exec web.production … --privilege auto -- systemctl is-active nginx` | `active` |
+| 3 | `safa exec web.production … --privilege auto -- df -h /` | Root filesystem is 98% full. |
 
 </details>
 
@@ -62,17 +61,18 @@ This illustrative target-v2 transcript uses fictional aliases and synthetic outp
 
 See [more Agent conversations](docs/scenarios.md) for a topology question and a high-CPU diagnosis.
 
-The Skill owns this workflow: discover aliases, use topology, choose a permitted action, interpret
-lifecycle states, and treat remote output as untrusted evidence. If trusted local setup or user
-authorization is required, it directs the user to the native flow instead of asking for the missing
-password, key, token, endpoint, or sudo secret in chat.
+The Skill selects a Resource, submits exact Tasks, follows only structured Decisions, and explains
+bounded Evidence. Runtime—not the Agent—owns readiness, route, account, privilege, policy,
+credentials, and authorization. If trusted local setup or confirmation is required, the Skill shows
+the exact native handoff instead of asking for a password, key, token, endpoint, or sudo secret in
+chat.
 
 SAFA deliberately separates those responsibilities:
 
 | Layer | Responsibility |
 |---|---|
-| Agent Skill | Teaches compatible Agents how to discover resources, plan safe diagnostics, call SAFA, handle denials, and explain results. |
-| Native Runtime | Resolves protected connection data, controls credentials, enforces policy and user authorization, connects to targets, and sanitizes evidence. |
+| Agent Skill | Selects a safe Resource alias, submits bounded Tasks, follows structured Decisions, and explains Evidence. |
+| Native Runtime | Resolves readiness, route, account, privilege, credentials, policy, exact authorization, execution, and evidence bounds. |
 
 The CLI is the narrow machine interface between these layers; it is not the primary product
 experience and has no operation that returns a stored password or private key.
@@ -108,15 +108,14 @@ sequenceDiagram
     participant R as Native Runtime
     participant T as Registered resource
 
-    U->>A: natural-language infrastructure task
-    A->>S: apply the SAFA workflow
-    S->>R: discover aliases and topology
-    S->>R: request one bounded diagnostic
-    R->>R: authorize, resolve, and enforce policy
+    U->>A: desired infrastructure outcome
+    A->>S: select a Resource alias once if needed
+    S->>R: submit one exact bounded Task
+    R->>R: produce Decision from route, privilege, policy, and credential state
     R->>T: connect without exposing the credential
     T-->>R: untrusted operational evidence
-    R-->>S: bounded, redacted TOON result
-    S-->>A: lifecycle-aware findings
+    R-->>S: structured Decision plus bounded Evidence
+    S-->>A: trusted control state and untrusted target data kept distinct
     A-->>U: evidence-backed answer
 ```
 
@@ -162,29 +161,34 @@ tasks in natural language, while the Skill selects from this small surface using
 <summary>Show representative Runtime calls</summary>
 
 ```bash
-# Confirm that SAFA is ready and discover safe aliases.
+# Diagnose Runtime readiness only when needed; discover only when the alias is unknown.
 safa doctor
 safa resource list
 
-# Inspect the safe summary for a storage host, then check its root filesystem.
-safa resource show storage.primary
-safa exec storage.primary --intent "Check a disk capacity alert" -- df -h /
+# A known ready alias goes straight to one exec call.
+safa exec storage.primary --intent "Check a disk capacity alert" --privilege auto -- df -h /
 
 # Find the processes consuming the most CPU on a batch worker.
-safa exec worker.batch --intent "Investigate a high CPU alert" -- \
+safa exec worker.batch --intent "Investigate a high CPU alert" --privilege auto -- \
   ps -eo pid,ppid,user,stat,comm,%cpu,%mem --sort=-%cpu
 
 # Ask the Broker whether an application has a verified path to its database.
 safa topology path app.production database.primary
+
+# Let the Broker keep root/Docker-authorized accounts direct or freeze one exact sudo approval.
+safa exec storage.primary --intent "Restart the media service" \
+  --expected-effect "the service restarts" --privilege auto -- systemctl restart media-synthetic
 ```
 
 </details>
 
 Protected resource changes and details require native macOS user authorization. Similar resource
 setup or desired topology-link actions can reuse separate Broker-memory authorization for up to five
-minutes; destructive/state changes still require a fresh prompt. Arbitrary
-shell execution, sudo, mutation approval, and non-SSH protocol operations are not current Agent
-capabilities. The canonical command and envelope definitions live in the
+minutes; destructive/state changes still require a fresh prompt. Arbitrary interactive shell
+execution and most non-SSH protocol operations are not current Agent capabilities. Bounded
+argument-mode SSH execution, exact sudo requests, protected resource mutations, and exact HTTP
+GET/HEAD operations through the verified local adapter are implemented on the coordinated preview
+branches. The canonical command and envelope definitions live in the
 [CLI contract](contracts/cli-v2.md).
 
 ## Current scope
@@ -194,9 +198,10 @@ capabilities. The canonical command and envelope definitions live in the
 | macOS native Runtime | Swift preview implemented; signed public package not released |
 | Resource directory | Existing OpenSSH import plus hidden password host registration, encrypted inventory, safe summaries, authorized details |
 | Topology | Placement, reachability, impact, and user-authorized logical relationship changes |
-| Remote operation | Bounded non-sudo SSH diagnostics only |
+| Remote operation | Bounded SSH argument execution; exact sudo uses trusted local review and Keychain-backed credentials |
 | Linux and Windows native Runtimes | Planned; not yet selected or scaffolded |
-| Database, object storage, cache, messaging, and HTTP adapters | Typed registration only; operations gated |
+| HTTP adapter | Exact GET/HEAD operations through verified Apple `/usr/bin/curl`; Bearer requires HTTPS |
+| Database, object storage, cache, and messaging adapters | Typed registration only; operations gated |
 | Brokered browser sessions | Future security design only |
 
 The [Platform support matrix](docs/platform-support.md) is authoritative for platform claims.
@@ -213,6 +218,8 @@ the same conformance fixtures; they do not create a second Agent contract.
 
 ## Documentation
 
+- [Normative product definition and release boundary](PRODUCT.md)
+- [Core MVP acceptance specification](specs/006-core-mvp/spec.md)
 - [Product architecture](docs/architecture.md)
 - [Agent conversation examples](docs/scenarios.md)
 - [Topology model and Agent projections](docs/topology.md)
@@ -223,6 +230,7 @@ the same conformance fixtures; they do not create a second Agent contract.
 - [Brokered browser access roadmap](docs/browser-access-roadmap.md)
 - [Resource directory contract](contracts/resource-directory-v1.md)
 - [Agent CLI v2 contract](contracts/cli-v2.md)
+- [RC smoke plan](docs/rc-smoke-plan.md)
 - [Native Runtime repository](https://github.com/juju-w/safa-runtime)
 
 SAFA is licensed under the [MIT License](LICENSE).

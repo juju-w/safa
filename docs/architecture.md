@@ -1,5 +1,9 @@
 # SAFA Product Architecture
 
+[`PRODUCT.md`](../PRODUCT.md) is authoritative for SAFA's identity, four product concepts, primary
+journey, and release boundary. This document explains the technical decomposition that implements
+that product; it does not introduce additional normal-path concepts or release requirements.
+
 ## 1. Purpose
 
 SAFA is a local security boundary between an AI Agent and private infrastructure. It lets an Agent
@@ -42,7 +46,7 @@ sequenceDiagram
 
     A->>S: install Skill files (copy/symlink only)
     A->>S: request operation using resource alias
-    S->>L: safa doctor/resource/exec
+    S->>L: known alias: exec; otherwise one safe discovery
     L->>L: detect platform and architecture
     L->>L: resolve exact compatible manifest entry
     L->>L: verify digest and platform signature policy
@@ -67,13 +71,14 @@ Runtime.
 
 ## 4. Stable external contract
 
-All platforms expose the same conceptual surface:
+All platforms expose the same stable supporting contract:
 
-- `doctor` for compatibility and runtime readiness;
-- resource-directory lifecycle using aliases and typed safe metadata;
-- bounded execution/request state with stable status and error codes;
+- `doctor` for explicit compatibility diagnosis, not mandatory normal-path preflight;
+- resource-directory lifecycle as the safe Resource implementation;
+- bounded `exec` operations as Tasks and request state as Runtime Decisions;
 - version negotiation before protected actions;
-- one canonical TOON document that separates trusted control fields from untrusted remote output.
+- one canonical TOON Evidence document that separates trusted control fields from untrusted remote
+  output.
 
 The internal implementation may differ. macOS can use XPC, Linux can use a Unix domain socket with
 peer-credential checks, and Windows can use a Named Pipe with access control. Those transports are
@@ -91,10 +96,11 @@ prevent a predictable second call. Empty success, no-op, and error states are ex
 input fails before Broker work, while stdout remains one TOON document and stderr carries only
 redacted diagnostics.
 
-No-argument roots expose a bounded safe home view and contextual command templates. An optional
-session integration may inject that same safe view only after explicit setup; it never captures
-transcripts, protected topology, or remote output for ambient reuse. The complete target is
-specified in [`cli-v2.md`](../contracts/cli-v2.md). JSON v1 is not retained as a second public mode.
+No-argument roots expose a bounded safe home view and contextual command templates. The current
+selected contract installs no ambient session integration. Any future opt-in projection of that safe
+view is a separately admitted post-RC feature and must never capture transcripts, protected
+topology, or remote output for reuse. The complete current target is specified in
+[`cli-v2.md`](../contracts/cli-v2.md). JSON v1 is not retained as a second public mode.
 
 ## 5. Platform runtime design
 

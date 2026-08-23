@@ -38,16 +38,31 @@ description = metadata["description"]
 for trigger in ["SSH", "Docker", "K3s", "database", "NAS", "down", "alerting", "topology"]:
     if trigger.casefold() not in description.casefold():
         fail(f"Skill description must preserve the concrete recall trigger: {trigger}")
-if len(contents.splitlines()) > 500:
-    fail("SKILL.md exceeds the 500-line progressive-disclosure limit")
+body = contents[match.end():]
+if len(body.splitlines()) > 120:
+    fail("SKILL.md body exceeds the 120-line usability limit")
+if len(body.split()) > 900:
+    fail("SKILL.md body exceeds the 900-word usability limit")
 if "./scripts/safa doctor" not in contents:
-    fail("Skill must start workflows through the bundled launcher")
+    fail("Skill must preserve the bundled doctor diagnostic")
+for golden_path in [
+    "./scripts/safa exec ALIAS --intent",
+    "--privilege auto",
+    "safe_for_agent: true",
+    "safe_for_agent: false",
+]:
+    if golden_path not in body:
+        fail(f"Skill is missing golden-path guidance: {golden_path}")
 if re.search(r"(?m)^safa(?:\s|$)", contents) or re.search(r"`safa\s+", contents):
     fail("Skill command examples must not bypass the bundled launcher")
 
 required_files = [
     skill_directory / "agents" / "openai.yaml",
     skill_directory / "references" / "cli.md",
+    skill_directory / "references" / "execution.md",
+    skill_directory / "references" / "lifecycle.md",
+    skill_directory / "references" / "resources.md",
+    skill_directory / "references" / "topology.md",
     skill_directory / "scripts" / "safa",
 ]
 for required_file in required_files:
