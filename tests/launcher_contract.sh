@@ -3,6 +3,7 @@ set -eu
 
 repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 launcher="${repository_root}/skills/safa/scripts/safa"
+tree_hasher="${repository_root}/skills/safa/scripts/runtime-tree-sha256"
 test_home=$(mktemp -d "${TMPDIR:-/tmp}/safa-launcher-test.XXXXXX")
 
 cleanup() {
@@ -15,7 +16,19 @@ if [ ! -x "$launcher" ]; then
   exit 1
 fi
 
+if [ ! -x "$tree_hasher" ]; then
+  printf '%s\n' "Runtime tree hasher is missing or not executable: ${tree_hasher}" >&2
+  exit 1
+fi
+
 grep -F 'exec /usr/bin/env -i' "$launcher" >/dev/null
+grep -F 'CSSMERR_TP_NOT_TRUSTED' "$launcher" >/dev/null
+grep -F 'source-preview-tree-sha256-v1' "$launcher" >/dev/null
+grep -F 'installation_channel' "$launcher" >/dev/null
+grep -F 'runtime_tree_sha256' "$launcher" >/dev/null
+grep -F 'runtime_integrity_invalid' "$launcher" >/dev/null
+grep -F 'runtime.lock_upgrade_required' "$launcher" >/dev/null
+grep -F 'runtime-tree-sha256' "$launcher" >/dev/null
 
 set +e
 output=$(HOME="$test_home" "$launcher" doctor 2>&1)

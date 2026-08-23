@@ -39,7 +39,7 @@ emit_runtime_upgrade_required() {
     'status: user_action_required' \
     'error:' \
     '  code: runtime.lock_upgrade_required' \
-    '  message: The verified local Runtime lock predates the required CLI schema binding.' \
+    '  message: The verified local Runtime lock predates required launcher integrity bindings.' \
     '  retryable: false' \
     'next[1]{command,reason,safe_for_agent}:' \
     '  reinstall the verified SAFA Runtime,A local user must refresh the verified local lock,false'
@@ -91,6 +91,9 @@ locked_app_cdhash=$(lock_field app_cdhash) || emit_error "runtime_lock_invalid" 
 locked_broker_cdhash=$(lock_field broker_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 locked_askpass_cdhash=$(lock_field askpass_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
 locked_trusted_setup_cdhash=$(lock_field trusted_setup_cdhash) || emit_error "runtime_lock_invalid" "The local Runtime lock is invalid." 45
+locked_installation_channel=$(lock_field installation_channel || :)
+locked_verification_fallback=$(lock_field verification_fallback || :)
+locked_runtime_tree_sha256=$(lock_field runtime_tree_sha256 || :)
 
 if [ "$lock_schema" != "dev.safa.local-runtime-lock/v1" ] \
   || [ "$locked_cli_schema" != "dev.safa.cli/v2" ] \
@@ -114,12 +117,23 @@ for locked_cdhash in "$locked_app_cdhash" "$locked_broker_cdhash" "$locked_askpa
   fi
 done
 
+if [ -n "$locked_verification_fallback" ] || [ -n "$locked_runtime_tree_sha256" ]; then
+  if [ "$locked_installation_channel" != "source-preview" ] \
+    || [ "$locked_verification_fallback" != "source-preview-tree-sha256-v1" ] \
+    || ! printf '%s\n' "$locked_runtime_tree_sha256" \
+      | /usr/bin/grep -Eq '^[0-9a-f]{64}$'; then
+    emit_error "runtime_lock_invalid" "The local Runtime lock contains an invalid integrity fallback." 45
+  fi
+fi
+
 runtime_app="${data_root}/runtimes/${runtime_version}/SAFA.app"
 cli_path="${runtime_app}/Contents/MacOS/safa"
 broker_app="${runtime_app}/Contents/Library/Helpers/SAFABrokerAgent.app"
 broker_path="${broker_app}/Contents/MacOS/safa-broker"
 askpass_path="${runtime_app}/Contents/Library/Helpers/safa-askpass"
 trusted_setup_path="${runtime_app}/Contents/Library/Helpers/safa-trusted-setup"
+launcher_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+tree_hasher="${launcher_directory}/runtime-tree-sha256"
 
 if [ -L "$runtime_app" ]; then
   emit_error "runtime_integrity_invalid" "The locked SAFA Runtime must not be a symbolic link." 45
@@ -129,15 +143,34 @@ if [ ! -d "$runtime_app" ] || [ ! -x "$cli_path" ] || [ ! -x "$broker_path" ] ||
   emit_runtime_missing "The locked SAFA Runtime installation is incomplete."
 fi
 
-if ! /usr/bin/codesign --verify --deep --strict "$runtime_app" >/dev/null 2>&1; then
+native_signature_verification=0
+if codesign_error=$(/usr/bin/codesign --verify --deep --strict "$runtime_app" 2>&1 >/dev/null); then
+  native_signature_verification=1
+elif printf '%s\n' "$codesign_error" | /usr/bin/grep -F 'CSSMERR_TP_NOT_TRUSTED' >/dev/null; then
+  if [ "$locked_installation_channel" != "source-preview" ] \
+    || [ -z "$locked_verification_fallback" ] \
+    || [ -z "$locked_runtime_tree_sha256" ]; then
+    emit_runtime_upgrade_required
+  fi
+  if [ ! -x "$tree_hasher" ]; then
+    emit_error "runtime_integrity_invalid" "The SAFA Runtime integrity verifier is unavailable." 45
+  fi
+  installed_runtime_tree_sha256=$("$tree_hasher" "$runtime_app") \
+    || emit_error "runtime_integrity_invalid" "The SAFA Runtime file tree could not be verified." 45
+  if [ "$installed_runtime_tree_sha256" != "$locked_runtime_tree_sha256" ]; then
+    emit_error "runtime_integrity_invalid" "The SAFA Runtime file tree does not match its verified installation." 45
+  fi
+else
   emit_error "runtime_signature_invalid" "The SAFA Runtime package failed code-signature verification." 45
 fi
 
-for component in "$runtime_app" "$broker_app" "$cli_path" "$broker_path" "$askpass_path" "$trusted_setup_path"; do
-  if ! /usr/bin/codesign --verify --strict "$component" >/dev/null 2>&1; then
-    emit_error "runtime_signature_invalid" "The SAFA Runtime package failed code-signature verification." 45
-  fi
-done
+if [ "$native_signature_verification" -eq 1 ]; then
+  for component in "$runtime_app" "$broker_app" "$cli_path" "$broker_path" "$askpass_path" "$trusted_setup_path"; do
+    if ! /usr/bin/codesign --verify --strict "$component" >/dev/null 2>&1; then
+      emit_error "runtime_signature_invalid" "The SAFA Runtime package failed code-signature verification." 45
+    fi
+  done
+fi
 
 signature_field() {
   component="$1"

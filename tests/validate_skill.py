@@ -64,6 +64,7 @@ required_files = [
     skill_directory / "references" / "resources.md",
     skill_directory / "references" / "topology.md",
     skill_directory / "scripts" / "safa",
+    skill_directory / "scripts" / "runtime-tree-sha256",
 ]
 for required_file in required_files:
     if not required_file.is_file():

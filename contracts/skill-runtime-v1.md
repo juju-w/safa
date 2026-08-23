@@ -78,7 +78,9 @@ material. A published Skill package contains:
 safa/
 ├── SKILL.md
 ├── agents/openai.yaml
-├── scripts/safa
+├── scripts/
+│   ├── safa
+│   └── runtime-tree-sha256
 ├── references/cli.md
 └── manifests/runtime.lock.json
 ```
@@ -95,10 +97,18 @@ their runtimes pass conformance and security review.
 During the publication hold, a developer may pre-provision a signed macOS Runtime in the documented
 current-user version store. The local installer writes `runtime.local.json` with the exact version,
 Agent CLI schema, architecture, Developer Team, and Code Directory hashes for the app, Broker,
-AskPass, and trusted-setup helper. The launcher verifies every locked field before forwarding
-arguments. A legacy lock that lacks the CLI schema binding fails closed with a local upgrade action;
-the launcher never guesses compatibility or edits integrity metadata in place. This local lock is
-not a public release manifest and cannot authorize download or notarization claims.
+AskPass, and trusted-setup helper. A Source Preview lock additionally binds the complete installed
+app file tree to a deterministic SHA-256. The launcher always attempts native Apple signature
+verification first. Only when macOS returns `CSSMERR_TP_NOT_TRUSTED` inside a restricted Agent
+sandbox may a lock explicitly marked `source-preview` use that exact tree digest; any changed file,
+symbolic link, special node, different signing error, or incomplete fallback lock fails closed. The
+launcher still verifies all component identifiers, Team values, Code Directory hashes,
+architecture, and version before forwarding arguments.
+
+This restricted fallback is not accepted for a Developer ID/notarized release lock. A legacy lock
+that lacks a required CLI or Source Preview integrity binding fails closed with a local upgrade
+action; the launcher never guesses compatibility or edits integrity metadata in place. This local
+lock is not a public release manifest and cannot authorize download or notarization claims.
 
 ## Agent-visible safety invariant
 

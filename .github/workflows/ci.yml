@@ -63,7 +63,9 @@ jobs:
             zsh -n skills/safa/scripts/safa
           fi
       - name: Validate fail-closed launcher behavior
-        run: tests/launcher_contract.sh
+        run: |
+          tests/runtime_tree_digest_contract.sh
+          tests/launcher_contract.sh
       - name: Check whitespace
         shell: bash
         run: |

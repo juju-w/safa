@@ -10,6 +10,7 @@ fi
 
 repository_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 launcher="${repository_root}/skills/safa/scripts/safa"
+tree_hasher="${repository_root}/skills/safa/scripts/runtime-tree-sha256"
 source_app=$(CDPATH= cd -- "$(dirname -- "$SAFA_TEST_RUNTIME_APP")" && pwd)/$(basename -- "$SAFA_TEST_RUNTIME_APP")
 test_home=$(/usr/bin/mktemp -d "${TMPDIR:-/tmp}/safa-clean-profile.XXXXXX")
 
@@ -43,9 +44,10 @@ app_cdhash=$(signature_field "$runtime_app" CDHash)
 broker_cdhash=$(signature_field "$broker_app" CDHash)
 askpass_cdhash=$(signature_field "$askpass_path" CDHash)
 trusted_setup_cdhash=$(signature_field "$trusted_setup_path" CDHash)
+runtime_tree_sha256=$("$tree_hasher" "$runtime_app")
 
 umask 077
-printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"${runtime_version}\",\"cli_schema\":\"dev.safa.cli/v2\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"${team_identifier}\",\"app_cdhash\":\"${app_cdhash}\",\"broker_cdhash\":\"${broker_cdhash}\",\"askpass_cdhash\":\"${askpass_cdhash}\",\"trusted_setup_cdhash\":\"${trusted_setup_cdhash}\"}" \
+printf '%s\n' "{\"schema\":\"dev.safa.local-runtime-lock/v1\",\"runtime_version\":\"${runtime_version}\",\"cli_schema\":\"dev.safa.cli/v2\",\"platform\":\"macos\",\"architecture\":\"${architecture}\",\"team_identifier\":\"${team_identifier}\",\"app_cdhash\":\"${app_cdhash}\",\"broker_cdhash\":\"${broker_cdhash}\",\"askpass_cdhash\":\"${askpass_cdhash}\",\"trusted_setup_cdhash\":\"${trusted_setup_cdhash}\",\"installation_channel\":\"source-preview\",\"verification_fallback\":\"source-preview-tree-sha256-v1\",\"runtime_tree_sha256\":\"${runtime_tree_sha256}\"}" \
   > "${data_root}/runtime.local.json"
 /bin/chmod 600 "${data_root}/runtime.local.json"
 
