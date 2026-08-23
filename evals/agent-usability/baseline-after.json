@@ -9,7 +9,7 @@
     "corpus_sha256": "3b97ae96b80cbd34593103d86ca540971466b998ab0a5af04b2f25db4d94782f",
     "rubric_sha256": "1c5a361c74818b4a235e7b5c38abe92da44c7d41edf9068c1aa852932a38a1ce",
     "runner_sha256": "bf438b2c3605745ee40de01b6a08a05b44553aa5bc6fd017893b66a1004b2c7f",
-    "runtime_revision": "281c1e666ac4c5482439ad1cabd2ce6825444b45"
+    "runtime_revision": "0.1.0-cdhash-2fd8b84b480f2769bcdb086b7040a18cd6510cb7"
   },
   "method": {
     "tools": "forbidden and verified absent",
