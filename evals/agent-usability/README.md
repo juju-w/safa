@@ -21,3 +21,8 @@ node evals/agent-usability/run-codex-eval.mjs /absolute/path/to/codex gpt-5.6-lu
 The runner records exact SHA-256 digests for the Skill, contract, and corpus plus the supplied
 Runtime revision. Do not check in Codex authentication, local paths, environment variables, or raw
 diagnostic logs.
+
+If review finds that an expected pattern rejects a semantically equivalent safe command, correct
+only that expectation and rescore the same raw report with `rescore-report.mjs`. This is valid only
+when the scenario prompt, context, Skill, contract, and raw model answers are unchanged; otherwise
+rerun the model. Record the rescore explicitly in the checked-in baseline.

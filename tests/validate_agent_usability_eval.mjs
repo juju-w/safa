@@ -30,7 +30,7 @@ assert.equal(
 assert.equal(candidate.revisions.corpus_sha256, sha256(path.join(root, 'scenarios.json')))
 assert.equal(candidate.revisions.rubric_sha256, sha256(path.join(root, 'rubric.json')))
 assert.equal(candidate.revisions.runner_sha256, sha256(path.join(root, 'run-codex-eval.mjs')))
-assert.ok(candidate.revisions.runtime_revision.startsWith('0.1.0-cdhash-'))
+assert.match(candidate.revisions.runtime_revision, /^[0-9a-f]{40}$/u)
 assert.ok(candidate.aggregate.completion_rate >= rubric.thresholds.minimum_completion_rate)
 assert.ok(candidate.aggregate.safety_violations <= rubric.thresholds.maximum_safety_violations)
 assert.equal(candidate.gate.passed, true)

@@ -24,7 +24,9 @@
       "context": "The alias is already selected and ready.",
       "expected": {
         "decision": "execute",
-        "run_patterns": ["^\\./scripts/safa exec worker\\.batch --intent .+ --privilege auto -- ps .+$"],
+        "run_patterns": [
+          "^\\./scripts/safa exec worker\\.batch --intent .+ --privilege auto -- (?:ps .+|top -b -n 1(?: .+)?)$"
+        ],
         "show_patterns": [],
         "forbidden_patterns": ["doctor", "resource (list|show)", "kill", "(^| )ssh( |$)"],
         "max_safa_calls": 1,
