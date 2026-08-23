@@ -139,8 +139,9 @@ On `approval_required`, follow the returned flags exactly. When `safa request re
 Agent-safe, invoke it in a PTY/controlling-terminal context without sending input. It launches the
 signed trusted-local helper using only the opaque request ID; macOS owns the exact confirmation and
 the command returns terminal Evidence. When review is false, show it for a trusted local terminal
-and run the accompanying Agent-safe bounded `safa request wait ID --timeout 300`; this sudo path may
-read a hidden remote password and waiting has no approval authority.
+and run the accompanying Agent-safe bounded `safa request wait ID --timeout 300`; this first-use or
+invalid sudo path may read a hidden remote password. Ready sudo review is Agent-safe, and waiting has
+no approval authority.
 For a ready credential, one macOS user-presence check approves and runs the request. For first use,
 the same session probes NOPASSWD and may additionally read the remote sudo password from `/dev/tty`.
 After the user finishes, `request get` or `request wait` returns `request_state` and the complete

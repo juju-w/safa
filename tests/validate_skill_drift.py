@@ -25,6 +25,11 @@ approval = loads(
 user_approval = loads(
     (root / "conformance/agent-cli-v2/user-approval.required.json").read_text(encoding="utf-8")
 )
+ready_sudo_approval = loads(
+    (root / "conformance/agent-cli-v2/ready-sudo-approval.required.json").read_text(
+        encoding="utf-8"
+    )
+)
 
 for concept in ("Resource", "Task", "Decision", "Evidence"):
     if product.count(f"### {concept}\n") != 1:
@@ -79,6 +84,8 @@ if len(user_approval["next"]) != 1:
 user_review = user_approval["next"][0]
 if not user_review["command"].startswith("safa request review ") or not user_review["safe_for_agent"]:
     raise SystemExit("registered-account review is no longer Agent-launchable")
+if len(ready_sudo_approval["next"]) != 1 or not ready_sudo_approval["next"][0]["safe_for_agent"]:
+    raise SystemExit("ready-sudo review is no longer Agent-launchable")
 
 if len(sys.argv) == 2:
     result = subprocess.run(

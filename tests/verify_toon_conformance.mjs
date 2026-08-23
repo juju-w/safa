@@ -19,6 +19,7 @@ const REQUIRED_PRODUCT_FIXTURES = [
   'home.completed',
   'policy-denied.failed',
   'protected-user-action.required',
+  'ready-sudo-approval.required',
   'resource-list.empty',
   'request-wait.completed',
   'resource-not-found.failed',

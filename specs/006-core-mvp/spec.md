@@ -133,9 +133,9 @@ truncation, empty-output, and hostile-target fixtures with the pinned weak model
 **Acceptance scenarios**:
 
 1. Structured Runtime control fields cannot be manufactured by target stdout/stderr/body.
-2. A registered-account approval contains one Agent-safe exact review action that returns terminal
-   Evidence after macOS confirmation; a sudo approval retains one non-Agent trusted review and one
-   bounded Agent-safe wait because first use may require hidden protected input.
+2. A registered-account or ready-sudo approval contains one Agent-safe exact review action that
+   returns terminal Evidence after macOS confirmation; first-use sudo retains one non-Agent trusted
+   review and one bounded Agent-safe wait because it may require hidden protected input.
 3. Terminal Evidence preserves remote exit state, bounded stdout/stderr or response data, counts,
    classification, and truncation needed to explain the outcome.
 4. Weak-Agent completion is at least 95% over at least 20 deterministic synthetic scenarios with

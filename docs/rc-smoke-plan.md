@@ -66,8 +66,8 @@ Required automated evidence includes:
 - a current fixed read-only connection probe overrides stale stored account hints;
 - root and Docker-authorized current observations avoid unnecessary sudo selection;
 - probe failure, timeout, or malformed output never selects sudo.
-- a registered-account approval returns one Agent-safe review while sudo retains protected-terminal
-  review plus Agent-safe wait.
+- registered-account and ready-sudo approvals return one Agent-safe review while first-use sudo
+  retains protected-terminal review plus Agent-safe wait.
 
 ## 3. Signed local smoke
 
@@ -106,8 +106,8 @@ Use the installed Skill launcher, not a build-directory executable.
 8. While the trusted review is active, run the returned bounded wait action. Require
    `request_state: completed`, remote exit `0`, and terminal evidence. A response containing only
    the request ID fails the smoke.
-9. Submit a second exact sudo command with the ready credential. Confirm the review requires one
-   macOS user-presence check and no remote password prompt.
+9. Submit a second exact sudo command with the ready credential. Confirm it returns one Agent-safe
+   review, the Agent launches the macOS user-presence check, and no remote password prompt appears.
 10. Deny one request and cancel another. Confirm neither touches the transport and both remain
    terminal with stable states.
 11. On a root-account resource, confirm sudo status is `not_required` and the Agent uses user

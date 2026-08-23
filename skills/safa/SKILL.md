@@ -74,8 +74,8 @@ Read `status`, `error`, `execution`, and ordered `next` rows:
   context and tell the user that the exact macOS confirmation is appearing; never answer or bypass
   it. The command itself waits and returns terminal Evidence.
 - If `request review ID` is false, show it for a trusted local terminal and immediately run the
-  returned Agent-safe bounded `request wait ID --timeout 300`. This sudo path may read protected
-  input; waiting has no approval authority.
+  returned Agent-safe bounded `request wait ID --timeout 300`. This first-use/invalid sudo path may
+  read protected input; ready sudo is Agent-safe. Waiting has no approval authority.
 - On terminal denial, cancellation, expiry, or missing request state, report it. Never replay a
   state-changing task unless the user explicitly submits a new request.
 
