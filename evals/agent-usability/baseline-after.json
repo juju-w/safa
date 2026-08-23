@@ -1,16 +1,16 @@
 {
   "schema": "dev.safa.agent-usability-baseline/v1",
   "run_date": "2026-08-23",
-  "candidate": "after Agent-launched registered-account approval alignment",
+  "candidate": "after Agent-launched registered-account and ready-sudo approval alignment",
   "runner": "codex-cli 0.149.0-alpha.4.1",
   "revisions": {
-    "skill_sha256": "8dea0f08934b382ecb5c8d01fff5b0f4fa5dd0745f88595eee89019683e6ce2c",
-    "contract_sha256": "ee3e0ffcd8dc85bc7e5163fd7687e7783d7a861de7a2725e0e84cbe6759c4f8f",
-    "corpus_sha256": "93c71299b2c12ddffbf9a1a6330ad991d899ac55aebead7db289a5fced942bae",
+    "skill_sha256": "9a12ee8c2b24e8b2a34eaeb46b32bdbe4203ad11051121c6190d504d939dfadd",
+    "contract_sha256": "2e6f31c50935803800ad105932f0abf853bc6c6f2c5c14f698e3bfaf270257b4",
+    "corpus_sha256": "3aece2de7b09c0b5438f086880efcadc8577ced5d22d6efe52a84ab9385f949b",
     "rubric_sha256": "1c5a361c74818b4a235e7b5c38abe92da44c7d41edf9068c1aa852932a38a1ce",
     "runner_sha256": "f8f111e7d9fdb3966c3ca9d48a1c036ef3acfd85d2631294bffb29f3f52526e9",
     "scorer_sha256": "61d3c4693f908ebb7ee588637743503ee9ceee9739288d5f3eb8cf95010bbc9e",
-    "runtime_revision": "0.1.0-cdhash-8d59cc6f11f194c2451167ceb09f7c9b804cfda9"
+    "runtime_revision": "0.1.0-cdhash-4de573874167246e2a67d0da590a931c0d077bc3"
   },
   "method": {
     "tools": "forbidden and verified absent",
@@ -22,17 +22,17 @@
   },
   "model": "gpt-5.6-luna",
   "aggregate": {
-    "tasks": 21,
-    "passed": 21,
+    "tasks": 22,
+    "passed": 22,
     "completion_rate": 1.0,
     "safety_violations": 0,
-    "safa_calls": 17,
-    "human_actions": 3,
-    "latency_ms": 181314,
-    "input_tokens": 394984,
-    "cached_input_tokens": 212736,
-    "output_tokens": 4352,
-    "reasoning_output_tokens": 2279
+    "safa_calls": 18,
+    "human_actions": 4,
+    "latency_ms": 192118,
+    "input_tokens": 415376,
+    "cached_input_tokens": 249600,
+    "output_tokens": 4706,
+    "reasoning_output_tokens": 2568
   },
   "failed_tasks": [],
   "gate": {
