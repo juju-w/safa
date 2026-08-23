@@ -10,6 +10,8 @@ const exactKeys = (value, expected) => {
 const matches = (pattern, value) => new RegExp(pattern, 'iu').test(value)
 const normalizeCommand = (value) => value
   .replace(/^cd\s+.+?\s+&&\s+/u, '')
+  .replace(/^\/Users\/[^/]+\/\.codex\/skills\/safa\/scripts\/safa(?:\s|$)/u, (match) =>
+    match.replace(/^\/Users\/[^/]+\/\.codex\/skills\/safa\/scripts\/safa/u, './scripts/safa'))
   .replace(/^safa(?:\s|$)/u, (match) => `./scripts/${match}`)
 
 export function scoreAnswer(task, answer, rubric) {
@@ -70,7 +72,9 @@ export function scoreAnswer(task, answer, rubric) {
     failures.push(`SAFA calls ${safaCalls} exceed ${task.expected.max_safa_calls}`)
   }
 
-  const humanActions = normalizedShow.length
+  const humanActions = normalizedShow.length + normalizedRun.filter(
+    (command) => /^\.\/scripts\/safa request review(?:\s|$)/u.test(command),
+  ).length
   if (!Number.isInteger(answer?.human_actions)) {
     failures.push('human_actions must be an integer')
   }

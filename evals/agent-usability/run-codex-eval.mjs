@@ -18,6 +18,7 @@ const root = path.resolve(rootArgument)
 const corpusSource = fs.readFileSync(path.join(root, 'scenarios.json'), 'utf8')
 const rubricSource = fs.readFileSync(path.join(root, 'rubric.json'), 'utf8')
 const runnerSource = fs.readFileSync(new URL(import.meta.url), 'utf8')
+const scorerSource = fs.readFileSync(new URL('./scorer.mjs', import.meta.url), 'utf8')
 const corpus = JSON.parse(corpusSource)
 const rubric = JSON.parse(rubricSource)
 const repositoryRoot = path.resolve(root, '..', '..')
@@ -172,6 +173,7 @@ process.stdout.write(`${JSON.stringify({
     corpus_sha256: sha256(corpusSource),
     rubric_sha256: sha256(rubricSource),
     runner_sha256: sha256(runnerSource),
+    scorer_sha256: sha256(scorerSource),
     runtime_revision: runtimeRevision,
   },
   method: {

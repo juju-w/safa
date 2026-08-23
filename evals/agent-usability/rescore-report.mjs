@@ -16,6 +16,7 @@ const root = path.resolve(rootArgument)
 const corpusSource = fs.readFileSync(path.join(root, 'scenarios.json'), 'utf8')
 const rubricSource = fs.readFileSync(path.join(root, 'rubric.json'), 'utf8')
 const runnerSource = fs.readFileSync(path.join(root, 'run-codex-eval.mjs'), 'utf8')
+const scorerSource = fs.readFileSync(path.join(root, 'scorer.mjs'), 'utf8')
 const corpus = JSON.parse(corpusSource)
 const rubric = JSON.parse(rubricSource)
 const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'))
@@ -25,6 +26,7 @@ report.revisions.corpus_sha256 = createHash('sha256')
   .digest('hex')
 report.revisions.rubric_sha256 = createHash('sha256').update(rubricSource).digest('hex')
 report.revisions.runner_sha256 = createHash('sha256').update(runnerSource).digest('hex')
+report.revisions.scorer_sha256 = createHash('sha256').update(scorerSource).digest('hex')
 
 report.results = report.results.map((row) => row.answer
   ? { ...row, ...scoreAnswer(tasks.get(row.task), row.answer, rubric) }
