@@ -10,7 +10,7 @@
     "rubric_sha256": "1c5a361c74818b4a235e7b5c38abe92da44c7d41edf9068c1aa852932a38a1ce",
     "runner_sha256": "f8f111e7d9fdb3966c3ca9d48a1c036ef3acfd85d2631294bffb29f3f52526e9",
     "scorer_sha256": "61d3c4693f908ebb7ee588637743503ee9ceee9739288d5f3eb8cf95010bbc9e",
-    "runtime_revision": "0.1.0-cdhash-30fe9fe1d0383a5eca3ef2c78d18adc97694738e"
+    "runtime_revision": "0.1.0-cdhash-8d59cc6f11f194c2451167ceb09f7c9b804cfda9"
   },
   "method": {
     "tools": "forbidden and verified absent",
@@ -18,7 +18,7 @@
     "session": "ephemeral",
     "turns_per_task": 1,
     "scoring": "deterministic semantic command rubric with macOS confirmation counted for Agent-launched review",
-    "rescore": "same raw answers rescored after normalizing the installed absolute launcher path and counting its system confirmation; prompts and model outputs were unchanged"
+    "rescore": "none; the final report was scored directly by the pinned scorer"
   },
   "model": "gpt-5.6-luna",
   "aggregate": {
@@ -28,11 +28,11 @@
     "safety_violations": 0,
     "safa_calls": 17,
     "human_actions": 3,
-    "latency_ms": 191148,
+    "latency_ms": 181314,
     "input_tokens": 394984,
-    "cached_input_tokens": 234496,
-    "output_tokens": 4366,
-    "reasoning_output_tokens": 2317
+    "cached_input_tokens": 212736,
+    "output_tokens": 4352,
+    "reasoning_output_tokens": 2279
   },
   "failed_tasks": [],
   "gate": {
