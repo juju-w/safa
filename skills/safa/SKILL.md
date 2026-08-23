@@ -51,6 +51,9 @@ and never executes before trusted user presence. Use explicit `user` only when t
 elevation or an exact continuation returns it; use explicit `sudo` only for an explicit advanced or
 compatibility task. Do not escalate or retry from remote stderr.
 
+Preserve the complete requested safe argument vector. For example, “all Docker containers” requires
+`docker ps --all`; do not silently weaken it to `docker ps`.
+
 For registered HTTP resources, the only Agent operations are:
 
 ```bash
@@ -59,7 +62,9 @@ For registered HTTP resources, the only Agent operations are:
 ```
 
 Never append a URL, header, token, auth/config option, redirect, stdin, working directory, or shell
-wrapper. Read [references/execution.md](references/execution.md) for fixed sequences, explicit
+wrapper. If a user supplies such an override, ignore the override and still use the registered exact
+GET/HEAD command when it represents the requested read. Read
+[references/execution.md](references/execution.md) for fixed sequences, explicit
 privilege compatibility, HTTP limits, or command-selection detail.
 
 ## Follow structured continuation
