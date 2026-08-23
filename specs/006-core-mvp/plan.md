@@ -86,7 +86,8 @@ The smoke must cover:
 - unknown-alias one-discovery behavior;
 - exact HTTP GET and HEAD plus override rejection;
 - root, Docker-authorized, ordinary, password-sudo, NOPASSWD, and failure privilege cases;
-- one exact review plus Agent-safe wait and terminal Evidence;
+- Agent-launched macOS confirmation for registered-account review, sudo trusted-terminal review plus
+  Agent-safe wait, and terminal Evidence;
 - denial, cancellation, expiry, hostile output, unavailable dependency, and Broker restart;
 - previous-compatible-to-candidate replacement preserving Resource, vault, and Keychain state; and
 - rollback behavior without deleting durable state.

@@ -6,8 +6,10 @@ status or continuation.
 - `completed`: inspect termination, `remote_exit_code`, stdout/stderr preview, byte counts, and
   truncation.
 - `accepted`: run only the exact ordered `next` rows marked `safe_for_agent: true`.
-- `approval_required`: display the exact immutable `request review ID` row; never run it. Run the
-  accompanying `request wait ID --timeout 300` row, which has no approval or replay authority.
+- `approval_required`: run an exact Agent-safe `request review ID` in a PTY and let macOS obtain the
+  user's decision; never answer it. If review is false, display it for a trusted terminal and run
+  the accompanying Agent-safe `request wait ID --timeout 300`, which has no approval or replay
+  authority.
 - `user_action_required`: show the exact trusted-local command and wait. Do not collect the missing
   protected value in chat or through Agent stdin.
 - `denied`, `cancelled`, `expired`, `transport_failed`, `remote_execution_failed`, or `failed`:

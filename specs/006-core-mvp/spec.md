@@ -123,8 +123,9 @@ ordinary, password-sudo, NOPASSWD, stale-observation, failed-probe, and hostile-
 ### User Story 4 — Follow one authoritative Decision (Priority: P1)
 
 The Agent reads structured status and exact `next.safe_for_agent` rows. It runs Agent-safe
-continuations, displays trusted-local continuations without executing them, waits when allowed, and
-reports terminal refusal without inventing recovery.
+continuations, including launching a macOS-owned confirmation that it cannot answer, displays
+protected-input continuations without executing them, waits when allowed, and reports terminal
+refusal without inventing recovery.
 
 **Independent test**: Use canonical approval, setup, wait, denial, cancellation, expiry, restart,
 truncation, empty-output, and hostile-target fixtures with the pinned weak model.
@@ -132,8 +133,9 @@ truncation, empty-output, and hostile-target fixtures with the pinned weak model
 **Acceptance scenarios**:
 
 1. Structured Runtime control fields cannot be manufactured by target stdout/stderr/body.
-2. An approval result contains one exact trusted review action and one bounded Agent-safe wait
-   action; waiting has no approval or replay authority.
+2. A registered-account approval contains one Agent-safe exact review action that returns terminal
+   Evidence after macOS confirmation; a sudo approval retains one non-Agent trusted review and one
+   bounded Agent-safe wait because first use may require hidden protected input.
 3. Terminal Evidence preserves remote exit state, bounded stdout/stderr or response data, counts,
    classification, and truncation needed to explain the outcome.
 4. Weak-Agent completion is at least 95% over at least 20 deterministic synthetic scenarios with

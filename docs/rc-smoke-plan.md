@@ -66,6 +66,8 @@ Required automated evidence includes:
 - a current fixed read-only connection probe overrides stale stored account hints;
 - root and Docker-authorized current observations avoid unnecessary sudo selection;
 - probe failure, timeout, or malformed output never selects sudo.
+- a registered-account approval returns one Agent-safe review while sudo retains protected-terminal
+  review plus Agent-safe wait.
 
 ## 3. Signed local smoke
 
@@ -77,12 +79,17 @@ Use the installed Skill launcher, not a build-directory executable.
    Task directly with `--privilege auto`, without a preceding Agent `doctor`, list, show, sudo-status,
    topology, or context call. Confirm exit `0`, bounded stdout/stderr, and
    `execution.remote_exit_code: 0`.
-3. Start a synthetic loopback HTTP service and register a disposable `--template http` resource
+3. Submit one non-sudo command that policy requires reviewing. Confirm the Agent receives exactly
+   one `safe_for_agent: true` review row, launches it with a controlling terminal, and does not ask
+   the user to copy a request ID or switch to Terminal. Confirm macOS shows the exact immutable
+   Resource and command, the user alone confirms it, and the same review call returns terminal
+   Evidence.
+4. Start a synthetic loopback HTTP service and register a disposable `--template http` resource
    through the trusted-local flow without recording its endpoint. Confirm the resource initially
    reports `needs_verification`, then run exact `curl` GET and `curl --head` operations through the
    installed Skill launcher. Require both remote exits to be `0`, confirm the resource transitions
    to `ready`, then remove it and stop the synthetic service.
-4. Remove any test-only sudo credential through the trusted lifecycle, then submit one exact task:
+5. Remove any test-only sudo credential through the trusted lifecycle, then submit one exact task:
 
    ```bash
    safa exec <test-host> --intent "Confirm first-use sudo execution" \
@@ -91,23 +98,23 @@ Use the installed Skill launcher, not a build-directory executable.
 
    Confirm it returns `approval_required`, one request ID, one `safe_for_agent: false` review action,
    and one bounded `safe_for_agent: true` wait action.
-5. Run that review action in a trusted local terminal. Confirm the exact alias, command, intent,
+6. Run that review action in a trusted local terminal. Confirm the exact alias, command, intent,
    privilege, and risk appear before authorization. Complete the macOS user-presence check once.
-6. For password-sudo, confirm NOPASSWD is tried first and one hidden remote password prompt follows.
+7. For password-sudo, confirm NOPASSWD is tried first and one hidden remote password prompt follows.
    Confirm the command executes immediately after verification and no second approval command is
    needed. For NOPASSWD, confirm no password prompt appears.
-7. While the trusted review is active, run the returned bounded wait action. Require
+8. While the trusted review is active, run the returned bounded wait action. Require
    `request_state: completed`, remote exit `0`, and terminal evidence. A response containing only
    the request ID fails the smoke.
-8. Submit a second exact sudo command with the ready credential. Confirm the review requires one
+9. Submit a second exact sudo command with the ready credential. Confirm the review requires one
    macOS user-presence check and no remote password prompt.
-9. Deny one request and cancel another. Confirm neither touches the transport and both remain
+10. Deny one request and cancel another. Confirm neither touches the transport and both remain
    terminal with stable states.
-10. On a root-account resource, confirm sudo status is `not_required` and the Agent uses user
+11. On a root-account resource, confirm sudo status is `not_required` and the Agent uses user
     privilege. On a Docker-authorized resource, confirm Docker runs at user privilege; do not infer
     daemon health from group membership. Change or stale the stored account hint and confirm the
     next eligible `auto` call still follows the current connection probe.
-11. Restart the Mac-side Broker, rerun `doctor`, inspect the existing resource, and execute one
+12. Restart the Mac-side Broker, rerun `doctor`, inspect the existing resource, and execute one
     non-sudo command. Confirm vault access and installed entitlements survive restart.
 
 ## 4. Negative smoke

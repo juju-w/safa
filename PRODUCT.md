@@ -148,8 +148,10 @@ Rules:
    evidence and policy. It never retries with greater privilege because remote stderr suggested it.
 4. A sensitive Task is frozen before user confirmation. The user approves that exact target,
    operation, risk, and expected effect—not a vague reusable “sudo permission.”
-5. The Agent executes only exact continuations marked **safe_for_agent: true**. It presents but
-   never executes a trusted-local continuation marked false.
+5. The Agent executes only exact continuations marked **safe_for_agent: true**. A safe continuation
+   may launch a macOS-owned confirmation for an already frozen Task; the Agent starts the prompt but
+   cannot answer it. A continuation that may collect protected input remains false and is presented
+   for a trusted local terminal instead.
 6. Terminal Evidence answers the user's request or identifies one stable blocker. It does not expose
    Runtime dependency noise or protected values.
 

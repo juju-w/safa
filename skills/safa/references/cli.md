@@ -135,10 +135,12 @@ that cannot complete protected enrollment returns
 retry. Explicit pre-enrollment is optional; first-use review can establish the credential and run
 the approved request in one continuous trusted-local workflow.
 
-On `approval_required`, show the returned `safa request review ID` command to the user and never
-invoke it as the Agent. Run the accompanying Agent-safe bounded
-`safa request wait ID --timeout 300` continuation. The review launches the signed trusted-local
-helper using only the opaque request ID; waiting has no approval authority.
+On `approval_required`, follow the returned flags exactly. When `safa request review ID` is
+Agent-safe, invoke it in a PTY/controlling-terminal context without sending input. It launches the
+signed trusted-local helper using only the opaque request ID; macOS owns the exact confirmation and
+the command returns terminal Evidence. When review is false, show it for a trusted local terminal
+and run the accompanying Agent-safe bounded `safa request wait ID --timeout 300`; this sudo path may
+read a hidden remote password and waiting has no approval authority.
 For a ready credential, one macOS user-presence check approves and runs the request. For first use,
 the same session probes NOPASSWD and may additionally read the remote sudo password from `/dev/tty`.
 After the user finishes, `request get` or `request wait` returns `request_state` and the complete

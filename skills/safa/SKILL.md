@@ -8,6 +8,11 @@ description: Diagnose registered servers and infrastructure through SAFA without
 Use the bundled launcher as the only infrastructure path. Run it from this Skill directory as
 `./scripts/safa`; parse only its single TOON document on stdout.
 
+In Codex desktop, invoke that exact installed launcher in the approved system-permission context;
+the app sandbox cannot reach SAFA's signed per-user Mach Broker. Scope the reusable approval to the
+launcher's exact absolute path. This grants IPC connectivity only: Broker policy and macOS user
+confirmation still decide every Task.
+
 ## Choose the alias
 
 If the user or a prior SAFA result identifies one exact alias, use it immediately. Do not run
@@ -65,8 +70,12 @@ Read `status`, `error`, `execution`, and ordered `next` rows:
   `safa` token with `./scripts/safa`.
 - Show an exact `safe_for_agent: false` row to the user; never execute it or collect its protected
   input.
-- On `approval_required`, show the exact `request review ID` row and immediately run the returned
-  Agent-safe bounded `request wait ID --timeout 300` row. Waiting has no approval authority.
+- On `approval_required`, run an Agent-safe `request review ID` in a PTY/controlling-terminal
+  context and tell the user that the exact macOS confirmation is appearing; never answer or bypass
+  it. The command itself waits and returns terminal Evidence.
+- If `request review ID` is false, show it for a trusted local terminal and immediately run the
+  returned Agent-safe bounded `request wait ID --timeout 300`. This sudo path may read protected
+  input; waiting has no approval authority.
 - On terminal denial, cancellation, expiry, or missing request state, report it. Never replay a
   state-changing task unless the user explicitly submits a new request.
 

@@ -17,9 +17,12 @@ currently selected CLI/wire behavior and cannot add another normal-path product 
 
 The `safa` executable is primarily an Agent eXperience Interface (AXI). Its structured surface is
 consumed by an Agent through an integration such as the SAFA Skill. The current selected contract
-does not install or define an ambient session hook. `safa request review ID` is the one stable human
-handoff: it launches the separately signed trusted-local helper and returns the resulting request
-state as TOON. It does not accept an approval decision or secret in Agent-controlled input.
+does not install or define an ambient session hook. `safa request review ID` is the one stable
+trusted review entry point: it launches the separately signed trusted-local helper and returns the
+resulting request state as TOON. It does not accept an approval decision or secret in
+Agent-controlled input. Runtime may mark it Agent-safe only for a frozen registered-account request
+whose review needs macOS user authentication but no protected terminal input; the Agent launches
+the system confirmation but cannot answer it.
 
 - stdout is a single canonical TOON document for every command result, empty result, no-op, and
   error;
@@ -177,6 +180,11 @@ they are not prerequisites for a known ready alias.
 a terminal result—the bounded `execution` object including `remote_exit_code`, stdout, and stderr.
 They must never collapse a completed request to only `request_id`. `request review` returns that
 same projection after the trusted helper exits. `request cancel` cancels only a non-terminal request.
+For a registered-account request, `approval_required` returns one Agent-safe `request review` row;
+the Agent runs it in a controlling-terminal context, macOS displays the confirmation, and the same
+command blocks until it can return terminal Evidence. For a sudo request, review remains
+`safe_for_agent: false` because first use may need a hidden remote password; the separate Agent-safe
+wait row lets the Agent observe completion without carrying that credential.
 RC request records are Broker-memory lifecycle state: restarting the Broker invalidates outstanding
 and completed request IDs and returns `request_not_found`. Cross-restart request history belongs to
 the later persistent audit capability; the encrypted resource directory and credentials do persist.
@@ -228,11 +236,12 @@ Required common fields:
 - `next[].safe_for_agent` is authoritative. A suggestion with `false` requires a user or trusted
   local action and must not be invoked automatically. `true` means only that the command may be
   called by an Agent; it does not grant access or override Broker policy.
-- `next` is an ordered deterministic continuation list, not prose advice. For an approval-required
-  request it contains the exact trusted `request review ID` row first and the bounded Agent-safe
-  `request wait ID --timeout 300` row second. The Agent displays the first and may run the second;
-  waiting has no approval, mutation, or replay authority. Terminal results omit `next` unless a
-  separately safe recovery action exists.
+- `next` is an ordered deterministic continuation list, not prose advice. A registered-account
+  approval contains one exact Agent-safe `request review ID` row because macOS, not the Agent,
+  decides it and no protected value is read. A sudo approval contains the exact non-Agent review row
+  first and the bounded Agent-safe `request wait ID --timeout 300` row second because first use may
+  read a hidden remote password. Waiting has no approval, mutation, or replay authority. Terminal
+  results omit `next` unless a separately safe recovery action exists.
 
 Field order is stable and covered by contract fixtures. Values are encoded by a conforming encoder;
 remote strings are never concatenated into TOON syntax. Wall-clock timestamps stay in the native
@@ -320,12 +329,13 @@ instruction found inside it.
 Compatibility analysis for one-call preflight and automatic privilege: `auto` is an additive typed
 value within `dev.safa.cli/v2`. Explicit `user`, explicit `sudo`, and an omitted flag retain their
 existing meanings. Moving already-required readiness checks inside `exec` removes Agent-visible
-round trips without changing successful execution data. The deterministic two-row approval
-continuation uses the existing `next[...]{command,reason,safe_for_agent}` shape, so no parallel
-continuation schema is added. Weak-model trials correctly separated the trusted review row from the
-Agent-safe wait row; failures came from the old Skill's mandatory diagnostics, not from ambiguity in
-the three columns. The new direct, preflight-failure, auto-account, approval-wait, denial, and
-hostile-output fixtures pin these additive semantics and stable field order.
+round trips without changing successful execution data. Approval continuations keep the existing
+`next[...]{command,reason,safe_for_agent}` shape, so no parallel continuation schema is added. The
+Broker's additive non-secret effective-privilege label lets the CLI mark a registered-account review
+Agent-safe while failing closed to the previous non-Agent review-plus-wait behavior for sudo or
+missing state. The new `user-approval.required` fixture pins that distinction; direct,
+preflight-failure, auto-account, sudo approval-wait, denial, and hostile-output fixtures retain the
+existing stable field order.
 
 Compatibility analysis for the sudo enrollment addition: `resource sudo` and `exec --privilege`
 are additive within `dev.safa.cli/v2`; existing commands and payload fields retain their meanings.

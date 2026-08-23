@@ -22,6 +22,9 @@ home = loads((root / "conformance/agent-cli-v2/home.completed.json").read_text(e
 approval = loads(
     (root / "conformance/agent-cli-v2/sudo-approval.required.json").read_text(encoding="utf-8")
 )
+user_approval = loads(
+    (root / "conformance/agent-cli-v2/user-approval.required.json").read_text(encoding="utf-8")
+)
 
 for concept in ("Resource", "Task", "Decision", "Evidence"):
     if product.count(f"### {concept}\n") != 1:
@@ -57,6 +60,8 @@ if "main Skill submits one exact `exec --privilege auto` Task" not in contract:
     raise SystemExit("public contract drifted from Runtime-owned normal-path privilege")
 if "Do not run\n`doctor`, `resource list`, or `resource show` first." not in skill:
     raise SystemExit("Skill again requires diagnostic calls before known-alias exec")
+if "approved system-permission context" not in skill or "exact absolute path" not in skill:
+    raise SystemExit("Skill no longer explains the scoped Codex Broker integration")
 if home["next"][0]["command"] != "safa resource show <alias>":
     raise SystemExit("home view no longer exposes the documented safe detail action")
 
@@ -69,6 +74,11 @@ for row, (prefix, safe) in zip(approval["next"], expected_approval, strict=True)
         raise SystemExit("approval continuation drifted from the Skill control loop")
 if "--timeout 300" not in approval["next"][1]["command"]:
     raise SystemExit("approval wait is no longer explicitly bounded")
+if len(user_approval["next"]) != 1:
+    raise SystemExit("registered-account approval must have exactly one continuation")
+user_review = user_approval["next"][0]
+if not user_review["command"].startswith("safa request review ") or not user_review["safe_for_agent"]:
+    raise SystemExit("registered-account review is no longer Agent-launchable")
 
 if len(sys.argv) == 2:
     result = subprocess.run(

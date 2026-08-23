@@ -29,6 +29,7 @@ const REQUIRED_PRODUCT_FIXTURES = [
   'sudo-status.completed',
   'topology-path.completed',
   'transport.failed',
+  'user-approval.required',
   'usage-error.failed',
 ]
 const [referenceRoot, specRoot, fixtureRoot] = process.argv.slice(2)
